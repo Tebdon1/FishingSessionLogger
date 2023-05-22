@@ -82,7 +82,7 @@
 
     <h3>Catches</h3>
 
-    <button type="button" class="btn btn-primary" (click)="addCatchSummary()">
+    <button type="button" class="btn btn-primary btn-sm" (click)="addCatchSummary()">
       Add Species
     </button>
 
@@ -98,7 +98,7 @@
         <tr *ngFor="let item of editSessionItem.catchSummaries">
           <td>{{ '::Enum:SpeciesType.' + item.species | abpLocalization }}</td>  
           <td>{{item.quantity}}</td> 
-          <td><button type="button" class="btn btn-secondary" (click)="editCatchSummary(item)">Details</button></td>
+          <td><button type="button" class="btn btn-secondary btn-sm" (click)="editCatchSummary(item)">Details</button></td>
         </tr>
       </tbody>
     </table>
@@ -136,7 +136,7 @@
       </div>
     </form>
 
-    <button type="button" class="btn btn-secondary add-detail" (click)="addCatchDetail()">Add Detail</button>
+    <button type="button" class="btn btn-secondary add-detail btn-sm" (click)="addCatchDetail()">Add Detail</button>
 
     <div class="table-responsive">
       <table class="catchDetailsTable">
