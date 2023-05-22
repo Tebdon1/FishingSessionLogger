@@ -124,7 +124,7 @@ export class SessionComponent implements OnInit {
 
   buildCatchSummaryForm(catchSummaryItem: any) {
     this.catchSummaryForm = this.fb.group({
-      species: [catchSummaryItem.species || '', Validators.required],
+      species: [catchSummaryItem.species, Validators.required],
       quantity: [catchSummaryItem.quantity || 1, Validators.required],
     });
   }
