@@ -106,7 +106,7 @@
   </div>
 
   <div class="card-footer">
-    <button type="button" class="btn btn-secondary" (click)="closeSessionForm()" abpClose>
+    <button type="button" class="btn btn-secondary button-pad" (click)="closeSessionForm()" abpClose>
       {{ '::Close' | abpLocalization }}
     </button>
     <button class="btn btn-primary" (click)="saveSession()" [disabled]="sessionForm.invalid">
@@ -136,7 +136,7 @@
       </div>
     </form>
 
-    <button type="button" class="btn btn-secondary" (click)="addCatchDetail()">Add Detail</button>
+    <button type="button" class="btn btn-secondary add-detail" (click)="addCatchDetail()">Add Detail</button>
 
     <div class="table-responsive">
       <table class="catchDetailsTable">
@@ -159,7 +159,7 @@
   
 
   <div class="card-footer">
-    <button type="button" class="btn btn-secondary" (click)="closeCatchSummaryForm()">
+    <button type="button" class="btn btn-secondary button-pad" (click)="closeCatchSummaryForm()">
       {{ '::Close' | abpLocalization }}
     </button>
     <button *ngIf="catchSummaryForm" class="btn btn-primary" (click)="saveCatchSummary()" [disabled]="catchSummaryForm.invalid">
