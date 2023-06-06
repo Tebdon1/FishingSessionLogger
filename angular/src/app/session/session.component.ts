@@ -21,6 +21,7 @@ export class SessionComponent implements OnInit {
   editSessionItem: any;
   catchSummaryItem: any;
   editCatchSummaryItem: any;
+  expandedRow: any;
 
   session = { items: [], totalCount: 0 } as PagedResultDto<SessionDto>;
   
@@ -185,13 +186,13 @@ export class SessionComponent implements OnInit {
 
     this.editCatchSummaryItem = JSON.parse(JSON.stringify(catchSummary));
 
-    if (this.editCatchSummaryItem.catchDetails.length == 0) {
-      this.editCatchSummaryItem.catchDetails.push({
-        bait: '',
-        quantity: 1,
-        catchWeights: []
-      });
-    }
+    //if (this.editCatchSummaryItem.catchDetails.length == 0) {
+      //this.editCatchSummaryItem.catchDetails.push({
+        //bait: '',
+        //quantity: 1,
+        //catchWeights: []
+      //});
+    //} why do we need this? 
 
     for (const item of this.editCatchSummaryItem.catchDetails) {
       if (item.catchWeights) {
@@ -220,6 +221,18 @@ export class SessionComponent implements OnInit {
 
   deleteDetailRow(row) {
     this.editCatchSummaryItem.catchDetails.remove(row); // may need to amend  
+  }
+
+  // Overview level
+
+  async expand(row) {
+    this.expandedRow = row
+    this.sessionItem = await this.sessionService.get(row.id).toPromise();
+    this.view = 'overview';
+  }
+
+  counter(count) {
+    return new Array(count);
   }
 
 }

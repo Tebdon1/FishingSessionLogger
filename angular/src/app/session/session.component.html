@@ -47,7 +47,7 @@
         <ng-template
           let-row="row" ngx-datatable-cell-template>
           <div class="text-lg-end pt-2">
-            <button id="expand" class="btn mat-icon-button" type="button">
+            <button id="expand" class="btn mat-icon-button" (click)="expand(row)" type="button">
               <i class="fa fa-bars me-1"></i>
             </button>
           </div>
@@ -82,14 +82,14 @@
 
     <h3>Catches</h3>
 
-    <button type="button" class="btn btn-primary btn-sm" (click)="addCatchSummary()">
+    <button type="button" class="btn btn-primary btn-sm margin-bottom" (click)="addCatchSummary()">
       Add Species
     </button>
 
     <table>
       <thead>
         <tr>
-          <th>Species</th>
+          <th style="width:200px">Species</th>
           <th>Quantity</th>
           <th></th>
         </tr>
@@ -98,7 +98,7 @@
         <tr *ngFor="let item of editSessionItem.catchSummaries">
           <td>{{ '::Enum:SpeciesType.' + item.species | abpLocalization }}</td>  
           <td>{{item.quantity}}</td> 
-          <td><button type="button" class="btn btn-secondary btn-sm" (click)="editCatchSummary(item)">Details</button></td>
+          <td><button type="button" class="btn btn-sm btn-outline-secondary" (click)="editCatchSummary(item)">Details</button></td>
         </tr>
       </tbody>
     </table>
@@ -117,7 +117,7 @@
 </div>
 
 <div *ngIf="view == 'catchSummaryForm'" class="card">
-  <div class="card-heeader">
+  <div class="card-header">
     <h3>Catch Summary</h3>
   </div>
 
@@ -150,7 +150,7 @@
             <td><input type="text" [(ngModel)]="item.bait" /></td>
             <td><input type="number" [(ngModel)]="item.quantity" /></td>
             <td><input type="text" [(ngModel)]="item.weightString" /></td>
-            <td><button type="button" class="btn btn-warn" (click)="deleteDetailRow(item)">Delete Row</button></td>
+            <td><button type="button" class="btn btn-warn" (click)="deleteDetailRow(row)">Delete Row</button></td>
           </tr>
         </tbody>
       </table>
@@ -167,5 +167,85 @@
       {{ '::Save' | abpLocalization }}
     </button>
   </div>
+</div>
+
+<div *ngIf="view == 'overview'" class="card">
+  <div class="card-header">
+    <div class="row">
+      <h5 class="card-title">Overview</h5>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <div class="table">
+      <table>
+        <thead>
+          <th>Session Date</th>
+          <th>Venue</th>
+          <th>Duration (hrs)</th>
+          <th>Total Caught</th>
+          <th>Largest</th>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{{ expandedRow.sessionDate | date }}</td>
+            <td>{{expandedRow.venue}}</td>
+            <td>{{expandedRow.duration}}</td>
+            <td>{{expandedRow.totalCaught}}</td>
+            <td>{{expandedRow.Largest}}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h5>Fish Caught</h5>
+      <table class="overviewTable2">
+        <thead>
+          <th>Species</th>
+          <th>Weight</th>
+          <th>Bait</th>
+        </thead>
+        <tbody>
+          <ng-container *ngFor="let catchSummary of sessionItem.catchSummaries">
+            <ng-container *ngIf="catchSummary.catchDetails.length == 0 && catchSummary.quantity > 0">
+              <tr *ngFor="let noWeight of counter(catchSummary.quantity)">
+                <td>{{ '::Enum:SpeciesType.' + catchSummary.species | abpLocalization }}</td>
+                <td>N/A</td>
+                <td>N/A</td>
+              </tr>  
+            </ng-container>
+            <ng-container *ngFor="let catchDetail of catchSummary.catchDetails">
+              <ng-container *ngIf="catchDetail.catchWeights?.length > 0">
+                <tr *ngFor="let catchWeight of catchDetail.catchWeights">
+                  <td>{{ '::Enum:SpeciesType.' + catchSummary.species | abpLocalization }}</td>
+                  <td>{{catchWeight.weight}}</td>
+                  <td>{{catchDetail.bait}}</td>
+                </tr>  
+              </ng-container>
+              <ng-container *ngIf="catchDetail.catchWeights?.length < catchDetail.quantity && catchDetail.catchWeights.length != 0">
+                <tr *ngFor="let noWeight of counter(catchDetail.quantity - catchDetail.catchWeights?.length)">
+                  <td>{{ '::Enum:SpeciesType.' + catchSummary.species | abpLocalization }}</td>
+                  <td>N/A</td>
+                  <td>{{catchDetail.bait}}</td>
+                </tr>  
+              </ng-container>
+              <ng-container *ngIf="catchDetail.catchWeights?.length < catchDetail.quantity && catchDetail.catchWeights.length == 0">
+                <tr *ngFor="let noWeight of counter(catchDetail.quantity - catchDetail.catchWeights?.length)">
+                  <td>{{ '::Enum:SpeciesType.' + catchSummary.species | abpLocalization }}</td>
+                  <td>N/A</td>
+                  <td>{{catchDetail.bait}}</td>
+                </tr>  
+              </ng-container>
+            </ng-container>
+          </ng-container>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+
+  <div class="card-footer">
+    <button type="button" class="btn btn-secondary button-pad" (click)="closeSessionForm()">
+      {{ '::Close' | abpLocalization }}
+    </button>
 </div>
 
