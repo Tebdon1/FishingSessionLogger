@@ -22,6 +22,7 @@ export class SessionComponent implements OnInit {
   catchSummaryItem: any;
   editCatchSummaryItem: any;
   expandedRow: any;
+  expandedDetails = [];
 
   session = { items: [], totalCount: 0 } as PagedResultDto<SessionDto>;
   
@@ -73,6 +74,8 @@ export class SessionComponent implements OnInit {
     console.log('sessionItem', this.sessionItem);
 
     this.editSessionItem = JSON.parse(JSON.stringify(this.sessionItem));
+
+    this.editSessionItem.catchSummaries.sort((a,b) => a.species - b.species); // b - a for reverse sort
 
     this.buildSessionForm(this.editSessionItem);
     this.view = 'sessionForm';
@@ -158,7 +161,7 @@ export class SessionComponent implements OnInit {
               weight:parseFloat(stringWeight)
             });
         }
-      } 
+      }
 
       formValue.catchDetails.push(newDetail);
     }
@@ -192,7 +195,7 @@ export class SessionComponent implements OnInit {
         //quantity: 1,
         //catchWeights: []
       //});
-    //} why do we need this? 
+    //} do we need this? 
 
     for (const item of this.editCatchSummaryItem.catchDetails) {
       if (item.catchWeights) {
@@ -226,13 +229,71 @@ export class SessionComponent implements OnInit {
   // Overview level
 
   async expand(row) {
-    this.expandedRow = row
+    this.expandedRow = row;
     this.sessionItem = await this.sessionService.get(row.id).toPromise();
+    this.createExpandedDetail();
+
+    // Table sorting
+    this.sessionItem.catchSummaries.sort((a,b) => a.species - b.species);
+    for (const entry of this.sessionItem.catchSummaries) {
+      entry.catchDetails.sort((a,b) => (a.bait > b.bait) ? 1 : ((b.bait > a.bait) ? -1 : 0));
+      for (const detail of entry.catchDetails) {
+        detail.catchWeights.sort((a,b) => b.weight - a.weight); // b - a for reverse sort
+        //if ((a,b) => b.weight - a.weight == 0) {
+          //detail.catchWeights.sort((a,b) => (a.bait > b.bait) ? 1 : ((b.bait > a.bait) ? -1 : 0));
+        //} 
+        this.createExpandedDetail();
+      } 
+    }
     this.view = 'overview';
   }
-
+  
   counter(count) {
     return new Array(count);
   }
 
+  createExpandedDetail() {
+    this.expandedDetails = [];
+    for (const catchSummary of this.sessionItem.catchSummaries) {
+      if (catchSummary.catchDetails.length == 0 && catchSummary.quantity >0){
+        for (const noWeight of this.counter(catchSummary.quantity)) {
+          this.expandedDetails.push({ speciesName: catchSummary.species,
+          weightValue: 0, bait: 'N/A' });
+        }
+      }
+      for (const catchDetail of catchSummary.catchDetails) {
+        if (catchDetail.catchWeights?.length > 0) {
+          for (const catchWeight of catchDetail.catchWeights) {
+            this.expandedDetails.push({ speciesName: catchSummary.species,
+            weightValue: catchWeight.weight, bait: catchDetail.bait });
+          }
+        }
+        if (catchDetail.catchWeights?.length < catchDetail.quantity && catchDetail.catchWeights.length != 0) {
+          for (const noWeight of this.counter(catchDetail.quantity - catchDetail.catchWeights?.length)) {
+            this.expandedDetails.push({ speciesName: catchSummary.species,
+            weightValue: 0, bait: catchDetail.bait });
+          }
+        }
+        if (catchDetail.catchWeights?.length < catchDetail.quantity && catchDetail.catchWeights.length == 0) {
+          for (const noWeight of this.counter(catchDetail.quantity - catchDetail. catchWeights?.length)) {
+            this.expandedDetails.push({ speciesName: catchSummary.species,
+            weightValue: 0, bait: catchDetail.bait })
+          }
+        }
+      }
+    }
+    this.expandedDetails = this.expandedDetails.sort((a,b) =>
+      (a.speciesName > b.speciesName) ? 1 : (
+        (a.speciesName < b.speciesName) ? -1 : (
+          (b.weightValue > a.weightValue) ? 1 : (
+            (b.weightValue < a.weightValue) ? -1 : (
+              (a.bait > b.bait) ? 1 : (
+                (a.bait < b.bait) ? -1 : 0
+              )
+            )
+          )
+        )
+      )
+    );
+  }
 }

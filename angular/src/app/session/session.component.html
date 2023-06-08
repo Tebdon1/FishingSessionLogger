@@ -178,7 +178,7 @@
 
   <div class="card-body">
     <div class="table">
-      <table>
+      <table class="table table table-responsive">
         <thead>
           <th>Session Date</th>
           <th>Venue</th>
@@ -198,45 +198,36 @@
       </table>
 
       <h5>Fish Caught</h5>
-      <table class="overviewTable2">
+
+      <table class="table table-sm">
         <thead>
           <th>Species</th>
-          <th>Weight</th>
+          <th>Quantity</th>
+          <th>Largest</th>
+        </thead>
+        <tbody>
+          <tr *ngFor="let catchSummary of sessionItem.catchSummaries">
+            <td>{{ '::Enum:SpeciesType.' + catchSummary.species | abpLocalization }}</td>
+            <td>{{ catchSummary.quantity }}</td>
+            <td>{{ Largest }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h5>Detailed Breakdown</h5>
+
+      <table class="table table-sm">
+        <thead>
+          <th>Species</th>
+          <th>Weight (Lbs.Oz)</th>
           <th>Bait</th>
         </thead>
         <tbody>
-          <ng-container *ngFor="let catchSummary of sessionItem.catchSummaries">
-            <ng-container *ngIf="catchSummary.catchDetails.length == 0 && catchSummary.quantity > 0">
-              <tr *ngFor="let noWeight of counter(catchSummary.quantity)">
-                <td>{{ '::Enum:SpeciesType.' + catchSummary.species | abpLocalization }}</td>
-                <td>N/A</td>
-                <td>N/A</td>
-              </tr>  
-            </ng-container>
-            <ng-container *ngFor="let catchDetail of catchSummary.catchDetails">
-              <ng-container *ngIf="catchDetail.catchWeights?.length > 0">
-                <tr *ngFor="let catchWeight of catchDetail.catchWeights">
-                  <td>{{ '::Enum:SpeciesType.' + catchSummary.species | abpLocalization }}</td>
-                  <td>{{catchWeight.weight}}</td>
-                  <td>{{catchDetail.bait}}</td>
-                </tr>  
-              </ng-container>
-              <ng-container *ngIf="catchDetail.catchWeights?.length < catchDetail.quantity && catchDetail.catchWeights.length != 0">
-                <tr *ngFor="let noWeight of counter(catchDetail.quantity - catchDetail.catchWeights?.length)">
-                  <td>{{ '::Enum:SpeciesType.' + catchSummary.species | abpLocalization }}</td>
-                  <td>N/A</td>
-                  <td>{{catchDetail.bait}}</td>
-                </tr>  
-              </ng-container>
-              <ng-container *ngIf="catchDetail.catchWeights?.length < catchDetail.quantity && catchDetail.catchWeights.length == 0">
-                <tr *ngFor="let noWeight of counter(catchDetail.quantity - catchDetail.catchWeights?.length)">
-                  <td>{{ '::Enum:SpeciesType.' + catchSummary.species | abpLocalization }}</td>
-                  <td>N/A</td>
-                  <td>{{catchDetail.bait}}</td>
-                </tr>  
-              </ng-container>
-            </ng-container>
-          </ng-container>
+            <tr *ngFor="let detail of expandedDetails">
+              <td>{{ '::Enum:SpeciesType.' + detail.speciesName | abpLocalization }}</td>
+              <td>{{ detail.weightValue.toFixed(2) }}</td>
+              <td>{{ detail.bait }}</td>
+            </tr>
         </tbody>
       </table>
 
