@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using SessionLogger.Sessions;
+using SessionLogger.Weathers;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -24,5 +25,8 @@ public class SessionLoggerApplicationAutoMapperProfile : Profile
 
         CreateMap<CatchWeight, CatchWeightDto>();
         CreateMap<CreateUpdateCatchWeightDto, CatchWeight>();
+
+        CreateMap<Weather, WeatherDto>();
+        CreateMap<WeatherUpdateDto, Weather>();
     }
 }

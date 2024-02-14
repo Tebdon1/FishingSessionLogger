@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SessionLogger.Sessions;
+using SessionLogger.Weathers;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
 using Volo.Abp.Data;
@@ -110,6 +111,13 @@ public class SessionLoggerDbContext :
         builder.Entity<CatchWeight>(b =>
         {
             b.ToTable(SessionLoggerConsts.DbTablePrefix + "CatchWeight", SessionLoggerConsts.DbSchema);
+            b.ConfigureByConvention(); //auto configure for the base class props
+        });
+
+        builder.Entity<Weather>(b =>
+        {
+            b.ToTable(SessionLoggerConsts.DbTablePrefix + "Weather", SessionLoggerConsts.DbSchema);
+            b.Property(x => x.WeatherType).IsRequired();
             b.ConfigureByConvention(); //auto configure for the base class props
         });
     }
