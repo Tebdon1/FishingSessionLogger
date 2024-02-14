@@ -42,12 +42,11 @@
       </ngx-datatable-column>
       <ngx-datatable-column [name]="'::Venue' | abpLocalization" prop="venue"></ngx-datatable-column>
       <ngx-datatable-column [name]="'::Duration' | abpLocalization" prop="duration"></ngx-datatable-column>
-      <ngx-datatable-column [name]="'::Total' | abpLocalization" prop="total"></ngx-datatable-column>
       <ngx-datatable-column [name]="'::Expand' | abpLocalization" [maxWidth]="78" [sortable]="false">
         <ng-template
           let-row="row" ngx-datatable-cell-template>
           <div class="text-lg-end pt-2">
-            <button id="expand" class="btn mat-icon-button" type="button">
+            <button id="expand" class="btn mat-icon-button" (click)="expand(row)" type="button">
               <i class="fa fa-bars me-1"></i>
             </button>
           </div>
@@ -82,23 +81,25 @@
 
     <h3>Catches</h3>
 
-    <button type="button" class="btn btn-primary" (click)="addCatchSummary()">
+    <button type="button" class="btn btn-primary btn-sm margin-bottom" (click)="addCatchSummary()">
       Add Species
     </button>
 
-    <table>
+    <table class="table table-sm">
       <thead>
         <tr>
-          <th>Species</th>
-          <th>Quantity</th>
-          <th></th>
+          <th style="width:300px">Species</th>
+          <th style="width:100px">Quantity</th>
+          <th>Details</th>
+          <th style="width:100px"></th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let item of editSessionItem.catchSummaries">
           <td>{{ '::Enum:SpeciesType.' + item.species | abpLocalization }}</td>  
           <td>{{item.quantity}}</td> 
-          <td><button type="button" class="btn btn-secondary" (click)="editCatchSummary(item)">Details</button></td>
+          <td><button type="button" class="btn mat-icon-button" (click)="editCatchSummary(item)"><i class="fa fa-edit me-1"></i></button></td>
+          <td><button type="button" class="btn mat-icon-button" (click)="deleteCatchSummary(item)"><i class="fa fa-trash me-1"></i></button></td>
         </tr>
       </tbody>
     </table>
@@ -117,7 +118,7 @@
 </div>
 
 <div *ngIf="view == 'catchSummaryForm'" class="card">
-  <div class="card-heeader">
+  <div class="card-header">
     <h3>Catch Summary</h3>
   </div>
 
@@ -136,7 +137,7 @@
       </div>
     </form>
 
-    <button type="button" class="btn btn-secondary add-detail" (click)="addCatchDetail()">Add Detail</button>
+    <button type="button" class="btn btn-secondary add-detail btn-sm" (click)="addCatchDetail()">Add Detail</button>
 
     <div class="table-responsive">
       <table class="catchDetailsTable">
@@ -146,11 +147,11 @@
           <th>Weights</th>
         </thead>
         <tbody>
-          <tr *ngFor="let item of editCatchSummaryItem.catchDetails">
+          <tr *ngFor="let item of editCatchSummaryItem.catchDetails; let i = index">
             <td><input type="text" [(ngModel)]="item.bait" /></td>
             <td><input type="number" [(ngModel)]="item.quantity" /></td>
             <td><input type="text" [(ngModel)]="item.weightString" /></td>
-            <td><button type="button" class="btn btn-warn" (click)="deleteDetailRow(item)">Delete Row</button></td>
+            <td><button type="button" class="btn mat-icon-button" (click)="deleteCatchDetail(i)"><i class="fa fa-trash me-1"></i></button></td>
           </tr>
         </tbody>
       </table>
@@ -167,5 +168,76 @@
       {{ '::Save' | abpLocalization }}
     </button>
   </div>
+</div>
+
+<div *ngIf="view == 'overview'" class="card">
+  <div class="card-header">
+    <div class="row">
+      <h5 class="card-title">Overview</h5>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <div class="table">
+      <table class="table table table-responsive">
+        <thead>
+          <th>Session Date</th>
+          <th>Venue</th>
+          <th>Duration (hrs)</th>
+          <th>Total Caught</th>
+          <th>Largest</th>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{{ expandedRow.sessionDate | date }}</td>
+            <td>{{expandedRow.venue}}</td>
+            <td>{{expandedRow.duration}}</td>
+            <td>{{totalQuantity}}</td>
+            <td>{{weightMax.toFixed(2)}}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h5>Fish Caught</h5>
+
+      <table class="table table-sm">
+        <thead>
+          <th>Species</th>
+          <th>Quantity</th>
+          <th>Largest</th>
+        </thead>
+        <tbody>
+          <tr *ngFor="let catchSummary of sessionItem.catchSummaries">
+            <td>{{ '::Enum:SpeciesType.' + catchSummary.species | abpLocalization }}</td>
+            <td>{{ catchSummary.quantity }}</td>
+            <td>{{ catchSummary.weightMax.toFixed(2) }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h5>Detailed Breakdown</h5>
+
+      <table class="table table-sm">
+        <thead>
+          <th>Species</th>
+          <th>Weight (Lbs.Oz)</th>
+          <th>Bait</th>
+        </thead>
+        <tbody>
+            <tr *ngFor="let detail of expandedDetails">
+              <td>{{ '::Enum:SpeciesType.' + detail.speciesName | abpLocalization }}</td>
+              <td>{{ detail.weightValue.toFixed(2) }}</td>
+              <td>{{ detail.bait }}</td>
+            </tr>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+
+  <div class="card-footer">
+    <button type="button" class="btn btn-secondary button-pad" (click)="closeSessionForm()">
+      {{ '::Close' | abpLocalization }}
+    </button>
 </div>
 
