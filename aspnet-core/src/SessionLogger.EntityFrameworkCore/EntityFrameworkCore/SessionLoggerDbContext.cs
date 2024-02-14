@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SessionLogger.Baits;
 using SessionLogger.Sessions;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
@@ -110,6 +111,13 @@ public class SessionLoggerDbContext :
         builder.Entity<CatchWeight>(b =>
         {
             b.ToTable(SessionLoggerConsts.DbTablePrefix + "CatchWeight", SessionLoggerConsts.DbSchema);
+            b.ConfigureByConvention(); //auto configure for the base class props
+        });
+
+        builder.Entity<Bait>(b =>
+        {
+            b.ToTable(SessionLoggerConsts.DbTablePrefix + "Bait", SessionLoggerConsts.DbSchema);
+            b.Property(x => x.Name).IsRequired();
             b.ConfigureByConvention(); //auto configure for the base class props
         });
     }

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using SessionLogger.Baits;
 using SessionLogger.Sessions;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,5 +26,8 @@ public class SessionLoggerApplicationAutoMapperProfile : Profile
 
         CreateMap<CatchWeight, CatchWeightDto>();
         CreateMap<CreateUpdateCatchWeightDto, CatchWeight>();
+
+        CreateMap<Bait, BaitDto>();
+        CreateMap<BaitUpdateDto, Bait>();
     }
 }
