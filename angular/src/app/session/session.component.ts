@@ -1,6 +1,8 @@
 import { ListService, PagedResultDto } from '@abp/ng.core';
 import { Component, OnInit } from '@angular/core';
 import { SessionService, SessionDto, speciesTypeOptions, CreateUpdateSessionDto } from '@proxy/sessions';
+import { CatchSummaryService, CatchSummaryDto, CreateUpdateCatchSummaryDto } from '@proxy/sessions';
+import { CatchDetailService, CatchDetailDto, CreateUpdateCatchDetailDto } from '@proxy/sessions';
 import { ConfirmationService, Confirmation } from '@abp/ng.theme.shared';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { NgbDateNativeAdapter, NgbDateAdapter } from '@ng-bootstrap/ng-bootstrap';
@@ -23,6 +25,8 @@ export class SessionComponent implements OnInit {
   editCatchSummaryItem: any;
   expandedRow: any;
   expandedDetails = [];
+  weightMax = 0;
+  totalQuantity = 0;
 
   session = { items: [], totalCount: 0 } as PagedResultDto<SessionDto>;
   
@@ -36,8 +40,12 @@ export class SessionComponent implements OnInit {
   constructor(
     public readonly list: ListService,
     private sessionService: SessionService,
+    private catchSummaryService: CatchSummaryService,
+    private catchDetailService: CatchDetailService,
     private confirmation: ConfirmationService,
-    private fb: FormBuilder) {}
+    private fb: FormBuilder) {
+      this.list.maxResultCount = 25
+    }
   
     deleteSession(id: number) {
       this.confirmation.warn('::AreYouSureToDelete', '::AreYouSure').subscribe((status) => {
@@ -45,6 +53,27 @@ export class SessionComponent implements OnInit {
           this.sessionService.delete(id).subscribe(() => this.list.get());
         }
       });
+    }
+
+    deleteCatchSummary(catchSummary) {
+      this.confirmation.warn('::AreYouSureToDelete', '::AreYouSure').subscribe((status) => {
+        if (status === Confirmation.Status.confirm) {
+          this.catchSummaryService.delete(catchSummary).subscribe(() => this.list.get());
+        }
+      });
+    }
+
+    deleteCatchDetail(i) {
+      console.log(i)
+      if (i > -1){
+        this.catchSummaryItem.catchDetails = this.catchSummaryItem.catchDetails.splice(i, 1)
+      }
+      console.log(this.catchSummaryItem.catchDetails)
+      //this.confirmation.warn('::AreYouSureToDelete', '::AreYouSure').subscribe((status) => {
+        //if (status === Confirmation.Status.confirm) {
+          //this.catchDetailService.delete(id).subscribe(() => this.list.get());
+        //}
+      //});
     }
 
   ngOnInit() {
@@ -202,6 +231,7 @@ export class SessionComponent implements OnInit {
         let weights = [];
         for (const catchWeight of item.catchWeights){
           weights.push(catchWeight.weight)
+          weights.sort((a,b) => b-a);
         };
         item.weightString = weights.join(',');
       }
@@ -232,6 +262,7 @@ export class SessionComponent implements OnInit {
     this.expandedRow = row;
     this.sessionItem = await this.sessionService.get(row.id).toPromise();
     this.createExpandedDetail();
+    this.totalQuantity = this.calculateSessionTotal(this.sessionItem);
 
     // Table sorting
     this.sessionItem.catchSummaries.sort((a,b) => a.species - b.species);
@@ -241,8 +272,7 @@ export class SessionComponent implements OnInit {
         detail.catchWeights.sort((a,b) => b.weight - a.weight); // b - a for reverse sort
         //if ((a,b) => b.weight - a.weight == 0) {
           //detail.catchWeights.sort((a,b) => (a.bait > b.bait) ? 1 : ((b.bait > a.bait) ? -1 : 0));
-        //} 
-        this.createExpandedDetail();
+        //}
       } 
     }
     this.view = 'overview';
@@ -254,8 +284,10 @@ export class SessionComponent implements OnInit {
 
   createExpandedDetail() {
     this.expandedDetails = [];
+    this.weightMax = 0;
     for (const catchSummary of this.sessionItem.catchSummaries) {
-      if (catchSummary.catchDetails.length == 0 && catchSummary.quantity >0){
+      catchSummary.weightMax = 0;
+      if (catchSummary.catchDetails.length == 0 && catchSummary.quantity > 0){
         for (const noWeight of this.counter(catchSummary.quantity)) {
           this.expandedDetails.push({ speciesName: catchSummary.species,
           weightValue: 0, bait: 'N/A' });
@@ -266,6 +298,8 @@ export class SessionComponent implements OnInit {
           for (const catchWeight of catchDetail.catchWeights) {
             this.expandedDetails.push({ speciesName: catchSummary.species,
             weightValue: catchWeight.weight, bait: catchDetail.bait });
+            this.weightMax = catchWeight.weight > this.weightMax ? catchWeight.weight : this.weightMax;
+            catchSummary.weightMax = catchWeight.weight > catchSummary.weightMax ? catchWeight.weight : catchSummary.weightMax;
           }
         }
         if (catchDetail.catchWeights?.length < catchDetail.quantity && catchDetail.catchWeights.length != 0) {
@@ -294,6 +328,15 @@ export class SessionComponent implements OnInit {
           )
         )
       )
-    );
+    )
+  }
+
+  calculateSessionTotal(session) {
+    let totalQuantity = 0;
+    for (const catchSummary of session.catchSummaries) {
+      totalQuantity += catchSummary.quantity;
+    }
+    return totalQuantity
+    
   }
 }
