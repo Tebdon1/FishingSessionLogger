@@ -1,8 +1,8 @@
 import { ListService, PagedResultDto } from '@abp/ng.core';
 import { Component, OnInit } from '@angular/core';
-import { SessionService, SessionDto, speciesTypeOptions, CreateUpdateSessionDto } from '@proxy/sessions';
-import { CatchSummaryService, CatchSummaryDto, CreateUpdateCatchSummaryDto } from '@proxy/sessions';
-import { CatchDetailService, CatchDetailDto, CreateUpdateCatchDetailDto } from '@proxy/sessions';
+import { SessionService, SessionDto, speciesTypeOptions } from '@proxy/sessions';
+import { CatchSummaryService } from '@proxy/sessions';
+import { CatchDetailService } from '@proxy/sessions';
 import { ConfirmationService, Confirmation } from '@abp/ng.theme.shared';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { NgbDateNativeAdapter, NgbDateAdapter } from '@ng-bootstrap/ng-bootstrap';
@@ -261,21 +261,34 @@ export class SessionComponent implements OnInit {
 
   async expand(row) {
     this.expandedRow = row;
-    this.sessionItem = await this.sessionService.get(row.id).toPromise();
+    this.sessionItem = await lastValueFrom(this.sessionService.get(row.id));
     this.createExpandedDetail();
     this.totalQuantity = this.calculateSessionTotal(this.sessionItem);
 
     // Table sorting
+    // This seems to cause an issue. If there are x fish caught on y bait and x > y it will only show y amount 
+    //  of fish instead of the actual amount of fish caught
+    
+    
+    /*
+    Commented out. Not sure if this does anything? Looks like the sorting is done inside 
+
+    this.createExpandedDetail(); on line 331-343
+
     this.sessionItem.catchSummaries.sort((a,b) => a.species - b.species);
+
     for (const entry of this.sessionItem.catchSummaries) {
       entry.catchDetails.sort((a,b) => (a.bait > b.bait) ? 1 : ((b.bait > a.bait) ? -1 : 0));
       for (const detail of entry.catchDetails) {
-        detail.catchWeights.sort((a,b) => b.weight - a.weight); // b - a for reverse sort
+        detail.catchWeights.sort((a,b) => b.weight - a.weight);
+        
+        // b - a for reverse sort
         //if ((a,b) => b.weight - a.weight == 0) {
           //detail.catchWeights.sort((a,b) => (a.bait > b.bait) ? 1 : ((b.bait > a.bait) ? -1 : 0));
         //}
       } 
     }
+    */
     this.view = 'overview';
   }
   
@@ -286,20 +299,27 @@ export class SessionComponent implements OnInit {
   createExpandedDetail() {
     this.expandedDetails = [];
     this.weightMax = 0;
+
     for (const catchSummary of this.sessionItem.catchSummaries) {
       catchSummary.weightMax = 0;
       if (catchSummary.catchDetails.length == 0 && catchSummary.quantity > 0){
-        for (const noWeight of this.counter(catchSummary.quantity)) {
-          this.expandedDetails.push({ speciesName: catchSummary.species,
-          weightValue: 0, bait: 'N/A' });
+        for (const _ of this.counter(catchSummary.quantity)) {
+          this.expandedDetails.push({
+            speciesName: catchSummary.species,
+            weightValue: 0,
+            bait: 'N/A' });
         }
       }
       for (const catchDetail of catchSummary.catchDetails) {
         if (catchDetail.catchWeights?.length > 0) {
           for (const catchWeight of catchDetail.catchWeights) {
-            this.expandedDetails.push({ speciesName: catchSummary.species,
-            weightValue: catchWeight.weight, bait: catchDetail.bait });
+            this.expandedDetails.push({ 
+              speciesName: catchSummary.species,
+              weightValue: catchWeight.weight,
+              bait: catchDetail.bait });
+
             this.weightMax = catchWeight.weight > this.weightMax ? catchWeight.weight : this.weightMax;
+
             catchSummary.weightMax = catchWeight.weight > catchSummary.weightMax ? catchWeight.weight : catchSummary.weightMax;
           }
         }
@@ -317,6 +337,7 @@ export class SessionComponent implements OnInit {
         }
       }
     }
+
     this.expandedDetails = this.expandedDetails.sort((a,b) =>
       (a.speciesName > b.speciesName) ? 1 : (
         (a.speciesName < b.speciesName) ? -1 : (
@@ -330,6 +351,10 @@ export class SessionComponent implements OnInit {
         )
       )
     )
+
+    const grouped = this.groupBy(this.expandedDetails, expandedDetail => expandedDetail.speciesName);
+
+    console.log(grouped);
   }
 
   calculateSessionTotal(session) {
@@ -339,5 +364,19 @@ export class SessionComponent implements OnInit {
     }
     return totalQuantity
     
+  }
+
+  groupBy(list, keyGetter) {
+    const map = new Map();
+    list.forEach((item) => {
+         const key = keyGetter(item);
+         const collection = map.get(key);
+         if (!collection) {
+             map.set(key, [item]);
+         } else {
+             collection.push(item);
+         }
+    });
+    return map;
   }
 }
