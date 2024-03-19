@@ -5,6 +5,7 @@ import { ConfirmationService, Confirmation } from '@abp/ng.theme.shared';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { NgbDateNativeAdapter, NgbDateAdapter } from '@ng-bootstrap/ng-bootstrap';
 import * as _ from 'lodash'; 
+import { lastValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-session',
@@ -67,7 +68,7 @@ export class SessionComponent implements OnInit {
   }
 
   async editSession(id) {
-    this.sessionItem = await this.sessionService.get(id).toPromise();
+    this.sessionItem = await lastValueFrom(this.sessionService.get(id));
 
     console.log('sessionItem', this.sessionItem);
 
@@ -95,10 +96,10 @@ export class SessionComponent implements OnInit {
     formValue.catchSummaries = this.editSessionItem.catchSummaries;
 
     if (this.sessionItem) {
-      await this.sessionService.update(this.sessionItem.id, formValue).toPromise();
+      await lastValueFrom(this.sessionService.update(this.sessionItem.id, formValue));
     }
     else {
-      await this.sessionService.create(formValue).toPromise();
+      await lastValueFrom(this.sessionService.create(formValue));
     }
 
     this.view = '';
