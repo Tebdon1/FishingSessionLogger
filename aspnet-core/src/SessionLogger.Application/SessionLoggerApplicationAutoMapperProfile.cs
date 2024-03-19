@@ -14,6 +14,7 @@ public class SessionLoggerApplicationAutoMapperProfile : Profile
          * into multiple profile classes for a better organization. */
         //CreateMap<Session, SessionDto>();
         CreateMap<Session, SessionDto>();
+            ;
         CreateMap<CreateUpdateSessionDto, Session>();
 
         CreateMap<CatchSummary, CatchSummaryDto>();
