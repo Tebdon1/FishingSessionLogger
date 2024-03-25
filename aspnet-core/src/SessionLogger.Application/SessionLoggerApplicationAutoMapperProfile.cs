@@ -1,5 +1,8 @@
 ﻿using AutoMapper;
+using SessionLogger.Baits;
 using SessionLogger.Sessions;
+using SessionLogger.Tickets;
+using SessionLogger.Venues;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -25,5 +28,14 @@ public class SessionLoggerApplicationAutoMapperProfile : Profile
 
         CreateMap<CatchWeight, CatchWeightDto>();
         CreateMap<CreateUpdateCatchWeightDto, CatchWeight>();
+
+        CreateMap<Bait, BaitDto>();
+        CreateMap<BaitUpdateDto, Bait>();
+
+        CreateMap<Ticket, TicketDto>();
+        CreateMap<TicketUpdateDto, Ticket>();
+
+        CreateMap<Venue, VenueDto>();
+        CreateMap<VenueUpdateDto, Venue>();
     }
 }
