@@ -1,5 +1,5 @@
 import type { AuditedEntityDto } from '@abp/ng.core';
-import type { SpeciesType } from './species-type.enum';
+import type { SpeciesType } from '../../home/enums/species-type.enum';
 
 export interface CatchDetailDto extends AuditedEntityDto<number> {
   bait?: string;
