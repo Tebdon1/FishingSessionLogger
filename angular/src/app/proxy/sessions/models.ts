@@ -46,3 +46,16 @@ export interface SessionDto extends AuditedEntityDto<number> {
   duration: number;
   catchSummaries: CatchSummaryDto[];
 }
+
+export interface BaitDto extends AuditedEntityDto<number> {
+  name: string;
+}
+
+export interface BaitUpdateDto {
+  name: string;
+}
+
+export class Bait {
+  id: number;
+  name: string;
+}
