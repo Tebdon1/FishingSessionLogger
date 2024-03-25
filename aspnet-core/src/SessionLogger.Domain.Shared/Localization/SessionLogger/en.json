@@ -45,6 +45,14 @@
     "Enum:SpeciesType.22": "Trout (Rainbow)",
     "Enum:SpeciesType.23": "Trout (Sea)",
     "Enum:SpeciesType.24": "Wrasse",
-    "Enum:SpeciesType.25": "Zander"
+    "Enum:SpeciesType.25": "Zander",
+    "Enum:WindDirection.0": "North",
+    "Enum:WindDirection.1": "South",
+    "Enum:WindDirection.2": "East",
+    "Enum:WindDirection.3": "West",
+    "Enum:WindDirection.4": "North East",
+    "Enum:WindDirection.5": "North West",
+    "Enum:WindDirection.6": "South East",
+    "Enum:WindDirection.7": "South West"
   }
 }
