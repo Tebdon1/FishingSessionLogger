@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Volo.Abp.Domain.Entities.Auditing;
 
-namespace SessionLogger.Sessions;
+namespace SessionLogger.Domain.Sessions;
 
 public class CatchDetail : AuditedAggregateRoot<int>
 
@@ -19,7 +19,7 @@ public class CatchDetail : AuditedAggregateRoot<int>
 
     public CatchDetail()
     {
-        this.CatchWeights = new HashSet<CatchWeight>();
+        CatchWeights = new HashSet<CatchWeight>();
     }
 
     public virtual ICollection<CatchWeight> CatchWeights { get; set; }

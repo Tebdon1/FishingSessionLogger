@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using SessionLogger.Domain.Sessions;
 using SessionLogger.Sessions;
 using System.Collections.Generic;
 using System.Linq;
