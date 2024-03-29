@@ -20,8 +20,8 @@ import { Bait } from '../models/baits'
     CrudService,
     { provide: NgbDateAdapter, useClass: DateAdapter },
   ],
-  templateUrl: './bait.component.html',
-  styleUrls: ['./bait.component.scss'],
+  templateUrl: './baits.component.html',
+  styleUrls: ['./baits.component.scss'],
 })
 export class BaitsComponent implements CanComponentDeactivate  {
   @ViewChild('crud') crud: DynamicCrudComponent;

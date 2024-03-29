@@ -28,6 +28,12 @@ function configureRoutes(routesService: RoutesService) {
         parentName: '::Menu:SessionLogger',
         layout: eLayoutType.application,
       },
+      {
+        path: '/baits',
+        name: '::Menu:Baits',
+        parentName: '::Menu:SessionLogger',
+        layout: eLayoutType.application,
+      },
     ]);
   };
 }

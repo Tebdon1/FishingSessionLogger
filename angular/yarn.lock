@@ -1963,6 +1963,345 @@
   resolved "https://registry.yarnpkg.com/@popperjs/core/-/core-2.11.7.tgz#ccab5c8f7dc557a52ca3288c10075c9ccd37fff7"
   integrity sha512-Cr4OjIkipTtcXKjAsm8agyleBuDHvxzeBoa1v543lbv1YaIwQjESsVcmjiWiPEbC1FIeHOG/Op9kdCmAmiS3Kw==
 
+"@progress/jszip-esm@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@progress/jszip-esm/-/jszip-esm-1.0.3.tgz#778e2845206e2370eb72ca8d5f32041ee0d9dbbb"
+  integrity sha512-qu5qeIlUsJX0Z2oi3Aax3gvfjKrrtVzQ2LIEhmw2CVWffZ0JvtifiomyJOc0ZFk7oEyEyrVvab97bqKkNCKvfQ==
+  dependencies:
+    "@progress/pako-esm" "^1.0.1"
+
+"@progress/kendo-angular-buttons@^15.3.0":
+  version "15.3.0"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-angular-buttons/-/kendo-angular-buttons-15.3.0.tgz#1472032cf15700266271dacfeb7c58cdbf0b8b01"
+  integrity sha512-3xoukblQ5U9w6gjFiLgqyKyTqzwDU2isycSFSoDkKcfQGXsRJl/9RDWZjHQGFuJHN2WwB7NTbTUug/WSvmfFIA==
+  dependencies:
+    "@progress/kendo-angular-schematics" "15.3.0"
+    "@progress/kendo-common" "^0.2.1"
+    tslib "^2.3.1"
+
+"@progress/kendo-angular-common@^15.3.0":
+  version "15.3.0"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-angular-common/-/kendo-angular-common-15.3.0.tgz#ef6d94843bbf53ef3a43cf9fffe5c4b75d705b06"
+  integrity sha512-3U610/JJe2MngnMwged5PcKMSMlcdulXROfy+Febj5xzcJd/0wTyVe65bRsdtCWfGcjXjkoA+oJrxNfviMPA6g==
+  dependencies:
+    "@progress/kendo-angular-schematics" "15.3.0"
+    "@progress/kendo-common" "^0.2.1"
+    "@progress/kendo-draggable" "^3.0.2"
+    tslib "^2.3.1"
+
+"@progress/kendo-angular-dateinputs@^15.3.0":
+  version "15.3.0"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-angular-dateinputs/-/kendo-angular-dateinputs-15.3.0.tgz#fccc8d14e4a7807f87ca0d2203da548f156edad8"
+  integrity sha512-uc+TXIKasFqpDlHX9I9wwS1pzDMO4NfrGi1KKeEKpDQI6xV0+h/xU/RkkbW7WjSmQxok2t48inodZoSrylaGzA==
+  dependencies:
+    "@progress/kendo-angular-schematics" "15.3.0"
+    "@progress/kendo-common" "^0.2.0"
+    "@progress/kendo-date-math" "^1.1.0"
+    "@progress/kendo-dateinputs-common" "^0.3.2"
+    tslib "^2.3.1"
+
+"@progress/kendo-angular-dialog@^15.3.0":
+  version "15.3.0"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-angular-dialog/-/kendo-angular-dialog-15.3.0.tgz#7b1f950e9805917a1544b6221a81f9aeffc13cb1"
+  integrity sha512-UwwR/ke1tFVTPRIaTZo6bqwh8U69qyGTG3tCdh/Dd40mzPIQexbk/JgiXZgiAvrreYhh6JoCGclPsLqxLFViHA==
+  dependencies:
+    "@progress/kendo-angular-schematics" "15.3.0"
+    "@progress/kendo-popup-common" "^1.7.0"
+    tslib "^2.3.1"
+
+"@progress/kendo-angular-dropdowns@^15.3.0":
+  version "15.3.0"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-angular-dropdowns/-/kendo-angular-dropdowns-15.3.0.tgz#5547a66b23fdc23a1d0c8f8a540f9a04631e4656"
+  integrity sha512-YlxJbtF9UCC10qTymQA9PtSPCaH+c7Erf6wbQPi0gKFPjolmems509QitPixXDBOi6T0/oX8R75c1+rKsGEhyg==
+  dependencies:
+    "@progress/kendo-angular-schematics" "15.3.0"
+    "@progress/kendo-common" "^0.2.1"
+    tslib "^2.3.1"
+
+"@progress/kendo-angular-excel-export@^15.3.0":
+  version "15.3.0"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-angular-excel-export/-/kendo-angular-excel-export-15.3.0.tgz#94bb49907e9429d4026b57ec23be3414105180a3"
+  integrity sha512-R2zznvSq6SUpxdAv9zKWnP3g0YgcQ3ZdHkMqt0bEzvKUs8uJWERZGsbXeWSG/0WjWtvY3VNbrbTLtNVr4NqeQw==
+  dependencies:
+    "@progress/kendo-angular-schematics" "15.3.0"
+    "@progress/kendo-file-saver" "^1.0.0"
+    "@progress/kendo-intl" "^3.0.0"
+    "@progress/kendo-ooxml" "^1.9.0"
+    tslib "^2.3.1"
+
+"@progress/kendo-angular-grid@^15.3.0":
+  version "15.3.0"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-angular-grid/-/kendo-angular-grid-15.3.0.tgz#4e01faf97f686145319b9092fc15422e29801b28"
+  integrity sha512-bmu9hcyVW6xAVGYsGu5tqcCbogNw6eUTLJDgsqbwyqNJ8mqQxxNsX9PU5eYmUuwwl6TA7UCr8+rVTpu7DVJ8SA==
+  dependencies:
+    "@progress/kendo-angular-schematics" "15.3.0"
+    "@progress/kendo-common" "^0.2.0"
+    "@progress/kendo-file-saver" "^1.0.0"
+    tslib "^2.3.1"
+
+"@progress/kendo-angular-icons@^15.3.0":
+  version "15.3.0"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-angular-icons/-/kendo-angular-icons-15.3.0.tgz#6e468f2cec8aa7106e50d246df54129ec475098e"
+  integrity sha512-dOjHl63Uk6GIiM626LkxNlTh53toaZyqvEd2X3Ugr/5/ymheP5IyeKxc9iS2nwAQ68VEGt6Jke4uQNpcdZU/Sg==
+  dependencies:
+    "@progress/kendo-angular-schematics" "15.3.0"
+    tslib "^2.3.1"
+
+"@progress/kendo-angular-inputs@^15.3.0":
+  version "15.3.0"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-angular-inputs/-/kendo-angular-inputs-15.3.0.tgz#503d0a6d7000c4367dd9ab32e7a7ab32c7060b37"
+  integrity sha512-d3Izq09uZJOku1bRAAPBvM1MdVj1nO3Q2nnZ+UxFOKdVXaSD214aU/2zxGahU0vIAwcxB6BuBPs2uL4sUeomUQ==
+  dependencies:
+    "@progress/kendo-angular-schematics" "15.3.0"
+    "@progress/kendo-common" "^0.2.2"
+    "@progress/kendo-draggable" "^3.0.0"
+    "@progress/kendo-inputs-common" "^3.1.0"
+    tslib "^2.3.1"
+
+"@progress/kendo-angular-intl@^15.3.0":
+  version "15.3.0"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-angular-intl/-/kendo-angular-intl-15.3.0.tgz#94f1be57daededc1c1c080edd2443c8a9eece545"
+  integrity sha512-ccw55uCsa4HjiDKoYdMXo5UUzQpj4I8PsjnyWaj6k+HK9Dux2nmMqlXx5DIf4QuLkyn2NsRqzKfKFIRSBMEk9Q==
+  dependencies:
+    "@progress/kendo-angular-schematics" "15.3.0"
+    "@progress/kendo-intl" "^3.1.0"
+    tslib "^2.3.1"
+
+"@progress/kendo-angular-l10n@^15.3.0":
+  version "15.3.0"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-angular-l10n/-/kendo-angular-l10n-15.3.0.tgz#036d9bb9af384a9397dc2d2508a2330353661381"
+  integrity sha512-mMo/Fq95CPA0on+Kj0YwSBKAoq+mqUQqag0ATzdXnJZG74n4yslpxFNWsPs9duhIEE42/3yENgBpLhM/P3prNg==
+  dependencies:
+    "@progress/kendo-angular-schematics" "15.3.0"
+    tslib "^2.3.1"
+
+"@progress/kendo-angular-label@^15.3.0":
+  version "15.3.0"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-angular-label/-/kendo-angular-label-15.3.0.tgz#13612eaaabb2e2ca97085544f7031ad70dd54ab0"
+  integrity sha512-eivGTQbwn9Ft/m6AuhfavAbHybgJr5/PZvWonqZ2t/kJggMIXuRJ+EGhymNunhpDc9H/vVlCKydBw0LsKu3PyQ==
+  dependencies:
+    "@progress/kendo-angular-schematics" "15.3.0"
+    tslib "^2.3.1"
+
+"@progress/kendo-angular-layout@^15.3.0":
+  version "15.3.0"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-angular-layout/-/kendo-angular-layout-15.3.0.tgz#c95711ebf51dd1b27c5a162666f00a1bb7036a48"
+  integrity sha512-wXQ2xOy8/3QeFIOLxKNKHonIUn3Zo0f/yvBcwt+r0KWz+P1w8ye8Zqx2muMHLPt4+tAcup+sm29RUwbyEHjWDA==
+  dependencies:
+    "@progress/kendo-angular-schematics" "15.3.0"
+    "@progress/kendo-draggable" "^3.0.2"
+    tslib "^2.3.1"
+
+"@progress/kendo-angular-navigation@^15.3.0":
+  version "15.3.0"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-angular-navigation/-/kendo-angular-navigation-15.3.0.tgz#4117b384e4cf3fa5ea827aa0ff3049f8e4028bf4"
+  integrity sha512-ffrOddLdB6GuA36VG6cJyUZAi1F9TO1Yb9GwA8I2bVkYKSnfuHwRiAZcuEGJBkh7+zI/CHPP6lma+Ltfn9tsYw==
+  dependencies:
+    "@progress/kendo-angular-schematics" "15.3.0"
+    tslib "^2.3.1"
+
+"@progress/kendo-angular-pdf-export@^15.3.0":
+  version "15.3.0"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-angular-pdf-export/-/kendo-angular-pdf-export-15.3.0.tgz#3939d9afe7e61d1e1056078b70a74ce60f811c50"
+  integrity sha512-empKUx4ewubfza2O7BzevG4kOWysV7X1aaX/lLwvVV6jRiwyGSC82K32j3TezzF7yikHNYagXM8aG1rPf4REIw==
+  dependencies:
+    "@progress/kendo-angular-schematics" "15.3.0"
+    "@progress/kendo-file-saver" "^1.0.1"
+    tslib "^2.3.1"
+
+"@progress/kendo-angular-popup@^15.3.0":
+  version "15.3.0"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-angular-popup/-/kendo-angular-popup-15.3.0.tgz#c772785dd1d32aa76a3e4a8ee5c79cd679704c76"
+  integrity sha512-sWXvfDlbD8GnI0hvPCQo1675xY6dyCH2O+pEstpTKmMsAkYz/Q2Cvuvtq1yYLwtYObTk7mbmiKdS9DgYtdMFdA==
+  dependencies:
+    "@progress/kendo-angular-schematics" "15.3.0"
+    "@progress/kendo-popup-common" "^1.7.0"
+    tslib "^2.3.1"
+
+"@progress/kendo-angular-progressbar@^15.3.0":
+  version "15.3.0"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-angular-progressbar/-/kendo-angular-progressbar-15.3.0.tgz#2a13619c42ea54ef03c2df088d4a7538ced8bbdc"
+  integrity sha512-OnnDWaD/C4CrdUpqwOjO0+CtGr5uYf5268vYzJvzxkXZ0kzPmHqkh05BGkhPzZH/C0ulotxM0Z44SdJvjbvkJw==
+  dependencies:
+    "@progress/kendo-angular-schematics" "15.3.0"
+    tslib "^2.3.1"
+
+"@progress/kendo-angular-schematics@15.3.0":
+  version "15.3.0"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-angular-schematics/-/kendo-angular-schematics-15.3.0.tgz#62cb3a6ff99329d638fe2d4010016703c87ed801"
+  integrity sha512-mk6BFyNs9tzkT1xHsXEXgbXD91MzrS9xrAeTGFCRjAmUAGD8ukKqoe1HvEEtZ9mJqJqYkpFNF2d8s53GnQgnpA==
+  dependencies:
+    "@progress/kendo-angular-schematics" "15.3.0"
+    "@types/semver" "^7.5.0"
+    semver "^7.5.3"
+
+"@progress/kendo-angular-toolbar@^15.3.0":
+  version "15.3.0"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-angular-toolbar/-/kendo-angular-toolbar-15.3.0.tgz#74a9d87e0572ebef27efcdc362527f418ff96591"
+  integrity sha512-EsWiPe67IxLaUG1bFyvPc4vmIWJu+z9J7lc+/OkRXQ2U7JVtH7xH44IUW955MrNkGoYQuYokj4vkzCwUk8kqtg==
+  dependencies:
+    "@progress/kendo-angular-schematics" "15.3.0"
+    tslib "^2.3.1"
+
+"@progress/kendo-angular-treeview@^15.3.0":
+  version "15.3.0"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-angular-treeview/-/kendo-angular-treeview-15.3.0.tgz#8768b9f2ecc5044cd57513199196ec453354db5e"
+  integrity sha512-Sc5tGpFC1VohjgojpmQq4Pvjs7nrmHQJAuVPM2jm5yy7rNq9taarvsZwcL6Symq7X80tOKVb4iSQRRLnfm6d7g==
+  dependencies:
+    "@progress/kendo-angular-schematics" "15.3.0"
+    "@progress/kendo-common" "^0.2.0"
+    "@progress/kendo-draggable" "^3.0.2"
+    tslib "^2.3.1"
+
+"@progress/kendo-angular-upload@^15.3.0":
+  version "15.3.0"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-angular-upload/-/kendo-angular-upload-15.3.0.tgz#9e0eb8f0da3b87a0a12e829aa9d14a3d54ca995a"
+  integrity sha512-qNtaReoSkqoJDTNUwDPdDYcck996MeQOw7WqLCvbxICljSqGXEyDrYuFfkXkS/R6vnKmyn/xDrIxjOWkpyeusA==
+  dependencies:
+    "@progress/kendo-angular-schematics" "15.3.0"
+    tslib "^2.3.1"
+
+"@progress/kendo-angular-utils@^15.3.0":
+  version "15.3.0"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-angular-utils/-/kendo-angular-utils-15.3.0.tgz#bc3da658dbaa5cd723e3fcea3715bc18c8177126"
+  integrity sha512-7GOHDAydLHb5n2DUbu9c4X+y/o2spcCpzg9f6bUCRRCPfdNUzdI4a+qilYaENYaxaAH6+3KtfNDr1ymawVso2g==
+  dependencies:
+    "@progress/kendo-angular-schematics" "15.3.0"
+    "@progress/kendo-draggable-common" "^0.2.3"
+    tslib "^2.3.1"
+
+"@progress/kendo-common@^0.2.0", "@progress/kendo-common@^0.2.1", "@progress/kendo-common@^0.2.2":
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-common/-/kendo-common-0.2.2.tgz#65b49ba8d90cbe3a2a9041564ebc76d9fa522af7"
+  integrity sha512-VwHyVXJ5o92pnljtmIULYVYUhyY9BXaPVTjLNMOc5MuYr2PU4tmpyzfJI/MeyfL1PuHJlgw7KqJJhvPqrOduNQ==
+  dependencies:
+    tslib "^1.7.0"
+
+"@progress/kendo-data-query@^1.7.0":
+  version "1.7.0"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-data-query/-/kendo-data-query-1.7.0.tgz#d2d6ae61232415ae1c893bba25af5f48bb86f509"
+  integrity sha512-mB+2WZFAZghxRwBhgWiJIysx7qcFkilnbcZWq0AfQ3KXfC3N5IY/EuKJNijhYrTdauYA1eL1GMe2FHsOWAlRHA==
+  dependencies:
+    tslib "^1.7.0"
+
+"@progress/kendo-date-math@^1.1.0", "@progress/kendo-date-math@^1.5.9":
+  version "1.5.12"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-date-math/-/kendo-date-math-1.5.12.tgz#fa4876e02c64f865e86355e0aa3fa75b3e79f233"
+  integrity sha512-cELK9aNVUu20a71FLnYd7JhBhCXk8NsFd9tu6n/LZJvOYzCYQ6J4XIVDc2RwLvbrD7MlBw4YARX1IIsESg7thg==
+  dependencies:
+    tslib "^1.7.0"
+
+"@progress/kendo-dateinputs-common@^0.3.2":
+  version "0.3.2"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-dateinputs-common/-/kendo-dateinputs-common-0.3.2.tgz#2131530731e0957b9e9aecda39539c792d795875"
+  integrity sha512-T1u1EkpSWUXGjYU5qDGllMiqJZOB/HBLYdLqddV3D2r1/X28Xv3NRjKueYW2VQX8o2unUHO7Y8PUXcIVC5qESA==
+  dependencies:
+    "@progress/kendo-date-math" "^1.5.9"
+    tslib "^2.4.1"
+
+"@progress/kendo-draggable-common@^0.2.3":
+  version "0.2.3"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-draggable-common/-/kendo-draggable-common-0.2.3.tgz#b4603d73239a85d13b467f11204db6f54e831c6f"
+  integrity sha512-e1FraFsT7zwevswzZlQYL//K+fzmRUvkr/4emp51dzkARLDtGd95BtPNSoXYRG5xYHeueKBS75hzVwQI6Dm3Dg==
+  dependencies:
+    tslib "^1.7.0"
+
+"@progress/kendo-draggable@^3.0.0", "@progress/kendo-draggable@^3.0.2":
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-draggable/-/kendo-draggable-3.0.2.tgz#d0ce83a466db470abc515fdf030b6094749e8156"
+  integrity sha512-B5bR1bEtLZ4i0eCtbT1umem3w9dC82QZ8wJ9/MMjcS0/luBiARnIacRM69b0PYN+uESztBuzKrrTpW70FCT47A==
+
+"@progress/kendo-drawing@^1.20.0":
+  version "1.20.0"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-drawing/-/kendo-drawing-1.20.0.tgz#a28e215d3b022400e5d3bc5a0b5762a7b0c22533"
+  integrity sha512-UbUdtp4iCKZZt42AmDURP+9fCdw1qAHpzhHAzIjNYiF3aze7qoPEJhFBuT1dI4VX+nEEl0Buso0INOcrcgCYrg==
+  dependencies:
+    "@progress/pako-esm" "^1.0.1"
+
+"@progress/kendo-file-saver@^1.0.0", "@progress/kendo-file-saver@^1.0.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-file-saver/-/kendo-file-saver-1.1.1.tgz#4225affb7064fe9e12d3a89f36e00ab6c92deef0"
+  integrity sha512-mo0Cw3MLoLcx2bA+Ma/VAxkM9vHSJ4Sg0vgh6U1ZIvPXmnfO8Dgsdiv/475lafyju0kG8KOhl3bcVagCF71glQ==
+
+"@progress/kendo-inputs-common@^3.1.0":
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-inputs-common/-/kendo-inputs-common-3.1.1.tgz#bfea6793ed56871bc85f9f1dc247082afe8aa773"
+  integrity sha512-OqID8+2DuAnUET0W1j357qqTPvws6hnByt2h5+uVS7uK9Wmt/NHA0gVhdYmh+Jyv6Pw+S2epSk47mDsfyreKYA==
+  dependencies:
+    tslib "^2.3.1"
+
+"@progress/kendo-intl@^3.0.0", "@progress/kendo-intl@^3.1.0":
+  version "3.1.2"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-intl/-/kendo-intl-3.1.2.tgz#ff87b051ca6ba36e290eb0f072d29ec28952da21"
+  integrity sha512-rOtMppQSrScwryMfeQSOdsnRi9Oj1l08HFoEC2ticZ0T2N0/JN9CHt+fuToRx5onXK7QkcbbuNM0D09o8TeeMw==
+
+"@progress/kendo-licensing@^1.3.5":
+  version "1.3.5"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-licensing/-/kendo-licensing-1.3.5.tgz#598d39068c87e64fac3930414f4d9f491b555099"
+  integrity sha512-HWxM6Ov1g0LvOQN9sp+3N1h+YpF0OKq7rWW2bqoJnkyHy8woC8Ve6ew6KmHdbeaKMgikVOYgyo5NTjef2j+gVQ==
+  dependencies:
+    jsonwebtoken "^9.0.2"
+
+"@progress/kendo-ooxml@^1.9.0":
+  version "1.9.0"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-ooxml/-/kendo-ooxml-1.9.0.tgz#ffb0ffb9056660867d52f1597a3ba789af1089ab"
+  integrity sha512-XkW23MU1snvNvn/hKFvRsrzrxJuRGeexbeXupouclqHJv8prhkFfAo8xlU7b+4bw362oI3eRXklvAPWdMYnA4w==
+  dependencies:
+    "@progress/jszip-esm" "^1.0.3"
+    "@progress/pako-esm" "^1.0.1"
+
+"@progress/kendo-popup-common@^1.7.0":
+  version "1.9.2"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-popup-common/-/kendo-popup-common-1.9.2.tgz#d5b56d22bc8c6ce812dd2973ad2b22abfac8720f"
+  integrity sha512-Gs50UafJcERiGuSP/47Yg7ftPX3HQXiK5M9zHB8sHSoc1/AEYd0/Sj5wh8UrVVBAM9b0pUTwmEuzQ/D5yDDd2Q==
+
+"@progress/kendo-svg-icons@2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-svg-icons/-/kendo-svg-icons-2.1.0.tgz#6a82dfa7a93056318e7e3c50b660164cd783afba"
+  integrity sha512-zAwxw8lt5xlIBMoE3uwUX2Z2RI5njWViYxdFoinvr5d8WJ6kU3sghNONsRelM9GiDd2vbSg0IkEN8dOrBvFjPg==
+
+"@progress/kendo-svg-icons@^2.3.0":
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-svg-icons/-/kendo-svg-icons-2.3.0.tgz#3926a0b39994a296c587d84144cf806739ab8a5d"
+  integrity sha512-VB4x1o6eVoYcCgTDBMkV88giGXsDlyCEJAMFLd9x99oJlmufx4KC6/bzehFn3CXdTcvhw0ONlTm3H8gM9ZH6JQ==
+
+"@progress/kendo-theme-bootstrap@^7.2.1":
+  version "7.2.1"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-theme-bootstrap/-/kendo-theme-bootstrap-7.2.1.tgz#c82a3d5b776d5c41074aaac544b00539dbe00399"
+  integrity sha512-lQcx6z9zKxtXwR5BtvSe4ZPs/TWxWzNNzvyh7ke5EekanWU8q1AY+7wntM6q6D7haWBdbAtqe0odmUiSaG2C8w==
+  dependencies:
+    "@progress/kendo-svg-icons" "2.1.0"
+    "@progress/kendo-theme-core" "7.2.1"
+    "@progress/kendo-theme-default" "7.2.1"
+    "@progress/kendo-theme-utils" "7.2.1"
+    bootstrap "5.2.1"
+
+"@progress/kendo-theme-core@7.2.1":
+  version "7.2.1"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-theme-core/-/kendo-theme-core-7.2.1.tgz#0dedd32dd06a5f3821f68c4e5ccdda1938822676"
+  integrity sha512-fv6ELPjmQWw5p7ksv96RIiSWMQKenXdkK6b96vSakoQcexR/4oKDgbEXnApxeLgTUimh8Hp8M+6JIoZm+EQhyA==
+
+"@progress/kendo-theme-default@7.2.1":
+  version "7.2.1"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-theme-default/-/kendo-theme-default-7.2.1.tgz#f84d25d0bdbb239a6a70b9964c8577db7dca6edf"
+  integrity sha512-WUMg+GZKpP37WL0aeGRi3i8vNmfEJdb5nHVBWAZeuEi/AS8cycVOCwcdDK4NywK9bUI/I0eUvLToxydLOHv6Pg==
+  dependencies:
+    "@progress/kendo-svg-icons" "2.1.0"
+    "@progress/kendo-theme-core" "7.2.1"
+    "@progress/kendo-theme-utils" "7.2.1"
+
+"@progress/kendo-theme-utils@7.2.1":
+  version "7.2.1"
+  resolved "https://registry.yarnpkg.com/@progress/kendo-theme-utils/-/kendo-theme-utils-7.2.1.tgz#8683d3c1acc9eafa18b574b6a12c69215b635f3a"
+  integrity sha512-2IzRoBkjb2yolzJoQBZcsccmHT5a6GDw52O/PBXZHsxc5Cir7ej9CjP3tO2O4rWRg+8GfNEzB5XpwUb54lLF0Q==
+  dependencies:
+    "@progress/kendo-theme-core" "7.2.1"
+
+"@progress/pako-esm@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@progress/pako-esm/-/pako-esm-1.0.1.tgz#eeb7d2c3f8e865198edf23fb42645bd8cb513a11"
+  integrity sha512-O4A3b1EuE9Xe1pC3Xz9Tcn1M/CYrL71f4y/5TXeytOVTkmkzBgYW97fYP2f+54H0e0erWRaqV/kUUB/a8Uxfbw==
+
 "@rollup/plugin-json@^6.0.0":
   version "6.0.0"
   resolved "https://registry.yarnpkg.com/@rollup/plugin-json/-/plugin-json-6.0.0.tgz#199fea6670fd4dfb1f4932250569b14719db234a"
@@ -2037,6 +2376,14 @@
   integrity sha512-4BAffykYOgO+5nzBWYwE3W90sBgLJoUPRWWcL8wlyiM8IB8ipJz3UMJ9KXQd1RKQXpKp8Tutn80HZtWsu2u76w==
   dependencies:
     defer-to-connect "^2.0.0"
+
+"@tinymce/tinymce-angular@^7.0.0":
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/@tinymce/tinymce-angular/-/tinymce-angular-7.0.0.tgz#010de497d5774a8bdc5d5936bf4fb976adf05f56"
+  integrity sha512-IKNaG/ihlxE1XCfq6lzULbnsqZO9KNJtlpu5jo6JDJDL9zcFzj/N2A16Kk7rTj1yfmDoB1IXAk/BpMOvgDY8cg==
+  dependencies:
+    tinymce "^6.0.0 || ^5.5.0"
+    tslib "^2.3.0"
 
 "@tootallnate/once@2":
   version "2.0.0"
@@ -2233,6 +2580,11 @@
   version "7.3.13"
   resolved "https://registry.yarnpkg.com/@types/semver/-/semver-7.3.13.tgz#da4bfd73f49bd541d28920ab0e2bf0ee80f71c91"
   integrity sha512-21cFJr9z3g5dW8B0CVI9g2O9beqaThGQ6ZFBqHfwhzLDKUxaqTIy3vnfah/UPkfOiF2pLq+tGz+W8RyCskuslw==
+
+"@types/semver@^7.5.0":
+  version "7.5.8"
+  resolved "https://registry.yarnpkg.com/@types/semver/-/semver-7.5.8.tgz#8268a8c57a3e4abd25c165ecd36237db7948a55e"
+  integrity sha512-I8EUhyrgfLrcTkzV3TSsGyl1tSuPrEDzr0yd5m90UgNxQkyDXULk3b6MlQqTCpZpNtWe1K0hzclnZkTcLBe2UQ==
 
 "@types/serve-index@^1.9.1":
   version "1.9.1"
@@ -2958,6 +3310,11 @@ bootstrap-icons@~1.8.3:
   resolved "https://registry.yarnpkg.com/bootstrap-icons/-/bootstrap-icons-1.8.3.tgz#14c15e26deaddd42af9f88c4d81f7c45bf26aa98"
   integrity sha512-s5kmttnbq4BXbx3Bwnj39y+t7Vc3blTtyD77W3aYQ1LlNoS3lNbbGvSYhIbg26Im8KmjScyFpHEevlPOBcIDdA==
 
+bootstrap@5.2.1:
+  version "5.2.1"
+  resolved "https://registry.yarnpkg.com/bootstrap/-/bootstrap-5.2.1.tgz#45f97ff05cbe828bad807b014d8425f3aeb8ec3a"
+  integrity sha512-UQi3v2NpVPEi1n35dmRRzBJFlgvWHYwyem6yHhuT6afYF+sziEt46McRbT//kVXZ7b1YUYEVGdXEH74Nx3xzGA==
+
 bootstrap@^5.2.0:
   version "5.2.3"
   resolved "https://registry.yarnpkg.com/bootstrap/-/bootstrap-5.2.3.tgz#54739f4414de121b9785c5da3c87b37ff008322b"
@@ -2994,6 +3351,11 @@ browserslist@4.21.5, browserslist@^4.14.5, browserslist@^4.21.3, browserslist@^4
     electron-to-chromium "^1.4.284"
     node-releases "^2.0.8"
     update-browserslist-db "^1.0.10"
+
+buffer-equal-constant-time@1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/buffer-equal-constant-time/-/buffer-equal-constant-time-1.0.1.tgz#f8e71132f7ffe6e01a5c9697a4c6f3e48d5cc819"
+  integrity sha512-zRpUiDwd/xk6ADqPMATG8vc9VPrkck7T07OIx0gnjmJAnHnTVXNQG3vfvWNuiZIkwu9KrKdA1iJKfsfTVxE6NA==
 
 buffer-from@^1.0.0:
   version "1.1.2"
@@ -3696,6 +4058,13 @@ domutils@^2.8.0:
     dom-serializer "^1.0.1"
     domelementtype "^2.2.0"
     domhandler "^4.2.0"
+
+ecdsa-sig-formatter@1.0.11:
+  version "1.0.11"
+  resolved "https://registry.yarnpkg.com/ecdsa-sig-formatter/-/ecdsa-sig-formatter-1.0.11.tgz#ae0f0fa2d85045ef14a817daa3ce9acd0489e5bf"
+  integrity sha512-nagl3RYrbNv6kQkeJIpt6NJZy8twLB/2vtz6yN9Z4vRKHN4/QZJIEbqohALSgwKdnksuY3k5Addp5lg8sVoVcQ==
+  dependencies:
+    safe-buffer "^5.0.1"
 
 ee-first@1.1.1:
   version "1.1.1"
@@ -5244,6 +5613,22 @@ jsonparse@^1.3.1:
   resolved "https://registry.yarnpkg.com/jsonparse/-/jsonparse-1.3.1.tgz#3f4dae4a91fac315f71062f8521cc239f1366280"
   integrity sha512-POQXvpdL69+CluYsillJ7SUhKvytYjW9vG/GKpnf+xP8UWgYEM/RaMzHHofbALDiKbbP1W8UEYmgGl39WkPZsg==
 
+jsonwebtoken@^9.0.2:
+  version "9.0.2"
+  resolved "https://registry.yarnpkg.com/jsonwebtoken/-/jsonwebtoken-9.0.2.tgz#65ff91f4abef1784697d40952bb1998c504caaf3"
+  integrity sha512-PRp66vJ865SSqOlgqS8hujT5U4AOgMfhrwYIuIhfKaoSCZcirrmASQr8CX7cUg+RMih+hgznrjp99o+W4pJLHQ==
+  dependencies:
+    jws "^3.2.2"
+    lodash.includes "^4.3.0"
+    lodash.isboolean "^3.0.3"
+    lodash.isinteger "^4.0.4"
+    lodash.isnumber "^3.0.3"
+    lodash.isplainobject "^4.0.6"
+    lodash.isstring "^4.0.1"
+    lodash.once "^4.0.0"
+    ms "^2.1.1"
+    semver "^7.5.4"
+
 just-clone@^6.1.1:
   version "6.2.0"
   resolved "https://registry.yarnpkg.com/just-clone/-/just-clone-6.2.0.tgz#a4614d9bf7e4bbdcae7f9ba904aea5ea9cae8ae5"
@@ -5258,6 +5643,23 @@ just-compare@^2.3.0:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/just-compare/-/just-compare-2.3.0.tgz#a2adcc1d1940536263275f5a1ef1298bcacfeda7"
   integrity sha512-6shoR7HDT+fzfL3gBahx1jZG3hWLrhPAf+l7nCwahDdT9XDtosB9kIF0ZrzUp5QY8dJWfQVr5rnsPqsbvflDzg==
+
+jwa@^1.4.1:
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/jwa/-/jwa-1.4.1.tgz#743c32985cb9e98655530d53641b66c8645b039a"
+  integrity sha512-qiLX/xhEEFKUAJ6FiBMbes3w9ATzyk5W7Hvzpa/SLYdxNtng+gcurvrI7TbACjIXlsJyr05/S1oUhZrc63evQA==
+  dependencies:
+    buffer-equal-constant-time "1.0.1"
+    ecdsa-sig-formatter "1.0.11"
+    safe-buffer "^5.0.1"
+
+jws@^3.2.2:
+  version "3.2.2"
+  resolved "https://registry.yarnpkg.com/jws/-/jws-3.2.2.tgz#001099f3639468c9414000e99995fa52fb478304"
+  integrity sha512-YHlZCB6lMTllWDtSPHz/ZXTsi8S00usEV6v1tjq8tOUZzw7DpSDWVXjXDre6ed1w/pd495ODpHZYSdkRTsa0HA==
+  dependencies:
+    jwa "^1.4.1"
+    safe-buffer "^5.0.1"
 
 karma-chrome-launcher@~3.1.0:
   version "3.1.1"
@@ -5426,10 +5828,45 @@ lodash.debounce@^4.0.8:
   resolved "https://registry.yarnpkg.com/lodash.debounce/-/lodash.debounce-4.0.8.tgz#82d79bff30a67c4005ffd5e2515300ad9ca4d7af"
   integrity sha512-FT1yDzDYEoYWhnSGnpE/4Kj1fLZkDFyqRb7fNt6FdYOSxlUWAtp42Eh6Wb0rGIv/m9Bgo7x4GhQbm5Ys4SG5ow==
 
+lodash.includes@^4.3.0:
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/lodash.includes/-/lodash.includes-4.3.0.tgz#60bb98a87cb923c68ca1e51325483314849f553f"
+  integrity sha512-W3Bx6mdkRTGtlJISOvVD/lbqjTlPPUDTMnlXZFnVwi9NKJ6tiAk6LVdlhZMm17VZisqhKcgzpO5Wz91PCt5b0w==
+
+lodash.isboolean@^3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/lodash.isboolean/-/lodash.isboolean-3.0.3.tgz#6c2e171db2a257cd96802fd43b01b20d5f5870f6"
+  integrity sha512-Bz5mupy2SVbPHURB98VAcw+aHh4vRV5IPNhILUCsOzRmsTmSQ17jIuqopAentWoehktxGd9e/hbIXq980/1QJg==
+
+lodash.isinteger@^4.0.4:
+  version "4.0.4"
+  resolved "https://registry.yarnpkg.com/lodash.isinteger/-/lodash.isinteger-4.0.4.tgz#619c0af3d03f8b04c31f5882840b77b11cd68343"
+  integrity sha512-DBwtEWN2caHQ9/imiNeEA5ys1JoRtRfY3d7V9wkqtbycnAmTvRRmbHKDV4a0EYc678/dia0jrte4tjYwVBaZUA==
+
+lodash.isnumber@^3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/lodash.isnumber/-/lodash.isnumber-3.0.3.tgz#3ce76810c5928d03352301ac287317f11c0b1ffc"
+  integrity sha512-QYqzpfwO3/CWf3XP+Z+tkQsfaLL/EnUlXWVkIk5FUPc4sBdTehEqZONuyRt2P67PXAk+NXmTBcc97zw9t1FQrw==
+
+lodash.isplainobject@^4.0.6:
+  version "4.0.6"
+  resolved "https://registry.yarnpkg.com/lodash.isplainobject/-/lodash.isplainobject-4.0.6.tgz#7c526a52d89b45c45cc690b88163be0497f550cb"
+  integrity sha512-oSXzaWypCMHkPC3NvBEaPHf0KsA5mvPrOPgQWDsbg8n7orZ290M0BmC/jgRZ4vcJ6DTAhjrsSYgdsW/F+MFOBA==
+
+lodash.isstring@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/lodash.isstring/-/lodash.isstring-4.0.1.tgz#d527dfb5456eca7cc9bb95d5daeaf88ba54a5451"
+  integrity sha512-0wJxfxH1wgO3GrbuP+dTTk7op+6L41QCXbGINEmD+ny/G/eCqGzxyCsh7159S+mgDDcoarnBw6PC1PS5+wUGgw==
+
 lodash.merge@^4.6.2:
   version "4.6.2"
   resolved "https://registry.yarnpkg.com/lodash.merge/-/lodash.merge-4.6.2.tgz#558aa53b43b661e1925a0afdfa36a9a1085fe57a"
   integrity sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==
+
+lodash.once@^4.0.0:
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/lodash.once/-/lodash.once-4.1.1.tgz#0dd3971213c7c56df880977d504c88fb471a97ac"
+  integrity sha512-Sb487aTOCr9drQVL8pIxOzVhafOjZN9UU54hiN8PU3uAiSV7lx1yYNpbNmex2PK6dSJoNTSJUUswT651yww3Mg==
 
 lodash@^4.17.21:
   version "4.17.21"
@@ -5901,6 +6338,27 @@ ng-zorro-antd@^15.0.0:
     "@angular/cdk" "^15.0.0"
     "@ant-design/icons-angular" "^15.0.0"
     date-fns "^2.16.1"
+    tslib "^2.3.0"
+
+ngx-cookie-service@^17.1.0:
+  version "17.1.0"
+  resolved "https://registry.yarnpkg.com/ngx-cookie-service/-/ngx-cookie-service-17.1.0.tgz#f0a27092161e8c8a9eec10b7a2d42a83e5f3177e"
+  integrity sha512-m4YI9IEgTaEBDMCz7oeVsO6UX14EmCzg29cTL6yxW8f7oye9wv56egi+3C4wAVSRPkI+cWlqnIOr+XyHwYQYmg==
+  dependencies:
+    tslib "^2.6.2"
+
+ngx-infinite-scroll@^17.0.0:
+  version "17.0.0"
+  resolved "https://registry.yarnpkg.com/ngx-infinite-scroll/-/ngx-infinite-scroll-17.0.0.tgz#15726104d5b4e248a6eb96b03149959b20233ae8"
+  integrity sha512-pQXLuRiuhRuDKD3nmgyW1V08JVNBepmk6nb8qjHc5hgsWNts01+R/p33rYcRDzcut6/PWqGyrZ9o9i8swzMYMA==
+  dependencies:
+    tslib "^2.3.0"
+
+ngx-toastr@^18.0.0:
+  version "18.0.0"
+  resolved "https://registry.yarnpkg.com/ngx-toastr/-/ngx-toastr-18.0.0.tgz#0016e897108817eb6b2ee16ff130b4c42fc214b0"
+  integrity sha512-jZ3rOG6kygl8ittY8OltIMSo47P1VStuS01igm3MZXK6InJwHVvxU7wDHI/HGMlXSyNvWncyOuFHnnMEAifsew==
+  dependencies:
     tslib "^2.3.0"
 
 nice-napi@^1.0.2:
@@ -6882,7 +7340,7 @@ safe-buffer@5.1.2, safe-buffer@~5.1.0, safe-buffer@~5.1.1:
   resolved "https://registry.yarnpkg.com/safe-buffer/-/safe-buffer-5.1.2.tgz#991ec69d296e0313747d59bdfd2b745c35f8828d"
   integrity sha512-Gd2UZBJDkXlY7GbJxfsE8/nvKkUEU1G38c1siN6QP6a9PT9MmHB8GnpscSmMJSoF8LOIrt8ud/wPtojys4G6+g==
 
-safe-buffer@5.2.1, safe-buffer@>=5.1.0, safe-buffer@^5.1.0, safe-buffer@~5.2.0:
+safe-buffer@5.2.1, safe-buffer@>=5.1.0, safe-buffer@^5.0.1, safe-buffer@^5.1.0, safe-buffer@~5.2.0:
   version "5.2.1"
   resolved "https://registry.yarnpkg.com/safe-buffer/-/safe-buffer-5.2.1.tgz#1eaf9fa9bdb1fdd4ec75f58f9cdb4e6b7827eec6"
   integrity sha512-rp3So07KcdmmKbGvgaNxQSJr7bGVSVk5S9Eq1F+ppbRo70+YeaDxkw5Dd8NPN+GD6bjnYm2VuPuCXmpuYvmCXQ==
@@ -6975,6 +7433,13 @@ semver@^7.0.0, semver@^7.1.1, semver@^7.3.5, semver@^7.3.7, semver@^7.3.8:
   version "7.4.0"
   resolved "https://registry.yarnpkg.com/semver/-/semver-7.4.0.tgz#8481c92feffc531ab1e012a8ffc15bdd3a0f4318"
   integrity sha512-RgOxM8Mw+7Zus0+zcLEUn8+JfoLpj/huFTItQy2hsM4khuC1HYRDp0cU482Ewn/Fcy6bCjufD8vAj7voC66KQw==
+  dependencies:
+    lru-cache "^6.0.0"
+
+semver@^7.5.3, semver@^7.5.4:
+  version "7.6.0"
+  resolved "https://registry.yarnpkg.com/semver/-/semver-7.6.0.tgz#1a46a4db4bffcccd97b743b5005c8325f23d4e2d"
+  integrity sha512-EnwXhrlwXMk9gKu5/flx5sv/an57AkRplG3hTK68W7FRDN+k+OWBj65M7719OkA82XLBxrcX0KSHj+X5COhOVg==
   dependencies:
     lru-cache "^6.0.0"
 
@@ -7431,6 +7896,11 @@ thunky@^1.0.2:
   resolved "https://registry.yarnpkg.com/thunky/-/thunky-1.1.0.tgz#5abaf714a9405db0504732bbccd2cedd9ef9537d"
   integrity sha512-eHY7nBftgThBqOyHGVN+l8gF0BucP09fMo0oO/Lb0w1OF80dJv+lDVpXG60WMQvkcxAkNybKsrEIE3ZtKGmPrA==
 
+"tinymce@^6.0.0 || ^5.5.0":
+  version "6.8.3"
+  resolved "https://registry.yarnpkg.com/tinymce/-/tinymce-6.8.3.tgz#0025a4aaa4c24dc2a3e32e83dfda705d196fd802"
+  integrity sha512-3fCHKAeqT+xNwBVESf6iDbDV0VNwZNmfrkx9c/6Gz5iB8piMfaO6s7FvoiTrj1hf1gVbfyLTnz1DooI6DhgINQ==
+
 tmp@0.2.1, tmp@^0.2.1:
   version "0.2.1"
   resolved "https://registry.yarnpkg.com/tmp/-/tmp-0.2.1.tgz#8457fc3037dcf4719c251367a1af6500ee1ccf14"
@@ -7482,10 +7952,15 @@ tslib@2.5.0, tslib@^2.0.0, tslib@^2.1.0, tslib@^2.3.0:
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.5.0.tgz#42bfed86f5787aeb41d031866c8f402429e0fddf"
   integrity sha512-336iVw3rtn2BUK7ORdIAHTyxHGRIHVReokCR3XjbckJMK7ms8FysBfhLR8IXnAgy7T0PTPNBWKiH514FOW/WSg==
 
-tslib@^1.8.1, tslib@^1.9.0:
+tslib@^1.7.0, tslib@^1.8.1, tslib@^1.9.0:
   version "1.14.1"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.14.1.tgz#cf2d38bdc34a134bcaf1091c41f6619e2f672d00"
   integrity sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==
+
+tslib@^2.3.1, tslib@^2.4.1, tslib@^2.6.2:
+  version "2.6.2"
+  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.6.2.tgz#703ac29425e7b37cd6fd456e92404d46d1f3e4ae"
+  integrity sha512-AEYxH93jGFPn/a2iVAwW87VuUIkR1FVUKB77NwMF7nBTDkDrrT/Hpt/IrCJ0QXhW27jTBDcf5ZY7w6RiqTMw2Q==
 
 tsutils@^3.21.0:
   version "3.21.0"
