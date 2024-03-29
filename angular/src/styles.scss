@@ -1,4 +1,9 @@
 /* You can add global styles to this file, and also import other style files */
+@use '@angular/material' as mat;
+// Include the common styles for Angular Material. We include this here so that you only
+// have to load a single css file for Angular Material in your app.
+// Be sure that you only ever include this mixin once!
+@include mat.core();
 
 @keyframes donut-spin {
   0% {
@@ -8,6 +13,7 @@
     transform: rotate(360deg);
   }
 }
+
 :root  {
   --lpx-logo: url('/assets/images/logo/logo-light.png');
   --lpx-logo-icon: url('/assets/images/logo/logo-light-thumbnail.png');
@@ -27,5 +33,37 @@
     left: 50%;
     transform: translate(-50%, -50%);
   }
+
+  body {
+    margin: 0;
+  }
+ 
+  // Define the palettes for your theme using the Material Design palettes available in palette.scss
+  // (imported above). For each palette, you can optionally specify a default, lighter, and darker
+  // hue.
+
+  // These are used to define overarching app themes if used. Put here as a test at the moment. Likely not needed
+  // but could be useful to leave in case app themes are something that you want to implement
+  $my-app-primary: mat.define-palette(mat.$blue-palette);
+  $my-app-accent: mat.define-palette(mat.$pink-palette, A200, A100, A400);
+
+  // The warn palette is optional (defaults to red).
+  $my-app-warn: mat.define-palette(mat.$orange-palette);
+
+  // Create the theme object (a Sass map containing all of the palettes).
+  $my-app-theme: mat.define-light-theme(
+    (
+      color: (
+        primary: $my-app-primary,
+        accent: $my-app-accent,
+        warn: $my-app-warn,
+      ),
+    )
+  );
+
+  // Include theme styles for core and each component used in your app.
+  // Alternatively, you can import and @include the theme mixins for each component
+  // that you are using.
+  @include mat.all-component-themes($my-app-theme);
 
 }
