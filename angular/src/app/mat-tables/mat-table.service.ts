@@ -5,7 +5,7 @@ import { Observable, of } from 'rxjs';
 @Injectable()
 export class MatTableForSessions {
 
-  sortMatTableData(sessionItem: any): [Observable<CatchExpandedDetails[]>, number] {
+  sortMatTableData(sessionItem: any): Observable<CatchExpandedDetails[]> {
     let weightMax = 0;
     let expandDetailsForMatTable: CatchExpandedDetails[] = [];
     //Order first. this will help with creating the array of the WeightBaitInfo. Can create a singular array,
@@ -104,7 +104,7 @@ export class MatTableForSessions {
       }      
     })
 
-    return [of(expandDetailsForMatTable), weightMax];
+    return of(expandDetailsForMatTable);
   }
 
   private addOrUpdateCatchExpandedDetailsArray(

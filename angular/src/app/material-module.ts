@@ -87,6 +87,6 @@ import {MatTreeModule} from '@angular/material/tree';
     MatTreeModule,
     PortalModule,
     ScrollingModule
-  ]
+  ],
 })
 export class SessionLoggerModule {}

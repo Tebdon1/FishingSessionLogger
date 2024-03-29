@@ -6,10 +6,11 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { NgbDateNativeAdapter, NgbDateAdapter } from '@ng-bootstrap/ng-bootstrap';
 import * as _ from 'lodash'; 
 import { lastValueFrom } from 'rxjs';
-import { MatTableDataSource, MatTable } from '@angular/material/table' 
+import { MatTableDataSource, MatTable } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { MatTableForSessions, CatchExpandedDetails, WeightBaitInfo } from '../mat-tables/mat-table.service';
+import { CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA } from '@angular/core';
 
 @Component({
   selector: 'app-session',
@@ -20,7 +21,7 @@ import { MatTableForSessions, CatchExpandedDetails, WeightBaitInfo } from '../ma
     { provide: NgbDateAdapter, useClass: NgbDateNativeAdapter }
   ],
   animations: [
-    trigger('detailExpand', [
+    trigger('detailExpand', [ 
       state('collapsed', style({ height: '0px', minHeight: '0' })),
       state('expanded', style({ height: '*' })),
       transition(
@@ -28,7 +29,7 @@ import { MatTableForSessions, CatchExpandedDetails, WeightBaitInfo } from '../ma
         animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')
       ),
     ]),
-  ],
+  ]
 })
 export class SessionComponent implements OnInit {
   @ViewChild(MatSort) sort: MatSort;
@@ -69,10 +70,10 @@ export class SessionComponent implements OnInit {
     private catchSummaryService: CatchSummaryService,
     private confirmation: ConfirmationService,
     private fb: FormBuilder,
-    private cd: ChangeDetectorRef) {
+    private cd: ChangeDetectorRef,
+    private matTableService: MatTableForSessions) {
       this.list.maxResultCount = 25
-    }
-  
+    }  
     
   ngOnInit() {
     const sessionStreamCreator = (query) => this.sessionService.getList(query);
@@ -289,119 +290,15 @@ export class SessionComponent implements OnInit {
 
   async expand(row) {
     this.sessionItem = await lastValueFrom(this.sessionService.get(row.id));
-    this.createExpandedDetail();
+    this.matTableService.sortMatTableData(this.sessionItem).subscribe((data: CatchExpandedDetails[]) => {
+      this.dataSource.data = data;
+    });
 
+    console.log(this.dataSource);
     this.expandedRow = row;
     this.totalQuantity = this.calculateSessionTotal(this.sessionItem);
 
     this.view = 'overview';
-  }
-  
-  counter(count) {
-    return new Array(count);
-  }
-
-  createExpandedDetail() {
-    this.weightMax = 0;
-/*
-    //Order first. this will help with creating the array of the WeightBaitInfo. Can create a singular array,
-    // then wipe it when moving onto a new 
-
-    //Sort ascending
-    this.sessionItem.catchSummaries.sort((a, b) => 
-      (a.speciesName > b.speciesName) ? 1 : (
-        (a.speciesName < b.speciesName) ? -1 : (
-          (b.weightValue > a.weightValue) ? 1 : (
-            (b.weightValue < a.weightValue) ? -1 : (
-              (a.bait > b.bait) ? 1 : (
-                (a.bait < b.bait) ? -1 : 0
-              )
-            )
-          )
-        )
-      )
-    );
-
-    for (const catchSummary of this.sessionItem.catchSummaries) {
-
-      catchSummary.weightMax = 0;
-      if (catchSummary.catchDetails.length == 0 && catchSummary.quantity > 0) {
-        for (const _ of this.counter(catchSummary.quantity)) {
-
-          let newWeightBaitInfo: WeightBaitInfo = {
-            weight: 0,
-            bait: "N/A"
-          }
-
-          this.addOrUpdateCatchExpandedDetailsArray(
-            catchSummary.species,
-            newWeightBaitInfo
-          );
-        }
-      }
-      for (const catchDetail of catchSummary.catchDetails) {
-        if (catchDetail.catchWeights?.length > 0) {
-          for (const catchWeight of catchDetail.catchWeights) {
-            console.log(catchWeight.weight, catchDetail.bait);
-            //Getting this info correctly is more involved than calling { weight: catchWeight.weight, bait: catchDetail.bait } I believe
-            var newWeightBaitInfo: WeightBaitInfo = {
-              weight: catchWeight.weight,
-              bait: catchDetail.bait
-            }
-
-            this.addOrUpdateCatchExpandedDetailsArray(
-              catchSummary.species,
-              newWeightBaitInfo
-            );
-
-            this.weightMax = catchWeight.weight > this.weightMax ? catchWeight.weight : this.weightMax;
-
-            catchSummary.weightMax = catchWeight.weight > catchSummary.weightMax ? catchWeight.weight : catchSummary.weightMax;
-          }
-        }
-        //I see there are two different checks here but I don't get why?
-        if (catchDetail.catchWeights?.length < catchDetail.quantity && catchDetail.catchWeights.length != 0) {
-          for (const noWeight of this.counter(catchDetail.quantity - catchDetail.catchWeights?.length)) {
-            //Getting this info correctly is more involved than calling { bait: catchDetail.bait } I believe
-            var newWeightBaitInfo: WeightBaitInfo = {
-              weight: 0,
-              bait: catchDetail.bait
-            }
-  
-            this.addOrUpdateCatchExpandedDetailsArray(
-              catchSummary.species,
-              newWeightBaitInfo
-            );
-          }
-        }
-        if (catchDetail.catchWeights?.length < catchDetail.quantity && catchDetail.catchWeights.length == 0) {
-          for (const noWeight of this.counter(catchDetail.quantity - catchDetail. catchWeights?.length)) { 
-            var newWeightBaitInfo: WeightBaitInfo = {
-              weight: 0,
-              bait: catchDetail.bait
-            }
-  
-            this.addOrUpdateCatchExpandedDetailsArray(
-              catchSummary.species,
-              newWeightBaitInfo
-            );
-          }
-        }
-      }
-    }
-
-    CatchDetailsArray.forEach((detail) => {
-      if (detail.weightBaitDetails && Array.isArray(detail.weightBaitDetails) && detail.weightBaitDetails)
-      {
-        this.expandDetailsForMatTable = [...CatchDetailsArray, {...detail, weightBaitDetails: new MatTableDataSource(detail.weightBaitDetails)}];
-      }
-      else {
-        this.expandDetailsForMatTable = [...CatchDetailsArray, detail]
-      }      
-    })
-*/
-
-    console.log(this.dataSource);
   }
 
   toggleRow(element: CatchExpandedDetails) {

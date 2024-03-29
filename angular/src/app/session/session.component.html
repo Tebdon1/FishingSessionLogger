@@ -234,7 +234,7 @@
           <mat-cell *matCellDef="let element"> {{items.value[0].weightValue.toFixed(2)}} </mat-cell>
         </ng-container>
 
-        <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
+        <mat-header-row *matHeaderRowDef="columnsToDisplay"></mat-header-row>
         <mat-row *matRowDef="let row; columns: columnsToDisplay;"></mat-row>
       
         <!-- Expanded Content Column - The detail row is made up of this one column that spans across all columns 
