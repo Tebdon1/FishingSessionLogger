@@ -10,7 +10,7 @@ const routes: Routes = [
     component: BaitsComponent,
     canActivate: [PermissionGuard],
     canDeactivate: [CanDeactivateGuard],
-    data: { requiredPolicy: 'Whitefox.Lookups.Search' },
+    data: { requiredPolicy: 'SessionLogger.Lookups.Search' },
   },
 ];
 

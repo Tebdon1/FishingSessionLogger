@@ -30,7 +30,7 @@ function configureRoutes(routesService: RoutesService) {
       },
       {
         path: '/baits',
-        name: '::Menu:Baits',
+        name: 'Baits',
         parentName: '::Menu:SessionLogger',
         layout: eLayoutType.application,
       },
