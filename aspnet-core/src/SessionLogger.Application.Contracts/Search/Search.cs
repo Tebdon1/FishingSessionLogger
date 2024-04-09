@@ -67,7 +67,6 @@ namespace SessionLogger.Contracts.Search
     public class UserViewVM
     {
         public string EntityType { get; set; }
-        public string EntityInfoId { get; set; }
         public string Name { get; set; }
         public List<string> SelectedColumnNames { get; set; }
         public List<CustomColumnWidth> CustomColumnWidths { get; set; }

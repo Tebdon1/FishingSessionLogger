@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SessionLogger.Domain.Baits;
 using SessionLogger.Domain.Folders;
 using SessionLogger.Domain.Sessions;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
@@ -31,6 +32,7 @@ public class SessionLoggerDbContext :
     public DbSet<CatchSummary> CatchSummaries { get; set; }
     public DbSet<CatchDetail> CatchDetails { get; set; }
     public DbSet<CatchWeight> CatchWeights { get; set; }
+    public DbSet<Bait> Baits { get; set; }
 
     #region Entities from the modules
 
@@ -113,6 +115,12 @@ public class SessionLoggerDbContext :
         builder.Entity<CatchWeight>(b =>
         {
             b.ToTable(SessionLoggerConsts.DbTablePrefix + "CatchWeight", SessionLoggerConsts.DbSchema);
+            b.ConfigureByConvention(); //auto configure for the base class props
+        });
+
+        builder.Entity<Bait>(b =>
+        {
+            b.ToTable(SessionLoggerConsts.DbTablePrefix + "Bait", SessionLoggerConsts.DbSchema);
             b.ConfigureByConvention(); //auto configure for the base class props
         });
     }

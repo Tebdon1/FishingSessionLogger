@@ -40,6 +40,12 @@ export class CrudService<
     take: number,
     endpoint = this.endpoint
   ) : Observable<any> {
+
+    userView.query.searchExpression = userView.query.searchExpression ?? '';
+    userView.query.keywords = userView.query.keywords ?? '';
+    userView.query.filterSQL = userView.query.filterSQL ?? '';
+    userView.query.filterLines = userView.query.filterLines ?? [];
+
     return this.restService.request<any, any>(
       {
         method: 'POST',

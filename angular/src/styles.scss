@@ -1,4 +1,5 @@
 /* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Titillium+Web&display=swap');
 
 @keyframes donut-spin {
   0% {
@@ -26,6 +27,141 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-  }
+  }}
+//abp-sidebar {
+    //float: left!important;
+//}
+abp-navbar  {
+    float: right!important;
+}
+#toast-container > div {
+    opacity:1;
+}
+.button-strip {
+    button:not(:last-child) {
+        margin-right: 5px;
+    }
+    abp-button:not(:last-child) {
+        margin-right: 5px;
+    }
+}
 
+.field-validation-error.text-danger span {
+    border-bottom: 1px solid #d12941 !important;
+    border: 1px solid #d12941 !important;
+    border-top: 0 !important;
+}
+
+body {
+    background-color: #F1EFF4;
+}
+
+body .h1, body .h2, body .h3, body .h4, body .h5, body .h6, body h1, body h2, body h3, body h4, body h5, body h6 {
+    font-family: "Titillium Web", sans-serif;
+}
+
+.card.welcomeCard {
+    text-align:center;
+}
+
+.welcome-logo {
+    margin: 1.0rem auto 2.0rem auto;
+    width: 250px;
+    text-align:center;
+}
+
+.welcome-logo img {
+    margin: auto;
+    text-align:center;
+}
+.lp-closed .lp-sidebar, .lp-opened-sidebar .lp-sidebar {
+    background: #282d37;
+}
+//buttons
+.btn.btn-primary {
+    background-color: #1db309;
+    border-color: #1db309;
+}
+
+.btn.btn-primary:hover, .btn.btn-primary:focus {
+    background-color: #54d144;
+    border-color: #54d144;
+}
+
+a {
+    color: #54d144;
+}
+a:hover {
+    color: #54d144;
+}
+
+.btn.btn-secondary {
+    background-color: #666666;
+    border-color: #666666;
+}
+
+.btn.btn-btn-secondary:hover, .btn.btn-btn-secondary:focus {
+    background-color: #999999;
+    border-color: #999999;
+}
+
+
+//tab strip link color
+.k-tabstrip-items-wrapper .k-item {
+    color: #1db309;
+}
+.k-tabstrip-items-wrapper .k-item:hover, .k-tabstrip-items-wrapper .k-item:focus {
+    color: #1db309;
+}
+//checkbox checked color
+.k-checkbox:checked, .k-checkbox.k-checked {
+    border-color: #1db309;
+    background-color: #1db309;
+}
+.k-checkbox:checked:hover, .k-checkbox.k-checked:hover, .k-checkbox:checked:focus, .k-checkbox.k-checked:focus {
+    border-color: #1db309;
+    background-color: #1db309;
+}
+.editor-form {
+    background-color: #ffffff;
+    padding: 14px;
+}
+.k-datepicker {
+    width: 180px;
+}
+.k-combobox {
+    width: 300px;
+}
+.below-form {
+    padding-top: 20px;
+}
+
+.grid400 .k-grid-content
+{
+    min-height: 100px !important;
+    max-height: 400px !important;
+}
+
+.nowrap {
+    white-space: nowrap;
+}
+  
+
+.k-tabstrip-items-wrapper {
+    z-index: 1!important;
+}
+.lp-closed .lp-sidebar .lp-sidebar-navi ul li.active-page>a>span.lp-icon, .lp-closed .lp-sidebar .lp-sidebar-navi ul li.current>a>span.lp-icon, .lp-opened-sidebar .lp-sidebar .lp-sidebar-navi ul li.active-page>a>span.lp-icon, .lp-opened-sidebar .lp-sidebar .lp-sidebar-navi ul li.current>a>span.lp-icon {
+    color: #1db309;
+    opacity: 1;
+}
+.lp-closed .lp-sidebar .lp-sidebar-navi ul li>a:hover>span.lp-icon, .lp-opened-sidebar .lp-sidebar .lp-sidebar-navi ul li>a:hover>span.lp-icon {
+    color: #1db309;
+    opacity: 1;
+}
+.lp-arrow-icon {
+    color: #ffffff !important;
+    opacity: 0.8 !important;
+}
+.lp-opened-sidebar .lp-sidebar .lp-sidebar-navi ul li.current>ul .current>a:before {
+    border: 2px solid #1db309 !important;
 }

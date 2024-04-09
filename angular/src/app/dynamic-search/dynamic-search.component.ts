@@ -149,7 +149,7 @@ export class DynamicSearchComponent<ItemType extends { id: number } = any, ItemD
     this.userViewEditor.setUserView(this.userView, this.folder);
     this.userViewEditor.showColumnProperties = true;
 
-    if (this.userView.query.keywords && this.userView.query.keywords.length > 0 || this.userView.query.lines.length > 0) {
+    if ((this.userView.query.keywords && this.userView.query.keywords.length > 0) || (this.userView.query.lines.length > 0 && this.userView.query.lines[0])) {
       this.keywordsChanged();
     }
 
@@ -499,6 +499,7 @@ export class DynamicSearchComponent<ItemType extends { id: number } = any, ItemD
 
   public setDisplayModeToGrid() {
     //this.userSelectedGridMode = true;
+
     this.doSearch();
   }
 
