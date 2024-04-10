@@ -1,25 +1,25 @@
-﻿using SessionLogger.Sessions;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using Volo.Abp.Domain.Entities.Auditing;
 
-namespace SessionLogger.Baits
+namespace SessionLogger.Domain.Tickets
 {
-    public class Bait : AuditedAggregateRoot<int>
+    public class Ticket : AuditedAggregateRoot<int>
 
     {
 
-        public Bait(int id) : base(id)
+        public Ticket(int id) : base(id)
         {
 
         }
 
-        public Bait()
+        public Ticket()
         {
 
         }

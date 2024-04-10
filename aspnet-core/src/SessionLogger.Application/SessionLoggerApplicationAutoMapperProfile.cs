@@ -9,6 +9,10 @@ using SessionLogger.Domain.Tickets;
 using SessionLogger.Domain.Venues;
 using System.Collections.Generic;
 using System.Linq;
+using SessionLogger.Sessions;
+using SessionLogger.Baits;
+using SessionLogger.Tickets;
+using SessionLogger.Venues;
 
 namespace SessionLogger;
 
