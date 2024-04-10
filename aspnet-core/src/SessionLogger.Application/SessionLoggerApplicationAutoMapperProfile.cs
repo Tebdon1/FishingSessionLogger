@@ -1,12 +1,12 @@
 ﻿using AutoMapper;
-using SessionLogger.Baits;
 using SessionLogger.Contracts.Search;
 using SessionLogger.Domain.Baits;
 using SessionLogger.Domain.Folders;
 using SessionLogger.Domain.Sessions;
 using SessionLogger.Folders;
 using SessionLogger.Search;
-using SessionLogger.Sessions;
+using SessionLogger.Domain.Tickets;
+using SessionLogger.Domain.Venues;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -39,5 +39,12 @@ public class SessionLoggerApplicationAutoMapperProfile : Profile
 
         CreateMap<Bait, BaitDto>();
         CreateMap<BaitUpdateDto, Bait>();
+
+        CreateMap<Ticket, TicketDto>();
+        CreateMap<TicketUpdateDto, Ticket>();
+
+        CreateMap<Venue, VenueDto>();
+        CreateMap<VenueUpdateDto, Venue>();
+
     }
 }

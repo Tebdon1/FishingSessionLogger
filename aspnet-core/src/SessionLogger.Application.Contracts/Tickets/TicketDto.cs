@@ -1,15 +1,11 @@
-
 ﻿using System;
-
 using System.Collections.Generic;
 using System.Text;
 using Volo.Abp.Application.Dtos;
 
-namespace SessionLogger.Baits;
+namespace SessionLogger.Tickets;
 
-public class BaitDto : AuditedEntityDto<int>
+public class TicketDto : AuditedEntityDto<int>
 {
     public string Name { get; set; }
-
-
 }

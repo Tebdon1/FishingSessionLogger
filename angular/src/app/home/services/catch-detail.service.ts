@@ -1,4 +1,4 @@
-import type { CatchWeightDto, CreateUpdateCatchWeightDto } from './models';
+import type { CatchDetailDto, CreateUpdateCatchDetailDto } from '../../proxy/sessions/models';
 import { RestService } from '@abp/ng.core';
 import type { PagedAndSortedResultRequestDto, PagedResultDto } from '@abp/ng.core';
 import { Injectable } from '@angular/core';
@@ -6,14 +6,14 @@ import { Injectable } from '@angular/core';
 @Injectable({
   providedIn: 'root',
 })
-export class CatchWeightService {
+export class CatchDetailService {
   apiName = 'Default';
   
 
-  create = (input: CreateUpdateCatchWeightDto) =>
-    this.restService.request<any, CatchWeightDto>({
+  create = (input: CreateUpdateCatchDetailDto) =>
+    this.restService.request<any, CatchDetailDto>({
       method: 'POST',
-      url: '/api/app/catch-weight',
+      url: '/api/app/catch-detail',
       body: input,
     },
     { apiName: this.apiName });
@@ -22,32 +22,32 @@ export class CatchWeightService {
   delete = (id: number) =>
     this.restService.request<any, void>({
       method: 'DELETE',
-      url: `/api/app/catch-weight/${id}`,
+      url: `/api/app/catch-detail/${id}`,
     },
     { apiName: this.apiName });
   
 
   get = (id: number) =>
-    this.restService.request<any, CatchWeightDto>({
+    this.restService.request<any, CatchDetailDto>({
       method: 'GET',
-      url: `/api/app/catch-weight/${id}`,
+      url: `/api/app/catch-detail/${id}`,
     },
     { apiName: this.apiName });
   
 
   getList = (input: PagedAndSortedResultRequestDto) =>
-    this.restService.request<any, PagedResultDto<CatchWeightDto>>({
+    this.restService.request<any, PagedResultDto<CatchDetailDto>>({
       method: 'GET',
-      url: '/api/app/catch-weight',
+      url: '/api/app/catch-detail',
       params: { sorting: input.sorting, skipCount: input.skipCount, maxResultCount: input.maxResultCount },
     },
     { apiName: this.apiName });
   
 
-  update = (id: number, input: CreateUpdateCatchWeightDto) =>
-    this.restService.request<any, CatchWeightDto>({
+  update = (id: number, input: CreateUpdateCatchDetailDto) =>
+    this.restService.request<any, CatchDetailDto>({
       method: 'PUT',
-      url: `/api/app/catch-weight/${id}`,
+      url: `/api/app/catch-detail/${id}`,
       body: input,
     },
     { apiName: this.apiName });

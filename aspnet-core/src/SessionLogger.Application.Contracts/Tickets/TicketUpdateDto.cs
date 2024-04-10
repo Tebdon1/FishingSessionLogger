@@ -3,17 +3,10 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 
-namespace SessionLogger.Venues;
+namespace SessionLogger.Tickets;
 
-public class VenueUpdateDto
+public class TicketUpdateDto
 {
     [MaxLength(255)]
-
     public string Name { get; set; }
-
-    [MaxLength(8)]
-    public string Postcode { get; set; }
-
-    public int TicketId { get; set; }
-
 }

@@ -1,4 +1,4 @@
-import type { CreateUpdateSessionDto, SessionDto } from './models';
+import type { CreateUpdateSessionDto, SessionDto } from '../../proxy/sessions/models';
 import { RestService } from '@abp/ng.core';
 import type { PagedAndSortedResultRequestDto, PagedResultDto } from '@abp/ng.core';
 import { Injectable } from '@angular/core';
