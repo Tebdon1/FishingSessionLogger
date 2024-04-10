@@ -9,10 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SessionLogger.Domain.Shared\SessionLogger.Domain.Shared.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer.NetTopologySuite" Version="5.0.14" />
     <PackageReference Include="Volo.Abp.Emailing" Version="7.1.1" />
     <PackageReference Include="Volo.Abp.Identity.Domain" Version="7.1.1" />
     <PackageReference Include="Volo.Abp.PermissionManagement.Domain.Identity" Version="7.1.1" />
@@ -23,6 +20,11 @@
     <PackageReference Include="Volo.Abp.SettingManagement.Domain" Version="7.1.1" />
     <PackageReference Include="Volo.Abp.OpenIddict.Domain" Version="7.1.1" />
     <PackageReference Include="Volo.Abp.PermissionManagement.Domain.OpenIddict" Version="7.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SessionLogger.Application.Contracts\SessionLogger.Application.Contracts.csproj" />
+    <ProjectReference Include="..\SessionLogger.Domain.Shared\SessionLogger.Domain.Shared.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,0 +1,68 @@
+<abp-page [title]="entityLabelPlural">
+    <app-dynamic-search 
+      #search 
+      [hidden]="displayMode != 'search'" 
+      [endpoint]="endpoint"
+      [entityLabelPlural]="entityLabelPlural"
+      [searchBarLeftTemplate]="searchBarLeftTemplate" 
+      [allowViewMode]="allowViewMode"
+      (onEvent)="onEvent($event)" 
+      (beforeSearch)="beforeSearchHandler($event)"> 
+    </app-dynamic-search>
+    <div [hidden]="displayMode != 'edit'">
+      <ng-container *ngTemplateOutlet="headerTemplate"></ng-container>
+
+      <h1>{{selected.id > 0 ? (readOnly ? 'View' : 'Edit') : 'Add'}} {{entityLabel}}</h1>
+
+      <div *ngIf="error" class="form-errors">
+        <ul>
+          <li *ngFor="let error of errors">
+            {{error}}
+          </li>
+        </ul>
+      </div>
+
+      <ng-container *ngTemplateOutlet="formTemplate"></ng-container>
+
+      <div class="button-strip" *ngIf="readOnly">
+        <button *ngIf="userCanEdit()" type="button" class="btn btn-secondary" (click)="edit()">
+          Edit
+        </button>
+        <button type="button" class="btn btn-primary" (click)="cancel()">
+          Close
+        </button>
+        <ng-container *ngTemplateOutlet="readonlyModeButtonTemplate"></ng-container>
+      </div>
+      <div class="form-errors" [hidden]="readOnly || !(form?.invalid)">
+        <p><a href="javascript:" (click)="getFormValidationErrors()">Show form errors</a></p>        
+        <div [innerHTML]="formErrors"></div>
+      </div>
+      <div class="button-strip" *ngIf="!readOnly">
+        <button type="button" class="btn btn-secondary" (click)="cancel()">
+          Cancel
+        </button>
+    
+        <button *ngIf="!hideSaveButton && !readOnly" type="button" class="btn btn-primary" (click)="save()" [disabled]="form?.invalid || busy">
+          Save
+        </button>
+
+        <button *ngIf="!readOnly" type="button" class="btn btn-primary" (click)="saveAndClose()" [disabled]="form?.invalid || busy">
+          {{saveAndCloseCaption}}
+        </button>
+
+        <ng-container *ngTemplateOutlet="editModeButtonTemplate"></ng-container>
+
+<!-- uncomment to find why a form has not validated        
+        <button class="btn btn-secondary" (click)="getFormValidationErrors()">
+          Check
+        </button> 
+-->
+      </div>
+      <ng-container *ngTemplateOutlet="belowFormTemplate"></ng-container>
+    </div>
+
+    <div [hidden]="displayMode != 'submitted'">
+      <ng-container *ngTemplateOutlet="afterSaveTemplate"></ng-container>
+    </div>
+</abp-page>
+  

@@ -1,0 +1,152 @@
+import { ABP, ListService, PagedResultDto, TrackByService } from '@abp/ng.core';
+import { Confirmation, ConfirmationService } from '@abp/ng.theme.shared';
+import { Component, Injector, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
+import { FormBuilder, FormGroup } from '@angular/forms';
+import { Router } from '@angular/router';
+import { Observable } from 'rxjs';
+import { finalize, tap } from 'rxjs/operators';
+import { CrudService } from './crud.service';
+import { CRUD_LIST_OPTIONS } from './crud.token';
+import { AdvancedFilters, CrudListOptions, CrudOptions } from './crud.types';
+
+// not an abstract class on purpose
+@Component({ template: '' })
+export class AbstractCrudComponent<
+  Filters extends ABP.PageQueryParams,
+  ReadItem extends { id: string } = any,
+  CreateUpdate = any
+> implements OnDestroy {
+  protected confirmation: ConfirmationService;
+  protected crud: CrudService<ReadItem, CreateUpdate>;
+  protected fb: FormBuilder;
+  public readonly list: ListService;
+  public readonly listOptions: CrudListOptions;
+  protected router: Router;
+  public readonly track: TrackByService;
+
+  @ViewChild('modalContent', { static: false })
+  modalContent: TemplateRef<any>;
+
+  advancedFilters = {} as AdvancedFilters<Filters>;
+
+  data$: Observable<PagedResultDto<ReadItem>>;
+
+  form: FormGroup;
+
+  selected = {} as ReadItem;
+
+  isModalVisible = false;
+
+  isAdvancedFiltersHidden = true;
+
+  loading = false;
+
+  modalBusy = false;
+
+  options = {} as CrudOptions;
+
+  constructor(injector: Injector) {
+    this.confirmation = injector.get(ConfirmationService);
+    this.crud = injector.get(CrudService);
+    this.fb = injector.get(FormBuilder);
+    this.list = injector.get(ListService);
+    this.listOptions = injector.get(CRUD_LIST_OPTIONS, {});
+    this.router = injector.get(Router);
+    this.track = injector.get(TrackByService);
+    this.initOptions();
+    this.initAdvancedFilters();
+    this.initData();
+  }
+
+  buildForm(): FormGroup {
+    throw 'Please implement a buildForm method in your component class.';
+  }
+
+  delete(id: string) {
+    this.confirmation
+      .warn('::DeleteConfirmationMessage', '::AreYouSure', {})
+      .subscribe((status: Confirmation.Status) => {
+        if (status !== Confirmation.Status.confirm) return;
+
+        this.crud.delete(id).subscribe(this.list.get);
+      });
+  }
+
+  initAdvancedFilters() {
+    const fields = Object.keys(this.buildForm().value);
+
+    const params = this.router.getCurrentNavigation()?.extras?.state;
+    if (!params) return;
+
+    const filters = {} as AdvancedFilters<Filters>;
+    let filtersHidden = true;
+
+    fields.forEach((field) => {
+      if (params.hasOwnProperty(field)) {
+        filters[field] = params[field];
+        filtersHidden = false;
+      }
+    });
+
+    this.advancedFilters = filters;
+    this.isAdvancedFiltersHidden = filtersHidden;
+  }
+
+  initData() {
+    Object.keys(this.listOptions).forEach((option) => {
+      this.list[option] = this.listOptions[option];
+    });
+
+    this.data$ = this.list.hookToQuery((query) => {
+      const params = { ...query, ...this.advancedFilters };
+
+      Object.keys(params).forEach((key) => {
+        if (params[key] === null) delete params[key];
+      });
+
+      return this.crud.get(params);
+    });
+  }
+
+  initOptions() {
+    this.options = this.crud.createOptions();
+  }
+
+  ngOnDestroy() {}
+
+  onSearch(value: string) {
+    this.list.filter = value;
+    this.list.get();
+  }
+
+  openModal() {
+    this.form = this.buildForm();
+    this.isModalVisible = true;
+  }
+
+  onAdd() {
+    this.selected = {} as ReadItem;
+    this.openModal();
+  }
+
+  onEdit(id: string) {
+    this.crud.getById(id).subscribe((response: ReadItem) => {
+      this.selected = response;
+      this.openModal();
+    });
+  }
+
+  save() {
+    if (!this.form.valid) return;
+
+    const operation = this.selected.id ? 'update' : 'create';
+
+    this.modalBusy = true;
+    this.crud[operation]({ ...this.form.value }, this.selected.id)
+      .pipe(
+        tap(() => (this.isModalVisible = false)),
+        finalize(() => (this.modalBusy = false))
+      )
+      .subscribe(this.list.get);
+  }
+}

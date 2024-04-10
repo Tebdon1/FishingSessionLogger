@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SessionLogger.Search;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -7,18 +8,18 @@ using System.Threading.Tasks;
 using System.Xml.Schema;
 using Volo.Abp.Domain.Entities.Auditing;
 
-namespace SessionLogger.Sessions;
+namespace SessionLogger.Domain.Sessions;
 
-public class Session : AuditedAggregateRoot<int>
+public class Session : AuditedAggregateRoot<int>, IItem
 {
-    public Session (int id) : base(id)
+    public Session(int id) : base(id)
     {
 
     }
-   
-    public Session ()
+
+    public Session()
     {
-        this.CatchSummaries = new HashSet<CatchSummary> ();
+        CatchSummaries = new HashSet<CatchSummary>();
     }
 
     public DateTime SessionDate { get; set; }

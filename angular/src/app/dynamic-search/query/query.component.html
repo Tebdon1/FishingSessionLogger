@@ -1,0 +1,73 @@
+<div class="keywords">
+  <label>Keywords</label>
+  <input
+  kendoTextBox
+  id="saveAsViewName"
+  placeholder="Enter keywords"
+  [(ngModel)]="query.keywords"
+  (change)="onChanged()"
+/>  
+</div>
+<div *ngIf="query.lines" class="queryLines">
+  <div *ngFor="let line of query.lines; let i=index" class="queryLine">
+    <div class="queryLineField">
+      <label *ngIf="query && query.lines && query.searchMethod == 'advanced'" class="search-field-line"><strong><span *ngIf="line.field">{{i+1}}</span><span *ngIf="!line.field">&nbsp;</span></strong></label>
+      <kendo-dropdownlist [(ngModel)]="line.field" [defaultItem]="fieldDefaultItem" (selectionChange)="fieldChanged($event,line)" [valuePrimitive]="true" [data]="queryFields" textField="text" valueField="id" ></kendo-dropdownlist>
+    </div>
+    <div class="queryLineOperator" *ngIf="line.field && line.dataType != 'boolean' && line.operators" [class]="line.dataType == 'boolean' ? 'checkbox' : ''">
+        <kendo-dropdownlist [(ngModel)]="line.queryOperator" (selectionChange)="operatorChanged($event,line)" [valuePrimitive]="true" [data]="line.operators" textField="text" valueField="id" placeholder="(select match)"></kendo-dropdownlist>
+    </div>
+    <div class="queryLineValue" *ngIf="line.queryOperator && !(line.queryOperator == 'blank' || line.queryOperator == 'notblank')">
+      <div *ngIf="line.useDropdown && line.valueOptions && line.valueOptions.length > 0">
+        <kendo-dropdownlist [(ngModel)]="line.dropdownValue" style="width: 250px" (selectionChange)="dropdownValueChanged($event,line)" [valuePrimitive]="true" [data]="line.valueOptions" textField="text" valueField="value" placeholder="(select value)"></kendo-dropdownlist>
+      </div>
+      <span *ngIf="!line.useDropdown">
+        <div *ngIf="line.dataType == columnDataType.String">
+          <input type="text" kendoTextBox placeholder="(enter text)" [(ngModel)]="line.value"  />
+        </div>
+        <div class="form-group" *ngIf="line.dataType == columnDataType.Integer">
+          <input type="text" kendoTextBox placeholder="(enter text)" type="number" step="1" [(ngModel)]="line.value" (change)="onChanged()" />
+        </div>
+        <div class="form-group" *ngIf="line.dataType == columnDataType.Date">
+          <kendo-datepicker [(value)]="line.value" placeholder="Select date" format="dd/MM/yyyy"></kendo-datepicker>
+        </div>
+        <div class="form-group" *ngIf="line.dataType == columnDataType.Decimal">
+          <input type="number" kendoTextBox placeholder="(enter value)" [(ngModel)]="line.value" />
+        </div>
+      </span>
+    </div>
+    <div class="queryLineDelete">
+      <button kendoButton (click)="removeLine(i)" icon="delete" fillMode="flat" aria-label="Remove line" themeColor="danger"
+        *ngIf="query.lines[i].field && !(i == 0 && (query.lines.length == 1 || (query.lines.length == 2 && !query.lines[1].field)))"
+      ></button>
+    </div>
+  </div>
+  <div class="queryMethod" [hidden]="!(query.lines && query.lines.length > 1 && query.lines[1].field)">
+    <label id="method-radio-group-label">Select how criteria will be combined</label>
+
+    <div class="angular-radio-group">
+      <div class="form-check">
+        <input class="form-check-input" type="radio" value="all" id="searchMethodRadios1" name="searchMethodRadios" [(ngModel)]="query.searchMethod" (change)="searchTypeChanged()">
+        <label class="form-check-label" for="searchMethodRadios1">
+          match all of the above
+        </label>
+      </div> 
+      <div class="form-check">
+        <input class="form-check-input" type="radio" value="any" id="searchMethodRadios2" name="searchMethodRadios" [(ngModel)]="query.searchMethod" (change)="searchTypeChanged()">
+        <label class="form-check-label" for="searchMethodRadios2">
+          match any of the above
+        </label>
+      </div> 
+      <div class="form-check">
+        <input class="form-check-input" type="radio" value="advanced" id="searchMethodRadios3" name="searchMethodRadios" [(ngModel)]="query.searchMethod" (change)="searchTypeChanged()">
+        <label class="form-check-label" for="searchMethodRadios3">
+          advanced
+        </label>
+      </div> 
+      <div [hidden]="query.searchMethod !== 'advanced'" class="form-group">
+          <label>Enter expression</label>
+          <input type="text" kendoTextBox class="form-control" [(ngModel)]="query.searchExpression" (change)="onChanged()" />
+      </div>
+    </div> 
+  </div>
+</div>

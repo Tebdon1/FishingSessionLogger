@@ -14,7 +14,8 @@ using Volo.Abp.SettingManagement.EntityFrameworkCore;
 using Volo.Abp.TenantManagement.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.EntityFrameworkCore;
-using SessionLogger.Sessions;
+using SessionLogger.Domain.Sessions;
+using SessionLogger.Search;
 
 namespace SessionLogger.EntityFrameworkCore;
 
@@ -74,5 +75,8 @@ public class SessionLoggerEntityFrameworkCoreModule : AbpModule
                  * See also SessionLoggerMigrationsDbContextFactory for EF Core tooling. */
             options.UseSqlServer();
         });
+
+        // add noise service for use by search
+        context.Services.AddSingleton<INoiseService, NoiseService>();
     }
 }

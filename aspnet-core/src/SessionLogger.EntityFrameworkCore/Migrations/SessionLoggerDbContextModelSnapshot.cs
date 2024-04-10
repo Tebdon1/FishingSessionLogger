@@ -24,7 +24,9 @@ namespace SessionLogger.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("SessionLogger.Baits.Bait", b =>
+
+            modelBuilder.Entity("SessionLogger.Domain.Folders.UserView", b =>
+
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -46,9 +48,38 @@ namespace SessionLogger.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("CreatorId");
 
+                    b.Property<Guid?>("DeleterId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("DeleterId");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("DeletionTime");
+
+                    b.Property<string>("EntityInfoId")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("EntityType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+
                     b.Property<string>("ExtraProperties")
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("ExtraProperties");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false)
+                        .HasColumnName("IsDeleted");
+
+                    b.Property<bool>("IsPublic")
+                        .HasColumnType("bit");
+
 
                     b.Property<DateTime?>("LastModificationTime")
                         .HasColumnType("datetime2")
@@ -63,12 +94,17 @@ namespace SessionLogger.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
+                    b.Property<string>("UserViewJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
-                    b.ToTable("AppBait", (string)null);
+                    b.ToTable("UserViews");
                 });
 
-            modelBuilder.Entity("SessionLogger.Sessions.CatchDetail", b =>
+            modelBuilder.Entity("SessionLogger.Domain.Sessions.CatchDetail", b =>
+
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -119,7 +155,7 @@ namespace SessionLogger.Migrations
                     b.ToTable("AppCatchDetail", (string)null);
                 });
 
-            modelBuilder.Entity("SessionLogger.Sessions.CatchSummary", b =>
+            modelBuilder.Entity("SessionLogger.Domain.Sessions.CatchSummary", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -169,7 +205,7 @@ namespace SessionLogger.Migrations
                     b.ToTable("AppCatchSummary", (string)null);
                 });
 
-            modelBuilder.Entity("SessionLogger.Sessions.CatchWeight", b =>
+            modelBuilder.Entity("SessionLogger.Domain.Sessions.CatchWeight", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -216,7 +252,7 @@ namespace SessionLogger.Migrations
                     b.ToTable("AppCatchWeight", (string)null);
                 });
 
-            modelBuilder.Entity("SessionLogger.Sessions.Session", b =>
+            modelBuilder.Entity("SessionLogger.Domain.Sessions.Session", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1987,9 +2023,9 @@ namespace SessionLogger.Migrations
                     b.ToTable("AbpTenantConnectionStrings", (string)null);
                 });
 
-            modelBuilder.Entity("SessionLogger.Sessions.CatchDetail", b =>
+            modelBuilder.Entity("SessionLogger.Domain.Sessions.CatchDetail", b =>
                 {
-                    b.HasOne("SessionLogger.Sessions.CatchSummary", "CatchSummary")
+                    b.HasOne("SessionLogger.Domain.Sessions.CatchSummary", "CatchSummary")
                         .WithMany("CatchDetails")
                         .HasForeignKey("CatchSummaryId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1998,9 +2034,9 @@ namespace SessionLogger.Migrations
                     b.Navigation("CatchSummary");
                 });
 
-            modelBuilder.Entity("SessionLogger.Sessions.CatchSummary", b =>
+            modelBuilder.Entity("SessionLogger.Domain.Sessions.CatchSummary", b =>
                 {
-                    b.HasOne("SessionLogger.Sessions.Session", "Session")
+                    b.HasOne("SessionLogger.Domain.Sessions.Session", "Session")
                         .WithMany("CatchSummaries")
                         .HasForeignKey("SessionId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2009,9 +2045,9 @@ namespace SessionLogger.Migrations
                     b.Navigation("Session");
                 });
 
-            modelBuilder.Entity("SessionLogger.Sessions.CatchWeight", b =>
+            modelBuilder.Entity("SessionLogger.Domain.Sessions.CatchWeight", b =>
                 {
-                    b.HasOne("SessionLogger.Sessions.CatchDetail", "CatchDetail")
+                    b.HasOne("SessionLogger.Domain.Sessions.CatchDetail", "CatchDetail")
                         .WithMany("CatchWeights")
                         .HasForeignKey("CatchDetailId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -2173,17 +2209,17 @@ namespace SessionLogger.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("SessionLogger.Sessions.CatchDetail", b =>
+            modelBuilder.Entity("SessionLogger.Domain.Sessions.CatchDetail", b =>
                 {
                     b.Navigation("CatchWeights");
                 });
 
-            modelBuilder.Entity("SessionLogger.Sessions.CatchSummary", b =>
+            modelBuilder.Entity("SessionLogger.Domain.Sessions.CatchSummary", b =>
                 {
                     b.Navigation("CatchDetails");
                 });
 
-            modelBuilder.Entity("SessionLogger.Sessions.Session", b =>
+            modelBuilder.Entity("SessionLogger.Domain.Sessions.Session", b =>
                 {
                     b.Navigation("CatchSummaries");
                 });

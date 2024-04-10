@@ -1,0 +1,35 @@
+.angular-radio-group {
+  display: flex;
+  flex-direction: column;
+  margin: 15px 0;
+}
+
+.angular-radio-button {
+  margin: 5px;
+}
+.keywords {
+  margin-bottom: 20px;
+}
+
+.queryLine {
+  clear:both;
+  margin-bottom: 8px;
+}
+.queryLineField {
+  width: 200px;
+  display: inline-block;
+  margin-right:10px;
+}
+.queryLineOperator {
+  width: 200px;
+  display: inline-block;
+  margin-right:10px;
+}
+.queryLineValue {
+  display: inline-block;
+  margin-right:10px;
+}
+.queryLineDelete {
+  display: inline-block;
+  width: 40px;
+}

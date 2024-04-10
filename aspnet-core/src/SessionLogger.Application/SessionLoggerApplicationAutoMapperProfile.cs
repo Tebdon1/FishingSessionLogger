@@ -1,8 +1,12 @@
 ﻿using AutoMapper;
-using SessionLogger.Baits;
-using SessionLogger.Sessions;
-using SessionLogger.Tickets;
-using SessionLogger.Venues;
+using SessionLogger.Contracts.Search;
+using SessionLogger.Domain.Baits;
+using SessionLogger.Domain.Folders;
+using SessionLogger.Domain.Sessions;
+using SessionLogger.Folders;
+using SessionLogger.Search;
+using SessionLogger.Domain.Tickets;
+using SessionLogger.Domain.Venues;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -16,8 +20,12 @@ public class SessionLoggerApplicationAutoMapperProfile : Profile
          * Alternatively, you can split your mapping configurations
          * into multiple profile classes for a better organization. */
         //CreateMap<Session, SessionDto>();
+        CreateMap<EntityInfo, FolderInfoVM>();
+
+        CreateMap<UserViewVM, UserView>();
+        CreateMap<UserView, UserViewVM>();
+
         CreateMap<Session, SessionDto>();
-            ;
         CreateMap<CreateUpdateSessionDto, Session>();
 
         CreateMap<CatchSummary, CatchSummaryDto>();
@@ -37,5 +45,6 @@ public class SessionLoggerApplicationAutoMapperProfile : Profile
 
         CreateMap<Venue, VenueDto>();
         CreateMap<VenueUpdateDto, Venue>();
+
     }
 }

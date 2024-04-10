@@ -1,0 +1,48 @@
+import { Injectable } from '@angular/core';
+import {HttpClient, HttpParams} from '@angular/common/http';
+import {map} from 'rxjs/operators';
+import {GridSearchResults} from '../models/documentResults';
+import {UserView} from '../models/userView';
+import { UrlHelperService } from "./url-helper.service";
+import { ErrorHandlerService } from "../../services/error-handler.service";
+import { Observable } from 'rxjs';
+
+@Injectable({
+  providedIn: 'root'
+})
+
+export class GridSearchService {
+
+  constructor(
+    private http: HttpClient,
+    private urlHelper: UrlHelperService,
+    private errorHandler: ErrorHandlerService
+    ) { }
+
+  search(
+    folderId: string,
+    userView: UserView
+   ): Observable<GridSearchResults> {
+    return this.http.post(this.urlHelper.searchControllerUrl() + '/' + folderId + '/Search',
+      {
+        folderId: folderId,
+        userView: userView
+      },
+      {
+        headers: {
+          'content': 'application/json',
+          'content-type': 'application/json'
+        }
+      }
+    ).pipe(map(res => {
+        var results = res['data'];
+
+        return { totalRecords: results['totalRecords'], totalSelectableRecords: results['totalSelectableRecords'], results: results['results'] };
+      },
+      error => {
+        this.errorHandler.handleError(error);
+      }
+    )
+    );
+  }
+}

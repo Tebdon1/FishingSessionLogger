@@ -8,10 +8,12 @@ namespace SessionLogger.Venues;
 public class VenueUpdateDto
 {
     [MaxLength(255)]
-    public string? Name { get; set; }
+
+    public string Name { get; set; }
 
     [MaxLength(8)]
-    public string? Postcode { get; set; }
+    public string Postcode { get; set; }
 
     public int TicketId { get; set; }
+
 }
