@@ -22,6 +22,7 @@ public enum SpeciesType
     Perch,
     Pike,
     Roach,
+    RoachBreamHybrid,
     Rudd,
     Ruffe,
     SeaBass,
