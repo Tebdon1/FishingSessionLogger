@@ -1,5 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SessionLogger.Sessions;
+
+using SessionLogger.Domain.Baits;
+using SessionLogger.Domain.Folders;
+using SessionLogger.Domain.Sessions;
+using SessionLogger.Domain.Tickets;
+using SessionLogger.Domain.Venues;
+
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
 using Volo.Abp.Data;
@@ -30,6 +36,9 @@ public class SessionLoggerDbContext :
     public DbSet<CatchSummary> CatchSummaries { get; set; }
     public DbSet<CatchDetail> CatchDetails { get; set; }
     public DbSet<CatchWeight> CatchWeights { get; set; }
+    public DbSet<Venue> Venues { get; set; }
+    public DbSet<Ticket> Tickets { get; set; }
+    public DbSet<Bait> Baits { get; set; }
 
     #region Entities from the modules
 
@@ -51,6 +60,8 @@ public class SessionLoggerDbContext :
     public DbSet<OrganizationUnit> OrganizationUnits { get; set; }
     public DbSet<IdentitySecurityLog> SecurityLogs { get; set; }
     public DbSet<IdentityLinkUser> LinkUsers { get; set; }
+
+    public DbSet<UserView> UserViews { get; set; }
 
     // Tenant Management
     public DbSet<Tenant> Tenants { get; set; }
@@ -110,6 +121,27 @@ public class SessionLoggerDbContext :
         builder.Entity<CatchWeight>(b =>
         {
             b.ToTable(SessionLoggerConsts.DbTablePrefix + "CatchWeight", SessionLoggerConsts.DbSchema);
+            b.ConfigureByConvention(); //auto configure for the base class props
+        });
+
+        builder.Entity<Bait>(b =>
+        {
+            b.ToTable(SessionLoggerConsts.DbTablePrefix + "Bait", SessionLoggerConsts.DbSchema);
+            b.Property(x => x.Name).IsRequired();
+            b.ConfigureByConvention(); //auto configure for the base class props
+        });
+
+        builder.Entity<Venue>(b =>
+        {
+            b.ToTable(SessionLoggerConsts.DbTablePrefix + "Venue", SessionLoggerConsts.DbSchema);
+            b.Property(x => x.Name).IsRequired();
+            b.ConfigureByConvention(); //auto configure for the base class props
+        });
+
+        builder.Entity<Ticket>(b =>
+        {
+            b.ToTable(SessionLoggerConsts.DbTablePrefix + "Ticket", SessionLoggerConsts.DbSchema);
+            b.Property(x => x.Name).IsRequired();
             b.ConfigureByConvention(); //auto configure for the base class props
         });
     }

@@ -1,0 +1,67 @@
+    <div class="view-outer">
+       <kendo-tabstrip [keepTabContent]="true">
+        <kendo-tabstrip-tab title="Filter" [selected]="true">
+          <ng-template kendoTabContent>
+            <app-query #queryEditor></app-query>
+          </ng-template>          
+        </kendo-tabstrip-tab>
+        <kendo-tabstrip-tab title="Columns" *ngIf="showColumnProperties">
+          <ng-template kendoTabContent>
+            <div>
+              <p>Click the titles to move them between the available
+              and selected areas or drag them. You can also
+              reorder the columns by dragging up or down.</p>
+            </div>
+            <div class="selection row">
+              <div class="col-md-4">
+                <h3 class="inline-block">Available Columns</h3>
+              </div>
+              <div class="col-md-4">
+                <h3>Selected Columns</h3>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-4" *ngIf="availableColumns">
+                <div cdkDropList [cdkDropListData]="availableColumns" [cdkDropListConnectedTo]="selectedList"
+                     #availableList="cdkDropList" (cdkDropListDropped)="dropColumn($event)" class="select-list">
+                  <div *ngFor="let column of availableColumns" class="select-box availableColumn" cdkDrag>
+                    {{ column.columnDisplayName }}
+                    <button kendoButton (click)="selectColumn(column)" icon="arrow-chevron-right" fillMode="flat" aria-label="Select column"></button>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4" *ngIf="selectedColumns">
+                <div cdkDropList [cdkDropListData]="selectedColumns" [cdkDropListConnectedTo]="availableList"
+                     #selectedList="cdkDropList" (cdkDropListDropped)="dropColumn($event)" class="select-list">
+                  <div *ngFor="let column of selectedColumns; let i = index" class="select-box selectedColumn" cdkDrag>
+                      <div class="selected-list-buttons">
+                        <button kendoButton (click)="removeColumn(column)" icon="arrow-chevron-left" fillMode="flat" aria-label="Remove column"></button>
+                        <button *ngIf="i > 0" kendoButton (click)="moveColumnUp(column)" icon="arrow-chevron-up" fillMode="flat" aria-label="Move column up"></button>
+                        <button *ngIf="i < selectedColumns.length-1" kendoButton (click)="moveColumnDown(column)" icon="arrow-chevron-down" fillMode="flat" aria-label="Move column down"></button>
+                      </div>
+                      {{ column.columnDisplayName }}
+                    </div>
+                </div>
+              </div>
+            </div>
+          </ng-template>
+        </kendo-tabstrip-tab>
+        <kendo-tabstrip-tab title="Sort" *ngIf="userView?.sortFields">
+          <ng-template kendoTabContent>
+            <div class="sortRow" *ngFor="let line of userView.sortFields; let i=index">
+              <div class="sortField">
+                <kendo-dropdownlist [(ngModel)]="line.fieldName" (selectionChange)="sortFieldChanged($event,line)" [valuePrimitive]="true" [data]="sortableFields" textField="displayText" valueField="fieldName"></kendo-dropdownlist>
+              </div>
+              <div class="sortDirection" [hidden]="!line.fieldName">
+                  <kendo-dropdownlist [(ngModel)]="line.isAscending" (selectionChange)="sortDirectionChanged($event,line)" [valuePrimitive]="true" [data]="[{value:true,text:'Ascending'},{value:false,text:'Descending'}]" textField="text" valueField="value"></kendo-dropdownlist>
+              </div>
+              <div class="sortDelete" [hidden]="userView?.sortFields.length < 2 || (i == userView?.sortFields.length - 1 && !line.fieldName) || (i == 0 && userView?.sortFields.length == 2 && !userView.sortFields[1].fieldName)">
+                <button kendoButton (click)="removeSortField(i)" icon="delete" fillMode="flat" aria-label="Remove line" themeColor="danger"></button>
+              </div>
+            </div>
+          </ng-template>
+        </kendo-tabstrip-tab>
+      </kendo-tabstrip>
+    </div>
+
+

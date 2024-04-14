@@ -1,0 +1,363 @@
+<div #searchContainer>
+    <!-- main search header panel-->
+    
+    <div class="top-strip" [hidden]="currentSection != gridSearchSection.Basic">
+      <ng-container *ngTemplateOutlet="searchBarLeftTemplate"></ng-container>
+      <!--text box for quick search-->
+      <kendo-textbox 
+        class="search-box"
+        #quickSearch 
+        *ngIf="folder && userView && userView.query" 
+        (valueChange)="applyKeywordFilter($event)" 
+        aria-label="Search keywords" 
+        placeholder="Search ..." 
+        [(ngModel)]="userView.query.keywords" 
+        [clearButton]="true" 
+        autofocus
+        >
+        <ng-template kendoTextBoxSuffixTemplate>
+          <kendo-textbox-separator></kendo-textbox-separator>
+          <button kendoButton fillMode="clear" icon="search" aria-label="Search" (click)="keywordsChanged()" ></button>
+          <button kendoButton fillMode="clear" icon="more-horizontal" aria-label="Advanced filter / columns / sort" (click)="toggleAdvancedSearch()" ></button>
+          <button kendoButton fillMode="clear" icon="help" aria-label="Help" (click)="showHelp = !showHelp" ></button>
+        </ng-template>
+      </kendo-textbox>
+      <button class="add-button" kendoButton *ngIf="userCanCreate" icon="add" (click)="raiseEvent('add',0)" aria-label="Add">Add</button>
+    </div>
+
+<!--     <div class="spinner-container" *ngIf="loading | async)">
+      <kendo-loader *ngIf="loaderVisible" size="small"> </kendo-loader>
+    </div>
+ -->
+    <div *ngIf="showHelp">
+      <div class="card">
+        <div class="card-header">
+          <h1>Using the Search Facility</h1>
+        </div>
+        <div class="card-body">
+          <p>You can search for documents and folders using a combination of keywords, tags or an advanced search. Searches include any results in sub-folders, so to search in a particular areas, navigate to the section first and then enter your search criteria.</p>
+          <h3>Keyword searching</h3>
+          <p>Keyword searches target the title and other information entered against documents as well as a scan of the documents themselves.</p>
+          <p>Enter mutiple keywords separated by spaces to find matches containing all of the keywords.</p>
+          <p>Prefix keywords with - to exclude them. e.g. <strong>black -red</strong>
+          <p>Uses brackets, <strong>and</strong> and <strong>or</strong> for more complex searches. e.g. <strong>red and (green or black)</strong>
+          <p>Note that some common words like <strong>and</strong> are ignored by the search.<p>
+  
+          <h3>Searching by tag</h3>
+          <p>Tick the tags in the dropdown that you want to search for. Documents tagged with all of the selected tags are returned.</p>
+  
+          <h3>Searching by field</h3>
+          <p>Click on the <strong>...</strong> button for advanced search options. Here you can enter any number of search criteria by selecting fields from the dropdown, choosing a comparison type and entering a value. e.g. <strong>Title - contains - red</strong>.</p>
+          <p>If you add more than one line the default is to search for entries that match all of the criteria. You can widen the search to find those that match any criteria by selecting <strong>match any of the above</strong>.</p>
+  
+          <h3>Using wildcards</h3>
+          <p>Use the wildcard asterisk character * as a placeholder for content in your search criteria. For example, entering <strong>Sm*</strong> in the Default view will return all results containing matches which begin with <strong>Sm</strong> such as <strong>Smith</strong>.</p>
+          <p>You can also search for fields containing keywords by placing a * before an after the text to search for. e.g. <strong>*anne*</strong> will find <strong>Anne</strong> and <strong>Jannette</strong> and <strong>Mary-Anne</strong>.</p>
+  
+          <h3>Advanced searching</h3>
+          <p>If you require more flexibility than searching for a set of criteria using the any / all options you can enter the criteria lines and them combine them in an expression using brackets, AND, OR and NOT</p><p>
+          </p><p>When you select the <strong>advanced</strong> option each line gets given an index starting at 1. Your expressions then uses these index numbers to make it easier to read.</p>
+          <p>Your advanced expression will then use the index numbers such as <strong>1 or (2 and 3 and 4)</strong>. So this means condition 1 has to be met or each of the conditions 2, 3 and 4. Your lines can be in any order and you can nest brackets and add the <strong>not</strong> keyword.</p>
+  
+          <h3>Sorting</h3>
+          <p>To sort on a column, click on the <strong>...</strong> button and select and reorder the sort columns under the <strong>Sort</strong> tab.</p>
+  
+          <h3>Selecting columns</h3>
+          <p>You can reorder columns in the grid view, add new ones or remove them by clicking on the <strong>Columns</strong> tab after clicking on the <strong>...</strong> button.</p>
+        </div>
+      </div>
+    </div>
+  
+    <div [hidden]="currentSection != gridSearchSection.Advanced">
+      <div class="card">
+        <div class="card-header">
+          <button kendoButton class="close" (click)="closeViewEditor()" icon="close" fillMode="flat" aria-label="Close"></button>
+          <h1 kendoCardTitle>View settings</h1>
+        </div>
+        <div class="card-body">
+          <div *ngIf="folder?.allowViews && allUserViews.length > 0">
+            <kendo-combobox [(ngModel)]="selectedUserViewId" class="viewDropdown" placeholder="Select a saved view..." (valueChange)="userViewSelectionChanged()" [valuePrimitive]="true" [data]="allUserViews" textField="name" valueField="id"></kendo-combobox>
+            <span *ngIf="viewIsPublic && this.userView.id > 0" style="margin-left:20px;margin-bottom:4px;">Public View</span>
+            <span *ngIf="!viewIsPublic && this.userView.id > 0" style="margin-left:20px;margin-bottom:4px;">Private View</span>
+          </div> 
+          <app-view #userViewEditor></app-view>
+        </div>
+        <div class="card-footer">
+          <div class="button-strip">
+            <button kendoButton themeColor="primary" (click)="doAdvancedSearch()" aria-label="Search">Search</button>
+            <button kendoButton (click)="resetUserView()" aria-label="Reset view">Reset</button>
+            <!--
+            <button mat-button (click)="userViewEditor.clear()" aria-label="Clear filter" matTooltip="Clear filter">Clear</button>
+            -->
+            <button kendoButton *ngIf="folder?.allowViews && selectedUserViewId && userOwnsView" (click)="saveUserView()" aria-label="Save">Save</button>
+            <button kendoButton *ngIf="folder?.allowViews" (click)="saveUserViewAs()" aria-label="Save as new view">Save As</button>
+            <button kendoButton *ngIf="userOwnsView" themeColor="warning" (click)="deleteUserView()" aria-label="Delete view">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <kendo-dialog
+      *ngIf="saveAsViewOpened"
+      autoFocusedElement="#saveAsViewName"
+      title="Save view"
+      (close)="saveAsViewClose()"
+      [minWidth]="250"
+      [width]="450"
+    >
+      <div style="margin: 30px; text-align: center;">
+        <p>Enter name for the view</p>
+  
+        <input
+          kendoTextBox
+          id="saveAsViewName"
+          placeholder="View name"
+          [(ngModel)]="newUserViewName"
+          [style.width.px]="200"
+        />
+
+        <div *ngIf="userCanAdmin" style="padding-top: 10px"> 
+          <input 
+          type="checkbox"
+          id="saveAsViewIsPublic"
+          [(ngModel)]="saveAsViewIsPublic" 
+          kendoCheckBox /> 
+          <label class="k-checkbox-label k-label" for="saveAsViewIsPublic">Make Public</label>
+       </div>
+      </div>
+      <kendo-dialog-actions>
+        <button kendoButton (click)="saveAsViewClose()">Cancel</button>
+        <button kendoButton (click)="saveAsViewSave()" themeColor="primary">
+          Save
+        </button>
+      </kendo-dialog-actions>
+    </kendo-dialog>
+  
+    <kendo-dialog
+      *ngIf="deleteViewOpened"
+      title="Delete view"
+      (close)="deleteViewClose()"
+      [minWidth]="250"
+      [width]="450"
+    >
+      <div style="margin: 30px; text-align: center;">
+        <p>Delete this view?</p>
+      </div>
+      <kendo-dialog-actions>
+        <button kendoButton (click)="deleteViewClose()">Cancel</button>
+        <button kendoButton (click)="deleteViewConfirm()" themeColor="warning">
+          Delete
+        </button>
+      </kendo-dialog-actions>
+    </kendo-dialog>
+
+    <div *ngIf="hasSelectedItems()">
+      <!-- selected items display -->
+      <kendo-toolbar class="toolbar-nopadding">
+        <span>{{allSelected ? 'All ' : ''}}{{selectedCount()}} selected</span>
+        <span class="toolbar-fill-remaining-space"></span>
+        <button kendoButton (click)="editSelected()" icon="create" fillMode="flat" aria-label="Edit selected"></button>
+        <button kendoButton (click)="confirmDeleteSelected()" icon="delete" fillMode="flat" aria-label="Delete selected"></button>
+        <button kendoButton (click)="clearSelection()" icon="close" fillMode="flat" aria-label="Clear selection"></button>
+      </kendo-toolbar>
+    </div>
+
+    <div #gridContainer>
+    <div [hidden]="" [hidden]="!(query && !showHelp) || currentSection != gridSearchSection.Basic">
+        <!-- grid mode -->
+        <kendo-grid
+        #gridUser
+        [data]="query | async"
+        (pageChange)="pageChange($event)"
+        [loading]="loading"
+        [pageSize]="100"
+        [rowHeight]="36"
+        scrollable="virtual"
+        [selectable]="selectableSettings()"
+        (cellClick)="gridCellClicked($event)"
+        (columnResize)="gridColumnResized($event)"
+        resizable="true"
+        class="main-grid"
+        >
+        <kendo-grid-messages
+          noRecords="There are no items to display.">
+        </kendo-grid-messages>
+        <ng-template kendoGridToolbarTemplate>
+          <button type="button" kendoGridExcelCommand icon="file-excel">
+          Export to Excel
+          </button>
+        </ng-template>
+        <ng-container>
+          <kendo-grid-column field="_actions" [width]="130" *ngIf="userCanEdit">
+            <ng-template kendoGridHeaderTemplate>
+            </ng-template>
+            <ng-template kendoGridCellTemplate let-dataItem>
+              <ng-container> 
+                <div ngbDropdown container="body" class="d-inline-block">
+                  <button
+                    class="btn btn-primary btn-sm dropdown-toggle"
+                    data-toggle="dropdown"
+                    aria-haspopup="true"
+                    ngbDropdownToggle
+                  >
+                    <i class="fa fa-cog mr-1"></i>Actions
+                  </button>
+  
+                  <div ngbDropdownMenu>
+                    <button
+                      ngbDropdownItem
+                      *ngIf="allowViewMode && (userCanView || userCanEdit)"
+                      (click)="raiseEvent('view', dataItem.id)"
+                    >
+                      View
+                    </button>
+
+                    <button
+                      ngbDropdownItem
+                      *ngIf="userCanEdit"
+                      (click)="raiseEvent('edit', dataItem.id)"
+                    >
+                      Edit
+                    </button>
+  
+                    <button
+                      ngbDropdownItem
+                      *ngIf="userCanDelete"
+                      (click)="raiseEvent('delete', dataItem.id)"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </ng-container>
+            </ng-template>
+          </kendo-grid-column>
+  
+          <kendo-grid-column field="_actions" [width]="75" *ngIf="!userCanEdit">
+            <ng-template kendoGridHeaderTemplate>
+            </ng-template>
+            <ng-template kendoGridCellTemplate let-dataItem>
+              <ng-container> 
+                  <button
+                    class="btn btn-primary btn-sm"
+                    (click)="raiseEvent('view', dataItem.id)"
+                  >
+                    View
+                  </button>
+              </ng-container>
+            </ng-template>
+          </kendo-grid-column>
+
+          <ng-template ngFor [ngForOf]="gridColumnDefinitions" let-column>
+            <kendo-grid-column field="{{column.columnAlias}}" [width]="column.width" [hidden]="column.hidden" [title]="column.title">
+  
+              <ng-template kendoGridHeaderTemplate>
+                <a _ngcontent-c1="" class="k-link" tabindex="-1" (click)="columnHeaderClick(column.columnName)">
+                  {{column.title}}
+                  <span *ngIf="isAscendingSort(column.columnName)" [ngClass]="'k-icon k-i-sort-asc-sm'" aria-label="Sorted ascending"></span>
+                  <span *ngIf="isDescendingSort(column.columnName)" [ngClass]="'k-icon k-i-sort-desc-sm'" aria-label="Sorted descending"></span>
+                </a>
+              </ng-template>
+  
+              <ng-container *ngIf="column.format && !column.templateName && column.dataType == 3">
+                <ng-template kendoGridCellTemplate let-dataItem>
+                    {{dataItem[column.columnAlias] | date: column.format}}
+                </ng-template>
+              </ng-container>
+  
+              <ng-container *ngIf="column.templateName">
+                <ng-template kendoGridCellTemplate let-dataItem>
+                  <app-column-template [dataItem]="dataItem" [columnDefinition]="column" (cellTemplateEvent)="handleCellTemplateEvent($event)"></app-column-template>
+                </ng-template>
+              </ng-container>
+            </kendo-grid-column>
+          </ng-template>
+          <!-- fill any remaining space-->
+          <kendo-grid-column field="_dummy">
+            <ng-template kendoGridHeaderTemplate>
+            </ng-template>
+          </kendo-grid-column>
+  
+  
+  <!--
+          <ng-template kendoGridDetailTemplate let-dataItem>
+            <p>Detail template here</p>
+          </ng-template>
+  
+  -->
+  
+        </ng-container>
+
+        <kendo-grid-excel 
+          [fileName]="fileName"
+          [fetchData]="allData">
+          <ng-template ngFor [ngForOf]="gridColumnDefinitions" let-column>
+            <kendo-excelexport-column [field]="column.columnAlias" [width]="column.width" [hidden]="column.hidden" [title]="column.title">
+              <ng-container *ngIf="column.format && !column.templateName && column.dataType == 3">
+                <ng-template kendoGridCellTemplate let-dataItem>
+                    {{dataItem[column.columnAlias] | date: column.format}}
+                </ng-template>
+              </ng-container>
+            </kendo-excelexport-column>
+          </ng-template>
+
+        </kendo-grid-excel>
+
+      </kendo-grid>
+      <div class="grid-footer-strip"><span>{{countText}}</span></div>
+    </div>
+  </div>
+  
+  <div class="expand-button" *ngIf="!query && !showHelp && currentSection != gridSearchSection.Advanced">
+    <button class="btn btn-primary btn-block" (click)="keywordsChanged()" >Show All Items</button>
+  </div>
+  
+    <!--<mat-table class="documents-table mat-elevation-z8"
+               [dataSource]="dataSource"
+               matSort
+               matSortActive="title"
+               matSortDirection="asc"
+               matSortDisableClear
+               [hidden]="showAdvanced">
+      <ng-container matColumnDef="_select">
+        <mat-header-cell *matHeaderCellDef>
+          <mat-checkbox [checked]="allSelected"
+                        (change)="toggleAllSelected()"
+                        aria-label="Select all"></mat-checkbox>&nbsp;Select
+        </mat-header-cell>
+        <mat-cell class="title-cell" *matCellDef="let document">
+          <mat-checkbox [checked]="allSelected || selectedIds.indexOf(document.id) > -1"
+                        (change)="toggleSelected(document.id)"></mat-checkbox>
+        </mat-cell>
+      </ng-container>
+      <ng-container matColumnDef="_open">
+        <mat-header-cell *matHeaderCellDef>Open</mat-header-cell>
+        <mat-cell class="title-cell" *matCellDef="let document;">
+          <app-download [documentId]="document.id"></app-download>
+        </mat-cell>
+      </ng-container>
+      <ng-container matColumnDef="id">
+        <mat-header-cell *matHeaderCellDef>Id</mat-header-cell>
+        <mat-cell class="title-cell" *matCellDef="let document">
+          {{
+          document.id
+          }}
+        </mat-cell>
+      </ng-container>
+      <ng-container matColumnDef="title">
+        <mat-header-cell *matHeaderCellDef>Title</mat-header-cell>
+        <mat-cell class="title-cell" *matCellDef="let document">
+          {{
+          document.Title
+          }}
+        </mat-cell>
+      </ng-container>
+      <mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+    </mat-table>-->
+  
+  </div>
+  
+  
+  
+  

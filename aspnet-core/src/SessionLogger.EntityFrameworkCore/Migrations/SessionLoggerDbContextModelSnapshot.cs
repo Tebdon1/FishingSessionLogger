@@ -24,7 +24,87 @@ namespace SessionLogger.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("SessionLogger.Sessions.CatchDetail", b =>
+
+            modelBuilder.Entity("SessionLogger.Domain.Folders.UserView", b =>
+
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)")
+                        .HasColumnName("ConcurrencyStamp");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("CreationTime");
+
+                    b.Property<Guid?>("CreatorId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("CreatorId");
+
+                    b.Property<Guid?>("DeleterId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("DeleterId");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("DeletionTime");
+
+                    b.Property<string>("EntityInfoId")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("EntityType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+
+                    b.Property<string>("ExtraProperties")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("ExtraProperties");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false)
+                        .HasColumnName("IsDeleted");
+
+                    b.Property<bool>("IsPublic")
+                        .HasColumnType("bit");
+
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("LastModificationTime");
+
+                    b.Property<Guid?>("LastModifierId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("LastModifierId");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("UserViewJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserViews");
+                });
+
+            modelBuilder.Entity("SessionLogger.Domain.Sessions.CatchDetail", b =>
+
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -75,7 +155,7 @@ namespace SessionLogger.Migrations
                     b.ToTable("AppCatchDetail", (string)null);
                 });
 
-            modelBuilder.Entity("SessionLogger.Sessions.CatchSummary", b =>
+            modelBuilder.Entity("SessionLogger.Domain.Sessions.CatchSummary", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -125,7 +205,7 @@ namespace SessionLogger.Migrations
                     b.ToTable("AppCatchSummary", (string)null);
                 });
 
-            modelBuilder.Entity("SessionLogger.Sessions.CatchWeight", b =>
+            modelBuilder.Entity("SessionLogger.Domain.Sessions.CatchWeight", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -172,7 +252,7 @@ namespace SessionLogger.Migrations
                     b.ToTable("AppCatchWeight", (string)null);
                 });
 
-            modelBuilder.Entity("SessionLogger.Sessions.Session", b =>
+            modelBuilder.Entity("SessionLogger.Domain.Sessions.Session", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -220,6 +300,103 @@ namespace SessionLogger.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("AppSession", (string)null);
+                });
+
+            modelBuilder.Entity("SessionLogger.Tickets.Ticket", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)")
+                        .HasColumnName("ConcurrencyStamp");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("CreationTime");
+
+                    b.Property<Guid?>("CreatorId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("CreatorId");
+
+                    b.Property<string>("ExtraProperties")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("ExtraProperties");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("LastModificationTime");
+
+                    b.Property<Guid?>("LastModifierId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("LastModifierId");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AppTicket", (string)null);
+                });
+
+            modelBuilder.Entity("SessionLogger.Venues.Venue", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)")
+                        .HasColumnName("ConcurrencyStamp");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("CreationTime");
+
+                    b.Property<Guid?>("CreatorId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("CreatorId");
+
+                    b.Property<string>("ExtraProperties")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("ExtraProperties");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("LastModificationTime");
+
+                    b.Property<Guid?>("LastModifierId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("LastModifierId");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("Postcode")
+                        .HasMaxLength(8)
+                        .HasColumnType("nvarchar(8)");
+
+                    b.Property<int>("TicketId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TicketId");
+
+                    b.ToTable("AppVenue", (string)null);
                 });
 
             modelBuilder.Entity("Volo.Abp.AuditLogging.AuditLog", b =>
@@ -1846,9 +2023,9 @@ namespace SessionLogger.Migrations
                     b.ToTable("AbpTenantConnectionStrings", (string)null);
                 });
 
-            modelBuilder.Entity("SessionLogger.Sessions.CatchDetail", b =>
+            modelBuilder.Entity("SessionLogger.Domain.Sessions.CatchDetail", b =>
                 {
-                    b.HasOne("SessionLogger.Sessions.CatchSummary", "CatchSummary")
+                    b.HasOne("SessionLogger.Domain.Sessions.CatchSummary", "CatchSummary")
                         .WithMany("CatchDetails")
                         .HasForeignKey("CatchSummaryId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1857,9 +2034,9 @@ namespace SessionLogger.Migrations
                     b.Navigation("CatchSummary");
                 });
 
-            modelBuilder.Entity("SessionLogger.Sessions.CatchSummary", b =>
+            modelBuilder.Entity("SessionLogger.Domain.Sessions.CatchSummary", b =>
                 {
-                    b.HasOne("SessionLogger.Sessions.Session", "Session")
+                    b.HasOne("SessionLogger.Domain.Sessions.Session", "Session")
                         .WithMany("CatchSummaries")
                         .HasForeignKey("SessionId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1868,15 +2045,26 @@ namespace SessionLogger.Migrations
                     b.Navigation("Session");
                 });
 
-            modelBuilder.Entity("SessionLogger.Sessions.CatchWeight", b =>
+            modelBuilder.Entity("SessionLogger.Domain.Sessions.CatchWeight", b =>
                 {
-                    b.HasOne("SessionLogger.Sessions.CatchDetail", "CatchDetail")
+                    b.HasOne("SessionLogger.Domain.Sessions.CatchDetail", "CatchDetail")
                         .WithMany("CatchWeights")
                         .HasForeignKey("CatchDetailId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("CatchDetail");
+                });
+
+            modelBuilder.Entity("SessionLogger.Venues.Venue", b =>
+                {
+                    b.HasOne("SessionLogger.Tickets.Ticket", "Ticket")
+                        .WithMany()
+                        .HasForeignKey("TicketId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Ticket");
                 });
 
             modelBuilder.Entity("Volo.Abp.AuditLogging.AuditLogAction", b =>
@@ -2021,17 +2209,17 @@ namespace SessionLogger.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("SessionLogger.Sessions.CatchDetail", b =>
+            modelBuilder.Entity("SessionLogger.Domain.Sessions.CatchDetail", b =>
                 {
                     b.Navigation("CatchWeights");
                 });
 
-            modelBuilder.Entity("SessionLogger.Sessions.CatchSummary", b =>
+            modelBuilder.Entity("SessionLogger.Domain.Sessions.CatchSummary", b =>
                 {
                     b.Navigation("CatchDetails");
                 });
 
-            modelBuilder.Entity("SessionLogger.Sessions.Session", b =>
+            modelBuilder.Entity("SessionLogger.Domain.Sessions.Session", b =>
                 {
                     b.Navigation("CatchSummaries");
                 });
