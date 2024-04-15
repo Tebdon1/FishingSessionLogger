@@ -278,6 +278,7 @@ export class SessionComponent implements OnInit {
 
   createExpandedDetails(sessionItem: any) {
     let weightMax = 0;
+    this.gridData = [];
     //Order first. this will help with creating the array of the WeightBaitInfo. Can create a singular array,
     // then wipe it when moving onto a new 
   
@@ -400,7 +401,7 @@ export class SessionComponent implements OnInit {
 
     this.gridData.push({
         species: species,
-        speciesName: speciesName,
+        speciesName: speciesName.toLocaleString(),
         maxWeight: catchInfoToMatch.weight != "0" ? parseFloat(catchInfoToMatch.weight).toFixed(2) : "0",
         quantity: 1,
         weightBaitDetails: {
