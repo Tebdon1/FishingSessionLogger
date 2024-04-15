@@ -257,7 +257,7 @@ export class SessionComponent implements OnInit {
     this.createExpandedDetails(this.sessionItem);
     this.expandedRow = [];
     this.expandedRow.push({
-      sessionDate: this.formatDate(row.sessionDate),
+      sessionDate: row.sessionDate.split("T")[0],
       venue: row.venue,
       duration: row.duration,
       maxWeight: this.maximumCatchWeight(),
@@ -423,28 +423,6 @@ export class SessionComponent implements OnInit {
     return maxWeight
   }
 
-  //This won't format based on a localisation. I don't like that at then moment but I think row.sessionDate not being strongly typed is making localisation harder
-  private formatDate(date: Date) {
-    return (
-      [
-        date.getFullYear(),
-        this.padTo2Digits(date.getMonth() + 1),
-        this.padTo2Digits(date.getDate()),
-      ].join('-') +
-      ' ' +
-      [
-        this.padTo2Digits(date.getHours()),
-        this.padTo2Digits(date.getMinutes()),
-        this.padTo2Digits(date.getSeconds()),
-      ].join(':')
-    );
-  }
-  
-  private padTo2Digits(num: number) {
-    return num.toString().padStart(2, '0');
-  }
-  
-  
   private counter(count) {
     return new Array(count);
   }
