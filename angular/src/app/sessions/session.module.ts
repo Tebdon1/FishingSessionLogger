@@ -3,7 +3,7 @@ import { SessionRoutingModule } from './session-routing.module';
 import { SessionComponent } from './session.component';
 import { SharedModule } from '../shared/shared.module';
 import { NgbDatepickerModule } from '@ng-bootstrap/ng-bootstrap';
-import { CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA } from '@angular/core';
+import { GridModule } from '@progress/kendo-angular-grid';
 
 
 @NgModule({
@@ -14,7 +14,7 @@ import { CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA } from '@angular/core';
     SharedModule,
     SessionRoutingModule,
     NgbDatepickerModule,
-  ],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA]
+    GridModule
+  ]
 })
 export class SessionModule { }
