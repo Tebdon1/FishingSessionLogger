@@ -179,49 +179,22 @@
 
   <div class="card-body">
     <div class="table">
-      <table class="table table table-responsive">
-        <thead>
-          <th>Session Date</th>
-          <th>Venue</th>
-          <th>Duration (hrs)</th>
-          <th>Total Caught</th>
-          <th>Largest</th>
-        </thead>
-        <tbody>
-          <tr>
-            <td>{{expandedRow.sessionDate | date }}</td>
-            <td>{{expandedRow.venue}}</td>
-            <td>{{expandedRow.duration}}</td>
-            <td>{{totalQuantity}}</td>
-            <td>{{weightMax.toFixed(2)}}</td>
-          </tr>
-        </tbody>
-      </table>
+      <kendo-grid [data]="expandedRow">
+        <kendo-grid-column field="sessionDate" title="Session Date"> </kendo-grid-column>
+        <kendo-grid-column field="venue" title="Venue"> </kendo-grid-column>
+        <kendo-grid-column field="duration" title="Duration"> </kendo-grid-column>
+        <kendo-grid-column field="totalQuantity" title="Total Caught"> </kendo-grid-column>
+        <kendo-grid-column field="weightMax" title="Largest (Lbs Oz)"> </kendo-grid-column>
+      </kendo-grid>
 
       <h5>Fish Caught</h5>
 
-      <table class="table table-sm">
-        <thead>
-          <th>Species</th>
-          <th>Quantity</th>
-          <th>Largest</th>
-        </thead>
-        <tbody>
-          <tr *ngFor="let catchSummary of sessionItem.catchSummaries">
-            <td>{{ '::Enum:SpeciesType.' + catchSummary.species | abpLocalization }}</td>
-            <td>{{ catchSummary.quantity }}</td>
-            <td>{{ catchSummary.weightMax.toFixed(2) }}</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <h5>Detailed Breakdown</h5>
-
       <kendo-grid [data]="gridData">
-        <kendo-grid-column field="species" title="Species"> </kendo-grid-column>
+        <kendo-grid-column field="speciesName" title="Species"> </kendo-grid-column>
         <kendo-grid-column field="quantity" title="Quantity"> </kendo-grid-column>
-        <kendo-grid-column field="quantity" title="quantity"> </kendo-grid-column>
-    </kendo-grid>
+        <kendo-grid-column field="maxWeight" title="Largest (Lbs Oz)"> </kendo-grid-column>
+      </kendo-grid>
+    </div>
   </div>
 
   <div class="card-footer">

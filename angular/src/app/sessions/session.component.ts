@@ -1,6 +1,6 @@
 import { ListService, PagedResultDto } from '@abp/ng.core';
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { SessionService, SessionDto, speciesTypeOptions, CatchSummaryService } from '@proxy/sessions';
+import { SessionService, SessionDto, speciesTypeOptions, CatchSummaryService, SpeciesType } from '@proxy/sessions';
 import { ConfirmationService, Confirmation } from '@abp/ng.theme.shared';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { NgbDateNativeAdapter, NgbDateAdapter } from '@ng-bootstrap/ng-bootstrap';
@@ -21,9 +21,7 @@ export class SessionComponent implements OnInit {
   editSessionItem: any;
   catchSummaryItem: any;
   editCatchSummaryItem: any;
-  expandedRow: any;
-  weightMax = 0;
-  totalQuantity = 0;
+  expandedRow: ExpandedRowDetails[] = [];
 
   gridData: CatchExpandedDetails[] = [];
 
@@ -97,8 +95,6 @@ export class SessionComponent implements OnInit {
 
   async editSession(id) {
     this.sessionItem = await lastValueFrom(this.sessionService.get(id));
-
-    console.log('sessionItem', this.sessionItem);
 
     this.editSessionItem = JSON.parse(JSON.stringify(this.sessionItem));
 
@@ -259,9 +255,15 @@ export class SessionComponent implements OnInit {
   async expand(row) {
     this.sessionItem = await lastValueFrom(this.sessionService.get(row.id));
     this.createExpandedDetails(this.sessionItem);
-    this.expandedRow = row;
-    this.totalQuantity = this.calculateSessionTotal(this.sessionItem);
-
+    this.expandedRow = [];
+    this.expandedRow.push({
+      sessionDate: this.formatDate(row.sessionDate),
+      venue: row.venue,
+      duration: row.duration,
+      maxWeight: this.maximumCatchWeight(),
+      totalCaught: this.calculateSessionTotal(this.sessionItem)
+    });
+    console.log(this.expandedRow);
     this.view = 'overview';
   }
 
@@ -301,12 +303,13 @@ export class SessionComponent implements OnInit {
         for (const _ of this.counter(catchSummary.quantity)) {
   
           let newWeightBaitInfo = {
-            weight: 0,
+            weight: "0",
             bait: "N/A"
           }
   
           this.addOrUpdateCatchExpandedDetailsArray(
             catchSummary.species,
+            catchSummary.speciesName,
             newWeightBaitInfo
           );
         }
@@ -314,7 +317,6 @@ export class SessionComponent implements OnInit {
       for (const catchDetail of catchSummary.catchDetails) {
         if (catchDetail.catchWeights?.length > 0) {
           for (const catchWeight of catchDetail.catchWeights) {
-            console.log(catchWeight.weight, catchDetail.bait);
             //Getting this info correctly is more involved than calling { weight: catchWeight.weight, bait: catchDetail.bait } I believe
             let newWeightBaitInfo = {
               weight: catchWeight.weight,
@@ -323,6 +325,7 @@ export class SessionComponent implements OnInit {
   
             this.addOrUpdateCatchExpandedDetailsArray(
               catchSummary.species,
+              catchSummary.speciesName,
               newWeightBaitInfo
             );
   
@@ -331,17 +334,16 @@ export class SessionComponent implements OnInit {
             catchSummary.weightMax = catchWeight.weight > catchSummary.weightMax ? catchWeight.weight : catchSummary.weightMax;
           }
         }
-        //I see there are two different checks here but I don't get why?
         if (catchDetail.catchWeights?.length < catchDetail.quantity && catchDetail.catchWeights.length != 0) {
           for (const noWeight of this.counter(catchDetail.quantity - catchDetail.catchWeights?.length)) {
-            //Getting this info correctly is more involved than calling { bait: catchDetail.bait } I believe
             let newWeightBaitInfo = {
-              weight: 0,
+              weight: "0",
               bait: "string"
             }
   
             this.addOrUpdateCatchExpandedDetailsArray(
               catchSummary.species,
+              catchSummary.speciesName,
               newWeightBaitInfo
             );
           }
@@ -349,25 +351,25 @@ export class SessionComponent implements OnInit {
         if (catchDetail.catchWeights?.length < catchDetail.quantity && catchDetail.catchWeights.length == 0) {
           for (const noWeight of this.counter(catchDetail.quantity - catchDetail. catchWeights?.length)) { 
             let newWeightBaitInfo = {
-              weight: 0,
+              weight: "0",
               bait: catchDetail.bait
             }
   
             this.addOrUpdateCatchExpandedDetailsArray(
               catchSummary.species,
+              catchSummary.speciesName,
               newWeightBaitInfo
             );
           }
         }
       }
     }
-    console.log(this.gridData);
-    console.log(sessionItem.catchSummaries[0].quantity);
   }
   
   private addOrUpdateCatchExpandedDetailsArray(
     species: number,
-    catchInfoToMatch: { weight: number, bait: string },
+    speciesName: string,
+    catchInfoToMatch: { weight: string, bait: string },
    )
   {
     //If a catch entry already exists we simply add an element of { weight: number, bait: string } to the ArrayForTryingToGetThingsIntoMatTable.weightBaitDetails
@@ -378,6 +380,7 @@ export class SessionComponent implements OnInit {
       if (catchDetails.weightBaitDetails && Array.isArray(catchDetails.weightBaitDetails))
       {
         catchDetails.weightBaitDetails.push(catchInfoToMatch);
+        catchDetails.quantity++;
       }
       else 
       {
@@ -385,17 +388,21 @@ export class SessionComponent implements OnInit {
           weight: catchInfoToMatch.weight,
           bait: catchInfoToMatch.bait
         };
+        catchDetails.quantity++;
       }
 
       if (catchDetails.maxWeight < catchInfoToMatch.weight)
-        catchDetails.maxWeight = catchInfoToMatch.weight;
+        catchDetails.maxWeight = parseFloat(catchInfoToMatch.weight).toFixed(2);
    }
    else 
    {
+    speciesName = SpeciesType[species];
+
     this.gridData.push({
         species: species,
-        maxWeight: catchInfoToMatch.weight != 0 ? catchInfoToMatch.weight : 0,
-        quantity: 0,
+        speciesName: speciesName,
+        maxWeight: catchInfoToMatch.weight != "0" ? parseFloat(catchInfoToMatch.weight).toFixed(2) : "0",
+        quantity: 1,
         weightBaitDetails: {
           weight: catchInfoToMatch.weight,
           bait: catchInfoToMatch.bait
@@ -403,6 +410,40 @@ export class SessionComponent implements OnInit {
       });
    }
   }
+
+  private maximumCatchWeight()
+  {
+    let maxWeight: string = "0.00";
+    this.gridData.forEach(element => {
+      if (element.maxWeight > maxWeight)
+        {
+          maxWeight = element.maxWeight;
+        }
+    });
+    return maxWeight
+  }
+
+  //This won't format based on a localisation. I don't like that at then moment but I think row.sessionDate not being strongly typed is making localisation harder
+  private formatDate(date: Date) {
+    return (
+      [
+        date.getFullYear(),
+        this.padTo2Digits(date.getMonth() + 1),
+        this.padTo2Digits(date.getDate()),
+      ].join('-') +
+      ' ' +
+      [
+        this.padTo2Digits(date.getHours()),
+        this.padTo2Digits(date.getMinutes()),
+        this.padTo2Digits(date.getSeconds()),
+      ].join(':')
+    );
+  }
+  
+  private padTo2Digits(num: number) {
+    return num.toString().padStart(2, '0');
+  }
+  
   
   private counter(count) {
     return new Array(count);
@@ -414,6 +455,7 @@ export class SessionComponent implements OnInit {
 * Formatting will be as follows. This is for formatting data to use in the kendo table
 *  var ArrayForTryingToGetThingsTable: CatchExpandedDetailsForTable[] = [
     {
+      species: enum value here
       speciesName: 'Fishy name',
       weightBaitDetails: [
         {
@@ -423,7 +465,9 @@ export class SessionComponent implements OnInit {
       ],
     },
     {
-      speciesName: 'Fishy name 2',weightBaitDetails: [
+      species: enum value here
+      speciesName: 'Fishy name 2',
+      weightBaitDetails: [
         {
           weight: 95000,
           bait: 'A baity bait',
@@ -438,12 +482,22 @@ export class SessionComponent implements OnInit {
 
 export interface CatchExpandedDetails
 {
-  species: number;
-  maxWeight: number;
+  species: number,
+  speciesName: string;
+  maxWeight: string;
   quantity: number;
   weightBaitDetails: 
   {
-    weight: number;
+    weight: string;
     bait: string;
   };
+}
+
+export interface ExpandedRowDetails
+{
+  sessionDate: string,
+  venue: string,
+  duration: number,
+  totalCaught: number,
+  maxWeight: string
 }
