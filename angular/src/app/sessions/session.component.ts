@@ -23,7 +23,7 @@ export class SessionComponent implements OnInit {
   editCatchSummaryItem: any;
   expandedRow: ExpandedRowDetails[] = [];
 
-  gridData: CatchExpandedDetails[] = [];
+  kendoGridData: CatchExpandedDetails[] = [];
 
   session = { items: [], totalCount: 0 } as PagedResultDto<SessionDto>;
   
@@ -32,7 +32,12 @@ export class SessionComponent implements OnInit {
 
   speciesTypes = speciesTypeOptions;
 
-  view = ''; 
+  view = '';
+
+  public expandedDetailKeys: string[] = [];
+  public expandDetailsBy = (dataItem: CatchExpandedDetails): string => {
+    return dataItem.speciesName;
+  };
 
   constructor(
     public readonly list: ListService,
@@ -278,7 +283,7 @@ export class SessionComponent implements OnInit {
 
   createExpandedDetails(sessionItem: any) {
     let weightMax = 0;
-    this.gridData = [];
+    this.kendoGridData = [];
     //Order first. this will help with creating the array of the WeightBaitInfo. Can create a singular array,
     // then wipe it when moving onto a new 
   
@@ -318,10 +323,10 @@ export class SessionComponent implements OnInit {
       for (const catchDetail of catchSummary.catchDetails) {
         if (catchDetail.catchWeights?.length > 0) {
           for (const catchWeight of catchDetail.catchWeights) {
-            //Getting this info correctly is more involved than calling { weight: catchWeight.weight, bait: catchDetail.bait } I believe
+            console.log(catchDetail.bait);
             let newWeightBaitInfo = {
               weight: catchWeight.weight,
-              bait: catchDetail.bait
+              bait: (catchDetail.bait && catchDetail.bait != "") ? catchDetail.bait : "N/A"
             }
   
             this.addOrUpdateCatchExpandedDetailsArray(
@@ -339,7 +344,7 @@ export class SessionComponent implements OnInit {
           for (const noWeight of this.counter(catchDetail.quantity - catchDetail.catchWeights?.length)) {
             let newWeightBaitInfo = {
               weight: "0",
-              bait: "string"
+              bait: "N/A"
             }
   
             this.addOrUpdateCatchExpandedDetailsArray(
@@ -350,10 +355,11 @@ export class SessionComponent implements OnInit {
           }
         }
         if (catchDetail.catchWeights?.length < catchDetail.quantity && catchDetail.catchWeights.length == 0) {
-          for (const noWeight of this.counter(catchDetail.quantity - catchDetail. catchWeights?.length)) { 
+          for (const noWeight of this.counter(catchDetail.quantity - catchDetail. catchWeights?.length)) {
+            console.log(catchDetail.bait);
             let newWeightBaitInfo = {
               weight: "0",
-              bait: catchDetail.bait
+              bait: catchDetail.bait ?? "N/A"
             }
   
             this.addOrUpdateCatchExpandedDetailsArray(
@@ -374,9 +380,9 @@ export class SessionComponent implements OnInit {
    )
   {
     //If a catch entry already exists we simply add an element of { weight: number, bait: string } to the ArrayForTryingToGetThingsIntoMatTable.weightBaitDetails
-    if (this.gridData && this.gridData.findIndex((catchEntry) => catchEntry.species === species) !== -1)
+    if (this.kendoGridData && this.kendoGridData.findIndex((catchEntry) => catchEntry.species === species) !== -1)
     {
-      var catchDetails = this.gridData.find((catchEntry) => catchEntry.species === species);
+      var catchDetails = this.kendoGridData.find((catchEntry) => catchEntry.species === species);
   
       if (catchDetails.weightBaitDetails && Array.isArray(catchDetails.weightBaitDetails))
       {
@@ -385,10 +391,7 @@ export class SessionComponent implements OnInit {
       }
       else 
       {
-        catchDetails.weightBaitDetails = {
-          weight: catchInfoToMatch.weight,
-          bait: catchInfoToMatch.bait
-        };
+        catchDetails.weightBaitDetails.push(catchInfoToMatch);
         catchDetails.quantity++;
       }
 
@@ -399,15 +402,12 @@ export class SessionComponent implements OnInit {
    {
     speciesName = SpeciesType[species];
 
-    this.gridData.push({
+    this.kendoGridData.push({
         species: species,
-        speciesName: speciesName.toLocaleString(),
+        speciesName: SpeciesType[species],
         maxWeight: catchInfoToMatch.weight != "0" ? parseFloat(catchInfoToMatch.weight).toFixed(2) : "0",
         quantity: 1,
-        weightBaitDetails: {
-          weight: catchInfoToMatch.weight,
-          bait: catchInfoToMatch.bait
-        }
+        weightBaitDetails: [catchInfoToMatch]
       });
    }
   }
@@ -415,7 +415,7 @@ export class SessionComponent implements OnInit {
   private maximumCatchWeight()
   {
     let maxWeight: string = "0.00";
-    this.gridData.forEach(element => {
+    this.kendoGridData.forEach(element => {
       if (element.maxWeight > maxWeight)
         {
           maxWeight = element.maxWeight;
@@ -426,13 +426,12 @@ export class SessionComponent implements OnInit {
 
   private counter(count) {
     return new Array(count);
-  }
-  
+  }  
 }
 
 /*
 * Formatting will be as follows. This is for formatting data to use in the kendo table
-*  var ArrayForTryingToGetThingsTable: CatchExpandedDetailsForTable[] = [
+*  var TableArray: CatchExpandedDetails[] = [
     {
       species: enum value here
       speciesName: 'Fishy name',
@@ -462,14 +461,16 @@ export class SessionComponent implements OnInit {
 export interface CatchExpandedDetails
 {
   species: number,
-  speciesName: string;
+  speciesName: string,
   maxWeight: string;
   quantity: number;
-  weightBaitDetails: 
-  {
-    weight: string;
-    bait: string;
-  };
+  weightBaitDetails: WeightBaitDetails[];
+}
+
+export interface WeightBaitDetails
+{
+  weight: string;
+  bait: string;
 }
 
 export interface ExpandedRowDetails
