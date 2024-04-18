@@ -22,7 +22,6 @@ public enum SpeciesType
     Perch,
     Pike,
     Roach,
-    RoachBreamHybrid,
     Rudd,
     Ruffe,
     SeaBass,
@@ -32,5 +31,6 @@ public enum SpeciesType
     TroutRainbow,
     TroutSea,
     Wrasse,
-    Zander
+    Zander,
+    RoachBreamHybrid,
 }
