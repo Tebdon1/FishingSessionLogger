@@ -1,11 +1,13 @@
 import { ListService, PagedResultDto } from '@abp/ng.core';
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { SessionService, SessionDto, speciesTypeOptions, CatchSummaryService, SpeciesType } from '@proxy/sessions';
+import { Component, OnInit } from '@angular/core';
+import { CatchSummaryService, SessionService, SessionDto, speciesTypeOptions, SpeciesType } from '@proxy/sessions';
+import { ElementRef } from '@angular/core';
 import { ConfirmationService, Confirmation } from '@abp/ng.theme.shared';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { NgbDateNativeAdapter, NgbDateAdapter } from '@ng-bootstrap/ng-bootstrap';
 import * as _ from 'lodash'; 
 import { lastValueFrom } from 'rxjs';
+import { CatchDetails } from './session-models';
 
 @Component({
   selector: 'app-session',
@@ -44,7 +46,8 @@ export class SessionComponent implements OnInit {
     private sessionService: SessionService,
     private catchSummaryService: CatchSummaryService,
     private confirmation: ConfirmationService,
-    private fb: FormBuilder) {
+    private fb: FormBuilder,
+    private elementRef: ElementRef<HTMLElement>) {
       this.list.maxResultCount = 25
     }
 
@@ -151,6 +154,21 @@ export class SessionComponent implements OnInit {
     this.view = 'sessionForm';
   }
 
+  validateCatchTotals() {
+    var catchDetailQuantities: number = 0;
+    this.editCatchSummaryItem.catchDetails.forEach(element => {
+      catchDetailQuantities += element.quantity;
+    });
+    if(catchDetailQuantities != this.catchSummaryForm.value.quantity) {
+      this.udpateBaitCatchDetailElements(true);
+      return;
+    }
+    else if (catchDetailQuantities == this.catchSummaryForm.value.quantity) {
+      this.udpateBaitCatchDetailElements(false);
+      return;
+    }
+  }
+
   saveCatchSummary() {
     if (this.catchSummaryForm.invalid) {
       return;
@@ -160,8 +178,21 @@ export class SessionComponent implements OnInit {
     
     formValue.catchDetails = [];
 
+    var catchDetailQuantities: number = 0;
+
+    if (this.editCatchSummaryItem.catchDetails.length > 0) {
+      this.editCatchSummaryItem.catchDetails.forEach(element => {
+        catchDetailQuantities += element.quantity;
+      });
+
+      if(catchDetailQuantities != formValue.quantity) {
+        this.udpateBaitCatchDetailElements(true);
+        return;
+      }
+    }
+    
     for (const item of this.editCatchSummaryItem.catchDetails) {
-      let newDetail = {
+      let newDetail: CatchDetails = {
         bait: item.bait,
         quantity: item.quantity,
         catchWeights: []
@@ -189,7 +220,28 @@ export class SessionComponent implements OnInit {
     }
 
     this.view = 'sessionForm';
+  }
 
+  //I'm not thrilled about doing this like this. There is probably a clever angular method I don't know about?
+  // Maybe making the inputs a form but that seems to break the dynamic adding of rows
+  // Man I'm bad at angular now
+  udpateBaitCatchDetailElements(error: boolean) {
+    if(error) {
+      for(let i = 0; i < this.editCatchSummaryItem.catchDetails.length; i++){
+        document.getElementById(`baitQuantity-${i}`)
+          .setAttribute('class', 'form-control is-invalid ng-dirty ng-invalid ng-touched');
+      }
+      document.getElementById('bait-details-error-message').setAttribute('style', '');
+      return;
+    }
+    else if (!error){
+      for(let i = 0; i < this.editCatchSummaryItem.catchDetails.length; i++){
+        document.getElementById(`baitQuantity-${i}`)
+          .setAttribute('class', 'form-control');
+      }
+      document.getElementById('bait-details-error-message').setAttribute('style', 'display: none;');
+      return;
+    }
   }
 
   editCatchSummary(catchSummary) {
