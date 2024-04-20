@@ -47,34 +47,21 @@ export class SessionComponent implements OnInit {
       this.list.maxResultCount = 25
     }
   
-    deleteSession(id: number) {
-      this.confirmation.warn('::AreYouSureToDelete', '::AreYouSure').subscribe((status) => {
-        if (status === Confirmation.Status.confirm) {
-          this.sessionService.delete(id).subscribe(() => this.list.get());
-        }
-      });
-    }
-
-    deleteCatchSummary(catchSummary) {
-      this.confirmation.warn('::AreYouSureToDelete', '::AreYouSure').subscribe((status) => {
-        if (status === Confirmation.Status.confirm) {
-          this.catchSummaryService.delete(catchSummary).subscribe(() => this.list.get());
-        }
-      });
-    }
-
-    deleteCatchDetail(i) {
-      console.log(i)
-      if (i > -1){
-        this.catchSummaryItem.catchDetails = this.catchSummaryItem.catchDetails.splice(i, 1)
+  deleteSession(id: number) {
+    this.confirmation.warn('::AreYouSureToDelete', '::AreYouSure').subscribe((status) => {
+      if (status === Confirmation.Status.confirm) {
+        this.sessionService.delete(id).subscribe(() => this.list.get());
       }
-      console.log(this.catchSummaryItem.catchDetails)
-      //this.confirmation.warn('::AreYouSureToDelete', '::AreYouSure').subscribe((status) => {
-        //if (status === Confirmation.Status.confirm) {
-          //this.catchDetailService.delete(id).subscribe(() => this.list.get());
-        //}
-      //});
-    }
+    });
+  }
+
+  deleteCatchSummary(catchSummary) {
+    this.confirmation.warn('::AreYouSureToDelete', '::AreYouSure').subscribe((status) => {
+      if (status === Confirmation.Status.confirm) {
+        this.catchSummaryService.delete(catchSummary).subscribe(() => this.list.get());
+      }
+    });
+  }
 
   ngOnInit() {
     const sessionStreamCreator = (query) => this.sessionService.getList(query);
@@ -250,8 +237,23 @@ export class SessionComponent implements OnInit {
         quantity: 1,
         weightString: '',
     });
+    
+    console.log(this.editCatchSummaryItem.catchDetails);
   }
 
+  deleteCatchDetail(i: number) {
+    console.log(i)
+    if (i > -1){
+      this.editCatchSummaryItem.catchDetails.splice(i, 1);
+    }
+    //this.confirmation.warn('::AreYouSureToDelete', '::AreYouSure').subscribe((status) => {
+      //if (status === Confirmation.Status.confirm) {
+        //this.catchDetailService.delete(id).subscribe(() => this.list.get());
+      //}
+    //});
+  }
+
+  //TODO is this used? can't find a reference in the HTML
   deleteDetailRow(row) {
     this.editCatchSummaryItem.catchDetails.remove(row); // may need to amend  
   }
