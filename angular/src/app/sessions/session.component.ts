@@ -397,7 +397,7 @@ export class SessionComponent implements OnInit {
           for (const noWeight of this.counter(catchDetail.quantity - catchDetail.catchWeights?.length)) {
             let newWeightBaitInfo = {
               weight: "0",
-              bait: "N/A"
+              bait: (catchDetail.bait && catchDetail.bait != "") ? catchDetail.bait : "N/A"
             }
   
             this.addOrUpdateCatchExpandedDetailsArray(
@@ -409,10 +409,9 @@ export class SessionComponent implements OnInit {
         }
         if (catchDetail.catchWeights?.length < catchDetail.quantity && catchDetail.catchWeights.length == 0) {
           for (const noWeight of this.counter(catchDetail.quantity - catchDetail. catchWeights?.length)) {
-            console.log(catchDetail.bait);
             let newWeightBaitInfo = {
               weight: "0",
-              bait: catchDetail.bait ?? "N/A"
+              bait: (catchDetail.bait && catchDetail.bait != "") ? catchDetail.bait : "N/A"
             }
   
             this.addOrUpdateCatchExpandedDetailsArray(
