@@ -15,7 +15,5 @@ namespace SessionLogger.Baits
         {
             _baitRepository = baitRepository;
         }
-
-
     }
 }
