@@ -139,22 +139,37 @@
 
     <button type="button" class="btn btn-secondary add-detail btn-sm" (click)="addCatchDetail()">Add Detail</button>
 
-    <div class="table-responsive">
+    <div class="table-responsive" *ngIf="editCatchSummaryItem.catchDetails.length > 0">
       <table class="catchDetailsTable">
         <thead>
-          <th>Bait</th>
-          <th>Quantity</th>
-          <th>Weights</th>
+          <th><div class="bait-details-input">Bait</div></th>
+          <th><div class="bait-details-input">Number of Fish</div></th>
+          <th><div class="bait-details-input">Weights</div></th>
         </thead>
         <tbody>
           <tr *ngFor="let item of editCatchSummaryItem.catchDetails; let i = index">
-            <td><input type="text" [(ngModel)]="item.bait" /></td>
-            <td><input type="number" [(ngModel)]="item.quantity" /></td>
-            <td><input type="text" [(ngModel)]="item.weightString" /></td>
+            <td>
+              <div class="bait-details-input">
+                <input type="text" class="form-control" [(ngModel)]="item.bait" />
+              </div>
+            </td>
+            <td>
+              <div class="bait-details-input">
+                <input (input)="validateCatchTotals()" type="number" class="form-control" id="baitQuantity-{{i}}" [(ngModel)]="item.quantity" />
+              </div>
+            </td>
+            <td>
+              <div class="bait-details-input">
+                <input type="text" class="form-control" [(ngModel)]="item.weightString" />
+              </div>
+            </td>
             <td><button type="button" class="btn mat-icon-button" (click)="deleteCatchDetail(i)"><i class="fa fa-trash me-1"></i></button></td>
           </tr>
         </tbody>
       </table>
+      <div id="bait-details-error-message" style="display: none;">
+        <p style="color: rgb(173, 31, 31);">Number of Fish doesn't match the Quantity</p>
+      </div>
     </div>
   </div>
   
