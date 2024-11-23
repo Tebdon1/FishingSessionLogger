@@ -192,32 +192,31 @@
     </div>
   </div>
 
-  <div class="card-body">
-    <div class="table">
-      <kendo-grid [data]="expandedRow">
+  <div class="card-body" style="margin-bottom: 25px;">
+      <kendo-grid scrollable="none" [data]="expandedRow">
         <kendo-grid-column field="sessionDate" title="Session Date"> </kendo-grid-column>
         <kendo-grid-column field="venue" title=Venue> </kendo-grid-column>
         <kendo-grid-column field="duration" title="Duration"> </kendo-grid-column>
         <kendo-grid-column field="totalCaught" title="Total Caught"> </kendo-grid-column>
         <kendo-grid-column field="maxWeight" title="Largest (Lbs Oz)"> </kendo-grid-column>
       </kendo-grid>
-
-      <h5>Fish Caught</h5>
-<!-- TODO we need to adjust the species names so they appear with the correcet localizations. Only tried a couple of things so far that didn't work.
+    <!-- TODO we need to adjust the species names so they appear with the correcet localizations. Only tried a couple of things so far that didn't work.
    Just needs a little trial and error I think-->
-      <kendo-grid [kendoGridBinding]="kendoGridData" [kendoGridExpandDetailsBy]="expandDetailsBy" [sortable]="true" [(expandedDetailKeys)]="expandedDetailKeys">
-        <kendo-grid-column field="speciesName" title="Species"> </kendo-grid-column>
-        <kendo-grid-column field="quantity" title="Quantity"> </kendo-grid-column>
-        <kendo-grid-column field="maxWeight" title="Largest (Lbs Oz)"> </kendo-grid-column>
-        <ng-template kendoGridDetailTemplate let-kendoGridData>
-          <section *ngIf="kendoGridData.weightBaitDetails">
-            <kendo-grid [kendoGridBinding]="kendoGridData.weightBaitDetails" [sortable]="true">
-              <kendo-grid-column field="bait" title="Bait Used"> </kendo-grid-column>
-              <kendo-grid-column field="weight" title="Fish Weight"> </kendo-grid-column>
-            </kendo-grid>
-          </section>
-      </ng-template>
-      </kendo-grid>
+    <div style="margin-top: 5px;">   
+      <h5>Fish Caught</h5>
+      <kendo-grid scrollable="none" [kendoGridBinding]="kendoGridData" [kendoGridExpandDetailsBy]="expandDetailsBy" [sortable]="true" [(expandedDetailKeys)]="expandedDetailKeys">
+          <kendo-grid-column field="speciesName" title="Species"> </kendo-grid-column>
+          <kendo-grid-column field="quantity" title="Quantity"> </kendo-grid-column>
+          <kendo-grid-column field="maxWeight" title="Largest (Lbs Oz)"> </kendo-grid-column>
+          <ng-template kendoGridDetailTemplate let-kendoGridData>
+            <section *ngIf="kendoGridData.weightBaitDetails">
+              <kendo-grid [kendoGridBinding]="kendoGridData.weightBaitDetails" [sortable]="true" [style.maxHeight.px]="400">
+                <kendo-grid-column field="bait" title="Bait Used"> </kendo-grid-column>
+                <kendo-grid-column field="weight" title="Fish Weight"> </kendo-grid-column>
+              </kendo-grid>
+            </section>
+          </ng-template>
+        </kendo-grid>
     </div>
   </div>
 
@@ -225,5 +224,7 @@
     <button type="button" class="btn btn-secondary button-pad expanded-details-button" (click)="closeSessionForm()">
       {{ '::Close' | abpLocalization }}
     </button>
+  </div>
+
 </div>
 
