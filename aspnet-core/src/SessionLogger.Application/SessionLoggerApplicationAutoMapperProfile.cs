@@ -30,6 +30,7 @@ public class SessionLoggerApplicationAutoMapperProfile : Profile
         CreateMap<UserView, UserViewVM>();
 
         CreateMap<Session, SessionDto>();
+            ;
         CreateMap<CreateUpdateSessionDto, Session>();
 
         CreateMap<CatchSummary, CatchSummaryDto>();

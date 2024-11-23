@@ -16,8 +16,6 @@ import { AppComponent } from './app.component';
 import { APP_ROUTE_PROVIDER } from './route.provider';
 import { FeatureManagementModule } from '@abp/ng.feature-management';
 import { AbpOAuthModule } from '@abp/ng.oauth';
-import { ReactiveFormsModule } from '@angular/forms';
-import { DynamicSearchModule } from './dynamic-search/dynamic-search.module';
 import { ToastrModule } from 'ngx-toastr';
 
 @NgModule({
@@ -38,10 +36,7 @@ import { ToastrModule } from 'ngx-toastr';
     ThemeLeptonXModule.forRoot(),
     SideMenuLayoutModule.forRoot(),
     FeatureManagementModule.forRoot(),
-    ReactiveFormsModule,
-    DynamicSearchModule,    
-    ToastrModule.forRoot(),
-
+    ToastrModule.forRoot()
   ],
   declarations: [AppComponent],
   providers: [APP_ROUTE_PROVIDER],

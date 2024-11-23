@@ -17,7 +17,7 @@ public class CatchSummary : AuditedAggregateRoot<int>
     {
         CatchDetails = new HashSet<CatchDetail>();
     }
-    public virtual ICollection<CatchDetail> CatchDetails { get; set; }
+    public virtual ICollection<CatchDetail>? CatchDetails { get; set; }
 
     public SpeciesType Species { get; set; }
 
@@ -27,5 +27,5 @@ public class CatchSummary : AuditedAggregateRoot<int>
 
     [ForeignKey("SessionId")]
 
-    public virtual Session Session { get; set; }
+    public virtual Session? Session { get; set; }
 }

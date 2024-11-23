@@ -1,12 +1,12 @@
 import { ListService, PagedResultDto } from '@abp/ng.core';
-import { Component, ElementRef, OnInit } from '@angular/core';
-import { SessionService, SessionDto, speciesTypeOptions, CreateUpdateSessionDto } from '@proxy/sessions';
-import { CatchSummaryService, CatchSummaryDto, CreateUpdateCatchSummaryDto } from '@proxy/sessions';
-import { CatchDetailService, CatchDetailDto, CreateUpdateCatchDetailDto } from '@proxy/sessions';
+import { Component, OnInit } from '@angular/core';
+import { CatchSummaryService, SessionService, SessionDto, speciesTypeOptions, SpeciesType } from '@proxy/sessions';
+import { ElementRef } from '@angular/core';
 import { ConfirmationService, Confirmation } from '@abp/ng.theme.shared';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { NgbDateNativeAdapter, NgbDateAdapter } from '@ng-bootstrap/ng-bootstrap';
 import * as _ from 'lodash'; 
+import { lastValueFrom } from 'rxjs';
 import { CatchDetails } from './session-models';
 
 @Component({
@@ -19,15 +19,13 @@ import { CatchDetails } from './session-models';
   ],
 })
 export class SessionComponent implements OnInit {
-  
   sessionItem: any;
   editSessionItem: any;
   catchSummaryItem: any;
   editCatchSummaryItem: any;
-  expandedRow: any;
-  expandedDetails = [];
-  weightMax = 0;
-  totalQuantity = 0;
+  expandedRow: ExpandedRowDetails[] = [];
+
+  kendoGridData: CatchExpandedDetails[] = [];
 
   session = { items: [], totalCount: 0 } as PagedResultDto<SessionDto>;
   
@@ -36,19 +34,30 @@ export class SessionComponent implements OnInit {
 
   speciesTypes = speciesTypeOptions;
 
-  view = ''; 
+  view = '';
+
+  public expandedDetailKeys: string[] = [];
+  public expandDetailsBy = (dataItem: CatchExpandedDetails): string => {
+    return dataItem.speciesName;
+  };
 
   constructor(
     public readonly list: ListService,
     private sessionService: SessionService,
     private catchSummaryService: CatchSummaryService,
-    private catchDetailService: CatchDetailService,
     private confirmation: ConfirmationService,
     private fb: FormBuilder,
     private elementRef: ElementRef<HTMLElement>) {
       this.list.maxResultCount = 25
     }
-  
+
+  ngOnInit() {
+    const sessionStreamCreator = (query) => this.sessionService.getList(query);
+    this.list.hookToQuery(sessionStreamCreator).subscribe((response) => {
+      this.session = response;
+    })
+  }
+
   deleteSession(id: number) {
     this.confirmation.warn('::AreYouSureToDelete', '::AreYouSure').subscribe((status) => {
       if (status === Confirmation.Status.confirm) {
@@ -64,14 +73,6 @@ export class SessionComponent implements OnInit {
       }
     });
   }
-
-  ngOnInit() {
-    const sessionStreamCreator = (query) => this.sessionService.getList(query);
-    this.list.hookToQuery(sessionStreamCreator).subscribe((response) => {
-      this.session = response;
-    })
-  }
-
   // session level
 
   createSession() {
@@ -87,9 +88,7 @@ export class SessionComponent implements OnInit {
   }
 
   async editSession(id) {
-    this.sessionItem = await this.sessionService.get(id).toPromise();
-
-    console.log('sessionItem', this.sessionItem);
+    this.sessionItem = await lastValueFrom(this.sessionService.get(id));
 
     this.editSessionItem = JSON.parse(JSON.stringify(this.sessionItem));
 
@@ -117,10 +116,10 @@ export class SessionComponent implements OnInit {
     formValue.catchSummaries = this.editSessionItem.catchSummaries;
 
     if (this.sessionItem) {
-      await this.sessionService.update(this.sessionItem.id, formValue).toPromise();
+      await lastValueFrom(this.sessionService.update(this.sessionItem.id, formValue));
     }
     else {
-      await this.sessionService.create(formValue).toPromise();
+      await lastValueFrom(this.sessionService.create(formValue));
     }
 
     this.view = '';
@@ -256,13 +255,13 @@ export class SessionComponent implements OnInit {
 
     this.editCatchSummaryItem = JSON.parse(JSON.stringify(catchSummary));
 
-    //if (this.editCatchSummaryItem.catchDetails.length == 0) {
-      //this.editCatchSummaryItem.catchDetails.push({
-        //bait: '',
-        //quantity: 1,
-        //catchWeights: []
-      //});
-    //} do we need this? 
+    if (this.editCatchSummaryItem.catchDetails.length == 0) {
+      this.editCatchSummaryItem.catchDetails.push({
+        bait: '',
+        quantity: 1,
+        catchWeights: []
+      });
+    }
 
     for (const item of this.editCatchSummaryItem.catchDetails) {
       if (item.catchWeights) {
@@ -312,64 +311,37 @@ export class SessionComponent implements OnInit {
   // Overview level
 
   async expand(row) {
-    this.expandedRow = row;
-    this.sessionItem = await this.sessionService.get(row.id).toPromise();
-    this.createExpandedDetail();
-    this.totalQuantity = this.calculateSessionTotal(this.sessionItem);
-
-    // Table sorting
-    this.sessionItem.catchSummaries.sort((a,b) => a.species - b.species);
-    for (const entry of this.sessionItem.catchSummaries) {
-      entry.catchDetails.sort((a,b) => (a.bait > b.bait) ? 1 : ((b.bait > a.bait) ? -1 : 0));
-      for (const detail of entry.catchDetails) {
-        detail.catchWeights.sort((a,b) => b.weight - a.weight); // b - a for reverse sort
-        //if ((a,b) => b.weight - a.weight == 0) {
-          //detail.catchWeights.sort((a,b) => (a.bait > b.bait) ? 1 : ((b.bait > a.bait) ? -1 : 0));
-        //}
-      } 
-    }
+    this.sessionItem = await lastValueFrom(this.sessionService.get(row.id));
+    this.createExpandedDetails(this.sessionItem);
+    this.expandedRow = [];
+    this.expandedRow.push({
+      sessionDate: row.sessionDate.split("T")[0],
+      venue: row.venue,
+      duration: row.duration,
+      maxWeight: this.maximumCatchWeight(),
+      totalCaught: this.calculateSessionTotal(this.sessionItem)
+    });
+    console.log(this.expandedRow);
     this.view = 'overview';
   }
-  
-  counter(count) {
-    return new Array(count);
+
+  calculateSessionTotal(session: { catchSummaries: any; }) {
+    let totalQuantity = 0;
+    for (const catchSummary of session.catchSummaries) {
+      totalQuantity += catchSummary.quantity;
+    }
+    return totalQuantity;
+    
   }
 
-  createExpandedDetail() {
-    this.expandedDetails = [];
-    this.weightMax = 0;
-    for (const catchSummary of this.sessionItem.catchSummaries) {
-      catchSummary.weightMax = 0;
-      if (catchSummary.catchDetails.length == 0 && catchSummary.quantity > 0){
-        for (const noWeight of this.counter(catchSummary.quantity)) {
-          this.expandedDetails.push({ speciesName: catchSummary.species,
-          weightValue: 0, bait: 'N/A' });
-        }
-      }
-      for (const catchDetail of catchSummary.catchDetails) {
-        if (catchDetail.catchWeights?.length > 0) {
-          for (const catchWeight of catchDetail.catchWeights) {
-            this.expandedDetails.push({ speciesName: catchSummary.species,
-            weightValue: catchWeight.weight, bait: catchDetail.bait });
-            this.weightMax = catchWeight.weight > this.weightMax ? catchWeight.weight : this.weightMax;
-            catchSummary.weightMax = catchWeight.weight > catchSummary.weightMax ? catchWeight.weight : catchSummary.weightMax;
-          }
-        }
-        if (catchDetail.catchWeights?.length < catchDetail.quantity && catchDetail.catchWeights.length != 0) {
-          for (const noWeight of this.counter(catchDetail.quantity - catchDetail.catchWeights?.length)) {
-            this.expandedDetails.push({ speciesName: catchSummary.species,
-            weightValue: 0, bait: catchDetail.bait });
-          }
-        }
-        if (catchDetail.catchWeights?.length < catchDetail.quantity && catchDetail.catchWeights.length == 0) {
-          for (const noWeight of this.counter(catchDetail.quantity - catchDetail. catchWeights?.length)) {
-            this.expandedDetails.push({ speciesName: catchSummary.species,
-            weightValue: 0, bait: catchDetail.bait })
-          }
-        }
-      }
-    }
-    this.expandedDetails = this.expandedDetails.sort((a,b) =>
+  createExpandedDetails(sessionItem: any) {
+    let weightMax = 0;
+    this.kendoGridData = [];
+    //Order first. this will help with creating the array of the WeightBaitInfo. Can create a singular array,
+    // then wipe it when moving onto a new 
+  
+    //Sort ascending
+    sessionItem.catchSummaries.sort((a, b) => 
       (a.speciesName > b.speciesName) ? 1 : (
         (a.speciesName < b.speciesName) ? -1 : (
           (b.weightValue > a.weightValue) ? 1 : (
@@ -381,15 +353,183 @@ export class SessionComponent implements OnInit {
           )
         )
       )
-    )
+    );
+  
+    for (const catchSummary of sessionItem.catchSummaries) {
+  
+      catchSummary.weightMax = 0;
+      if (catchSummary.catchDetails.length == 0 && catchSummary.quantity > 0) {
+        for (const _ of this.counter(catchSummary.quantity)) {
+  
+          let newWeightBaitInfo = {
+            weight: "0",
+            bait: "N/A"
+          }
+  
+          this.addOrUpdateCatchExpandedDetailsArray(
+            catchSummary.species,
+            catchSummary.speciesName,
+            newWeightBaitInfo
+          );
+        }
+      }
+      for (const catchDetail of catchSummary.catchDetails) {
+        if (catchDetail.catchWeights?.length > 0) {
+          for (const catchWeight of catchDetail.catchWeights) {
+            console.log(catchDetail.bait);
+            let newWeightBaitInfo = {
+              weight: catchWeight.weight,
+              bait: (catchDetail.bait && catchDetail.bait != "") ? catchDetail.bait : "N/A"
+            }
+  
+            this.addOrUpdateCatchExpandedDetailsArray(
+              catchSummary.species,
+              catchSummary.speciesName,
+              newWeightBaitInfo
+            );
+  
+            weightMax = catchWeight.weight > weightMax ? catchWeight.weight : weightMax;
+  
+            catchSummary.weightMax = catchWeight.weight > catchSummary.weightMax ? catchWeight.weight : catchSummary.weightMax;
+          }
+        }
+        if (catchDetail.catchWeights?.length < catchDetail.quantity && catchDetail.catchWeights.length != 0) {
+          for (const noWeight of this.counter(catchDetail.quantity - catchDetail.catchWeights?.length)) {
+            let newWeightBaitInfo = {
+              weight: "0",
+              bait: (catchDetail.bait && catchDetail.bait != "") ? catchDetail.bait : "N/A"
+            }
+  
+            this.addOrUpdateCatchExpandedDetailsArray(
+              catchSummary.species,
+              catchSummary.speciesName,
+              newWeightBaitInfo
+            );
+          }
+        }
+        if (catchDetail.catchWeights?.length < catchDetail.quantity && catchDetail.catchWeights.length == 0) {
+          for (const noWeight of this.counter(catchDetail.quantity - catchDetail. catchWeights?.length)) {
+            let newWeightBaitInfo = {
+              weight: "0",
+              bait: (catchDetail.bait && catchDetail.bait != "") ? catchDetail.bait : "N/A"
+            }
+  
+            this.addOrUpdateCatchExpandedDetailsArray(
+              catchSummary.species,
+              catchSummary.speciesName,
+              newWeightBaitInfo
+            );
+          }
+        }
+      }
+    }
+  }
+  
+  private addOrUpdateCatchExpandedDetailsArray(
+    species: number,
+    speciesName: string,
+    catchInfoToMatch: { weight: string, bait: string },
+   )
+  {
+    //If a catch entry already exists we simply add an element of { weight: number, bait: string } to the ArrayForTryingToGetThingsIntoMatTable.weightBaitDetails
+    if (this.kendoGridData && this.kendoGridData.findIndex((catchEntry) => catchEntry.species === species) !== -1)
+    {
+      var catchDetails = this.kendoGridData.find((catchEntry) => catchEntry.species === species);
+  
+      if (catchDetails.weightBaitDetails && Array.isArray(catchDetails.weightBaitDetails))
+      {
+        catchDetails.weightBaitDetails.push(catchInfoToMatch);
+        catchDetails.quantity++;
+      }
+      else 
+      {
+        catchDetails.weightBaitDetails.push(catchInfoToMatch);
+        catchDetails.quantity++;
+      }
+
+      if (catchDetails.maxWeight < catchInfoToMatch.weight)
+        catchDetails.maxWeight = parseFloat(catchInfoToMatch.weight).toFixed(2);
+   }
+   else 
+   {
+    speciesName = SpeciesType[species];
+
+    this.kendoGridData.push({
+        species: species,
+        speciesName: SpeciesType[species],
+        maxWeight: catchInfoToMatch.weight != "0" ? parseFloat(catchInfoToMatch.weight).toFixed(2) : "0",
+        quantity: 1,
+        weightBaitDetails: [catchInfoToMatch]
+      });
+   }
   }
 
-  calculateSessionTotal(session) {
-    let totalQuantity = 0;
-    for (const catchSummary of session.catchSummaries) {
-      totalQuantity += catchSummary.quantity;
-    }
-    return totalQuantity
-    
+  private maximumCatchWeight()
+  {
+    let maxWeight: string = "0.00";
+    this.kendoGridData.forEach(element => {
+      if (element.maxWeight > maxWeight)
+        {
+          maxWeight = element.maxWeight;
+        }
+    });
+    return maxWeight
   }
+
+  private counter(count) {
+    return new Array(count);
+  }  
+}
+
+/*
+* Formatting will be as follows. This is for formatting data to use in the kendo table
+*  var TableArray: CatchExpandedDetails[] = [
+    {
+      species: enum value here
+      speciesName: 'Fishy name',
+      weightBaitDetails: [
+        {
+          weight: 458,
+          bait: 'An extra baity bait',
+        },
+      ],
+    },
+    {
+      species: enum value here
+      speciesName: 'Fishy name 2',
+      weightBaitDetails: [
+        {
+          weight: 95000,
+          bait: 'A baity bait',
+        },
+        {
+          weight: 95000,
+          bait: '',
+        },
+      ],
+    },
+*/
+
+export interface CatchExpandedDetails
+{
+  species: number,
+  speciesName: string,
+  maxWeight: string;
+  quantity: number;
+  weightBaitDetails: WeightBaitDetails[];
+}
+
+export interface WeightBaitDetails
+{
+  weight: string;
+  bait: string;
+}
+
+export interface ExpandedRowDetails
+{
+  sessionDate: string,
+  venue: string,
+  duration: number,
+  totalCaught: number,
+  maxWeight: string
 }
