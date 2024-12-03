@@ -201,7 +201,7 @@
         <kendo-grid-column field="maxWeight" title="Largest (Lbs Oz)"> </kendo-grid-column>
       </kendo-grid>
     <!-- TODO we need to adjust the species names so they appear with the correcet localizations. Only tried a couple of things so far that didn't work.
-   Just needs a little trial and error I think-->
+   Just needs a little trial and error I think. Might be best to do it in the typescript if possible-->
     <div style="margin-top: 5px;">
       <h5>Fish Caught</h5>
       <kendo-grid scrollable="none" [kendoGridBinding]="kendoGridData" [kendoGridExpandDetailsBy]="expandDetailsBy" [sortable]="true" [(expandedDetailKeys)]="expandedDetailKeys">
