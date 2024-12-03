@@ -133,6 +133,7 @@ body .h1, body .h2, body .h3, body .h4, body .h5, body .h6, body h1, body h2, bo
 .btn.btn-login {
     --bs-btn-padding-x: 1rem !important;
     --bs-btn-padding-y: 0.25rem !important;
+    transition: .6s;
 }
 
 .btn.btn-login:hover {
