@@ -107,12 +107,10 @@ body .h1, body .h2, body .h3, body .h4, body .h5, body .h6, body h1, body h2, bo
     gap: 0.5rem;
 }
 .grid-item {
-    background-color: rgba(255, 255, 255, 0.8);
-    border: 1px solid rgba(0, 0, 0, 0.8);
     font-size: 30px;
     text-align: center;
     align-content: center;
-    border-radius: 10px;
+    border-radius: 8px;
     height: 10rem;
     overflow: hidden;
     position: relative;
