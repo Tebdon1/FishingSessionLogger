@@ -79,26 +79,6 @@ body .h1, body .h2, body .h3, body .h4, body .h5, body .h6, body h1, body h2, bo
     background: #282d37;
 }
 //Homepage
-//topbar
-.home-topbar-items {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-} 
-.home-title-grid {
-    grid-template-columns: auto auto;
-}
-.thumbnail-image {
-    width: 25px;
-    height: 25px;
-}
-//navigation
-.homepage-navigation {
-    height: 30px;
-    width: 100%;
-    background-color: #1db309;
-}
 //grid
 .grid-container {
     display: grid;
