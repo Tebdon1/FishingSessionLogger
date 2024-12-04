@@ -1,4 +1,6 @@
-<div *ngIf="view == ''" class="card mg-2">
+<!--TODO This needs to be a generic component than can be shown on every page, adding it in every piece of html is mental
+but I haven't figured out making it a component to import in yet-->
+<div *ngIf="view == ''" class="card mg-3">
   <div class="card-header">
     <div class="row">
       <div class="col col-md-6">
@@ -56,14 +58,14 @@
   </div>
 </div>
 
-<div *ngIf="view == 'sessionForm'" class="card">
+<div *ngIf="view == 'sessionForm'" class="card mg-3">
   <div class="card-header">
     <h3>Session</h3>
   </div>
 
   <div class="card-body">
     <form *ngIf="sessionForm" [formGroup]="sessionForm" (ngSubmit)="save()">
-      <div class="mt-2">
+      <div>
         <label>Session date</label><span> * </span>
         <input #datepicker="ngbDatepicker" class="form-control" name="datepicker"
           formControlName="sessionDate" ngbDatepicker (click)="datepicker.toggle()" />
@@ -79,7 +81,7 @@
       </div>
     </form>
 
-    <h3>Catches</h3>
+    <h3 class="pd-t-4">Catches</h3>
 
     <button type="button" class="btn btn-primary btn-sm margin-bottom" (click)="addCatchSummary()">
       Add Species
@@ -88,10 +90,10 @@
     <table class="table table-sm">
       <thead>
         <tr>
-          <th style="width:300px">Species</th>
-          <th style="width:100px">Quantity</th>
-          <th>Details</th>
-          <th style="width:100px"></th>
+          <th class="catch-species-table-headers">Species</th>
+          <th class="catch-species-table-headers">Quantity</th>
+          <th class="catch-species-table-headers">Details</th>
+          <th>Delete</th>
         </tr>
       </thead>
       <tbody>
@@ -117,7 +119,7 @@
   </div>
 </div>
 
-<div *ngIf="view == 'catchSummaryForm'" class="card">
+<div *ngIf="view == 'catchSummaryForm'" class="card mg-3">
   <div class="card-header">
     <h3>Catch Summary</h3>
   </div>
@@ -185,7 +187,7 @@
   </div>
 </div>
 
-<div *ngIf="view == 'overview'" class="card">
+<div *ngIf="view == 'overview'" class="card mg-3">
   <div class="card-header">
     <div class="row">
       <h5 class="card-title">Overview</h5>
@@ -220,7 +222,7 @@
     </div>
   </div>
 
-  <div class="card-footer">
+  <div class="card-footer mg-3">
     <button type="button" class="btn btn-secondary button-pad expanded-details-button" (click)="closeSessionForm()">
       {{ '::Close' | abpLocalization }}
     </button>
