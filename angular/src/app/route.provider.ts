@@ -18,7 +18,7 @@ function configureRoutes(routesService: RoutesService) {
       {
         path: '/session-logger',
         name: '::Menu:SessionLogger',
-        iconClass: 'fas fa-session',
+        iconClass: 'fas fa-fish',
         order: 2,
         layout: eLayoutType.application,
       },
