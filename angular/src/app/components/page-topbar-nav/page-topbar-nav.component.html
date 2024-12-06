@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <div class="home-topbar-items">
   <div class="home-title-grid">
     <h4 class="mg-t-3 mg-b-3 mg-l-2">
@@ -11,6 +12,11 @@
   </div>
 </div>
 
-<div class="homepage-navigation mg-b-2">
-
+<div class="homepage-navigation mg-b-2" style="display: flex; justify-content: center;">
+  <div style="width: 85%; height: inherit;">
+    <button class="nav-button" [routerLink]="['']">Home</button>
+    <!--TODO create a dropdown on hover and have Sessions and baits(baits only show when logged in)-->
+    <button class="nav-button" [routerLink]="['/sessions']">Session</button>
+    <button class="nav-button" [routerLink]="['/baits']">Baits</button>
+  </div>
 </div>

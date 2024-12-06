@@ -95,31 +95,8 @@ body .h1, body .h2, body .h3, body .h4, body .h5, body .h6, body h1, body h2, bo
     overflow: hidden;
     position: relative;
 }
-.homepage-grid-image-style {
-    height: 100%;
-    width: 100%;
-    transition: transform .4s;
-}
-.homepage-grid-image-style:hover {
-    transform: scale(115%);
-}
-.grid-item-text {
-    position: absolute;
-    top: 6px;
-    left: 6px;
-    color: white;
-}
-//login button styling
-.btn.btn-login {
-    --bs-btn-padding-x: 1rem !important;
-    --bs-btn-padding-y: 0.25rem !important;
-    transition: .6s;
-}
 
-.btn.btn-login:hover {
-    background-color:  #1db309;
-}
-
+//Buttons
 .btn.btn-primary {
     background-color: #1db309;
     border-color: #1db309;
