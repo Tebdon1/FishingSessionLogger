@@ -4,6 +4,7 @@ import { SessionComponent } from './session.component';
 import { SharedModule } from '../shared/shared.module';
 import { NgbDatepickerModule } from '@ng-bootstrap/ng-bootstrap';
 import { GridModule } from '@progress/kendo-angular-grid';
+import { PageTopbarNavComponent } from '../components/page-topbar-nav/page-topbar-nav.component';
 
 
 @NgModule({
@@ -14,7 +15,8 @@ import { GridModule } from '@progress/kendo-angular-grid';
     SharedModule,
     SessionRoutingModule,
     NgbDatepickerModule,
-    GridModule
+    GridModule,
+    PageTopbarNavComponent
   ]
 })
 export class SessionModule { }
