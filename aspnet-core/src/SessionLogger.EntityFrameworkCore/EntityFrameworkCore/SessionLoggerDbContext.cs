@@ -1,10 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
 using SessionLogger.Domain.Baits;
+using SessionLogger.Domain.Catches;
 using SessionLogger.Domain.Folders;
 using SessionLogger.Domain.Sessions;
 using SessionLogger.Domain.Tickets;
 using SessionLogger.Domain.Venues;
+using SessionLogger.Domain.SpeciesTypes;
 
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
@@ -33,12 +35,11 @@ public class SessionLoggerDbContext :
 {
     /* Add DbSet properties for your Aggregate Roots / Entities here. */
     public DbSet<Session> Sessions { get; set; }
-    public DbSet<CatchSummary> CatchSummaries { get; set; }
-    public DbSet<CatchDetail> CatchDetails { get; set; }
-    public DbSet<CatchWeight> CatchWeights { get; set; }
+    public DbSet<Catch> Catches { get; set; }
     public DbSet<Venue> Venues { get; set; }
     public DbSet<Ticket> Tickets { get; set; }
     public DbSet<Bait> Baits { get; set; }
+    public DbSet<Species> Species { get; set; }
 
     #region Entities from the modules
 
@@ -106,22 +107,21 @@ public class SessionLoggerDbContext :
             b.Property(x => x.Venue).IsRequired().HasMaxLength(128);
         });
 
-        builder.Entity<CatchSummary>(b =>
+        builder.Entity<Catch>(b =>
         {
-            b.ToTable(SessionLoggerConsts.DbTablePrefix + "CatchSummary", SessionLoggerConsts.DbSchema);
+            b.ToTable(SessionLoggerConsts.DbTablePrefix + "Catch", SessionLoggerConsts.DbSchema);
             b.ConfigureByConvention(); //auto configure for the base class props
-        });
-
-        builder.Entity<CatchDetail>(b =>
-        {
-            b.ToTable(SessionLoggerConsts.DbTablePrefix + "CatchDetail", SessionLoggerConsts.DbSchema);
-            b.ConfigureByConvention(); //auto configure for the base class props
-        });
-
-        builder.Entity<CatchWeight>(b =>
-        {
-            b.ToTable(SessionLoggerConsts.DbTablePrefix + "CatchWeight", SessionLoggerConsts.DbSchema);
-            b.ConfigureByConvention(); //auto configure for the base class props
+            b.Property(x => x.SessionId).IsRequired();
+            b.Property(x => x.Venue).IsRequired().HasMaxLength(128);
+            b.Property(x => x.Species).IsRequired().HasMaxLength(100);
+            b.Property(x => x.Weight).IsRequired();
+            b.Property(x => x.Bait).IsRequired().HasMaxLength(100);
+            
+            // Configure foreign key relationship
+            b.HasOne(x => x.Session)
+                .WithMany(x => x.Catches)
+                .HasForeignKey(x => x.SessionId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         builder.Entity<Bait>(b =>
@@ -142,6 +142,14 @@ public class SessionLoggerDbContext :
         {
             b.ToTable(SessionLoggerConsts.DbTablePrefix + "Ticket", SessionLoggerConsts.DbSchema);
             b.Property(x => x.Name).IsRequired();
+            b.ConfigureByConvention(); //auto configure for the base class props
+        });
+
+        builder.Entity<Species>(b =>
+        {
+            b.ToTable(SessionLoggerConsts.DbTablePrefix + "Species", SessionLoggerConsts.DbSchema);
+            b.Property(x => x.Name).IsRequired();
+            b.Property(x => x.IsSaltwater).IsRequired().HasDefaultValue(false); ;
             b.ConfigureByConvention(); //auto configure for the base class props
         });
     }

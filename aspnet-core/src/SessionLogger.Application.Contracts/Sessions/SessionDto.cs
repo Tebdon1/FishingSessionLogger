@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SessionLogger.Catches;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Volo.Abp.Application.Dtos;
@@ -13,6 +14,5 @@ public class SessionDto : AuditedEntityDto<int>
 
     public float Duration { get; set; }
 
-    public virtual ICollection<CatchSummaryDto> CatchSummaries { get; set; }
-
+    public virtual ICollection<CatchDto> Catches { get; set; }
 }

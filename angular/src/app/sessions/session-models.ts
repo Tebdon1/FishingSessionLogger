@@ -1,9 +1,8 @@
-export interface CatchDetails {
-    bait: string,
-    quantity: number,
-    catchWeights: CatchWeights[]
-}
-
-interface CatchWeights {
-    weight: number
+export interface Catch {
+    id: number;
+    species: number;
+    weight: number;
+    bait: string;
+    quantity: number;
+    sessionId: number;
 }

@@ -1,50 +1,34 @@
 import type { AuditedEntityDto } from '@abp/ng.core';
 import type { SpeciesType } from '../../home/enums/species-type.enum';
 
-export interface CatchDetailDto extends AuditedEntityDto<number> {
+export interface CatchDto extends AuditedEntityDto<number> {
+  species: SpeciesType;
+  weight: number;
   bait?: string;
   quantity: number;
-  catchWeights: CatchWeightDto[];
+  sessionId: number;
 }
 
-export interface CatchSummaryDto extends AuditedEntityDto<number> {
+export interface CreateUpdateCatchDto {
   species: SpeciesType;
-  quantity: number;
-  catchDetails: CatchDetailDto[];
-}
-
-export interface CatchWeightDto extends AuditedEntityDto<number> {
   weight: number;
-}
-
-export interface CreateUpdateCatchDetailDto {
   bait?: string;
   quantity: number;
-  catchWeights: CreateUpdateCatchWeightDto[];
-}
-
-export interface CreateUpdateCatchSummaryDto {
-  quantity: number;
-  species: SpeciesType;
-  catchDetails: CreateUpdateCatchDetailDto[];
-}
-
-export interface CreateUpdateCatchWeightDto {
-  weight: number;
+  sessionId: number;
 }
 
 export interface CreateUpdateSessionDto {
   sessionDate: string;
   venue: string;
   duration: number;
-  catchSummaries: CreateUpdateCatchSummaryDto[];
+  catches: CreateUpdateCatchDto[];
 }
 
 export interface SessionDto extends AuditedEntityDto<number> {
   sessionDate?: string;
   venue?: string;
   duration: number;
-  catchSummaries: CatchSummaryDto[];
+  catches: CatchDto[];
 }
 
 export interface BaitDto extends AuditedEntityDto<number> {

@@ -16,6 +16,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.EntityFrameworkCore;
 using SessionLogger.Domain.Sessions;
 using SessionLogger.Search;
+using SessionLogger.Domain.Catches;
 
 namespace SessionLogger.EntityFrameworkCore;
 
@@ -49,23 +50,13 @@ public class SessionLoggerEntityFrameworkCoreModule : AbpModule
             options.Entity<Session>(options =>
             {
                 options.DefaultWithDetailsFunc = query => query
-                .Include(o => o.CatchSummaries)
-                .ThenInclude(o => o.CatchDetails)
-                .ThenInclude(o => o.CatchWeights)
-                ;
+                .Include(o => o.Catches);
             });
 
-            options.Entity<CatchSummary>(options =>
+            options.Entity<Catch>(options =>
             {
                 options.DefaultWithDetailsFunc = query => query
-                .Include(o => o.CatchDetails)
-                .ThenInclude(o => o.CatchWeights);
-            });
-
-            options.Entity<CatchDetail>(options =>
-            {
-                options.DefaultWithDetailsFunc = query => query
-                .Include(o => o.CatchWeights);
+                .Include(o => o.Session);
             });
         });
 

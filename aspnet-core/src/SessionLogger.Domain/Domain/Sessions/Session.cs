@@ -1,4 +1,6 @@
-﻿using SessionLogger.Search;
+﻿using Microsoft.Extensions.FileSystemGlobbing;
+using SessionLogger.Domain.Catches;
+using SessionLogger.Search;
 using System;
 using System.Collections.Generic;
 using Volo.Abp.Domain.Entities.Auditing;
@@ -9,12 +11,11 @@ public class Session : AuditedAggregateRoot<int>, IItem
 {
     public Session(int id) : base(id)
     {
-
     }
 
     public Session()
     {
-        CatchSummaries = new HashSet<CatchSummary>();
+        Catches = new HashSet<Catch>();
     }
 
     public DateTime SessionDate { get; set; }
@@ -23,6 +24,6 @@ public class Session : AuditedAggregateRoot<int>, IItem
 
     public float Duration { get; set; }
 
-    public virtual ICollection<CatchSummary> CatchSummaries { get; set; }
+    public virtual ICollection<Catch> Catches { get; set; }
 
 }

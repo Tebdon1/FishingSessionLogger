@@ -33,4 +33,5 @@ public enum SpeciesType
     Wrasse,
     Zander,
     RoachBreamHybrid,
+    SeaBream,
 }

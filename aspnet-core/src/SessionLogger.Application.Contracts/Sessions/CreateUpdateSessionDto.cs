@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SessionLogger.Catches;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
@@ -18,5 +19,5 @@ public class CreateUpdateSessionDto
     [Required]
     public float Duration { get; set; }
 
-    public virtual ICollection<CreateUpdateCatchSummaryDto> CatchSummaries { get; set; }
+    public virtual ICollection<CreateUpdateCatchDto> Catches { get; set; }
 }

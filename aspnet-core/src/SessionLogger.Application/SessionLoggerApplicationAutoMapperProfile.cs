@@ -13,6 +13,8 @@ using SessionLogger.Sessions;
 using SessionLogger.Baits;
 using SessionLogger.Tickets;
 using SessionLogger.Venues;
+using SessionLogger.Domain.Catches;
+using SessionLogger.Catches;
 
 namespace SessionLogger;
 
@@ -30,17 +32,10 @@ public class SessionLoggerApplicationAutoMapperProfile : Profile
         CreateMap<UserView, UserViewVM>();
 
         CreateMap<Session, SessionDto>();
-            ;
         CreateMap<CreateUpdateSessionDto, Session>();
 
-        CreateMap<CatchSummary, CatchSummaryDto>();
-        CreateMap<CreateUpdateCatchSummaryDto, CatchSummary>();
-
-        CreateMap<CatchDetail, CatchDetailDto>();
-        CreateMap<CreateUpdateCatchDetailDto, CatchDetail>();
-
-        CreateMap<CatchWeight, CatchWeightDto>();
-        CreateMap<CreateUpdateCatchWeightDto, CatchWeight>();
+        CreateMap<Catch, CatchDto>();
+        CreateMap<CreateUpdateCatchDto, Catch>();
 
         CreateMap<Bait, BaitDto>();
         CreateMap<BaitUpdateDto, Bait>();
