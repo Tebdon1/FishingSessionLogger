@@ -1,4 +1,7 @@
+using SessionLogger.Domain.Baits;
+using SessionLogger.Domain.Files;
 using SessionLogger.Domain.Sessions;
+using SessionLogger.Domain.SpeciesTypes;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -23,17 +26,19 @@ public class Catch : AuditedAggregateRoot<int>
     public virtual Session Session { get; set; }
 
     [Required]
-    [StringLength(128)]
-    public string Venue { get; set; }
+    public int SpeciesId { get; set; }
 
-    [Required]
-    [StringLength(100)]
-    public string Species { get; set; }
+    [ForeignKey(nameof(SpeciesId))]
+    public virtual Species Species { get; set; }
 
-    [Required]
-    public float Weight { get; set; }
+    public int? BaitId { get; set; }
 
-    [Required]
-    [StringLength(100)]
-    public string Bait { get; set; }
+    [ForeignKey(nameof(BaitId))]
+    public virtual Bait? Bait { get; set; }
+
+    // Not every fish gets weighed, e.g. bulk-logged catches
+    public float? Weight { get; set; }
+
+    // One optional photo per catch, owned by the catch (see File.CatchId)
+    public virtual File? Photo { get; set; }
 }

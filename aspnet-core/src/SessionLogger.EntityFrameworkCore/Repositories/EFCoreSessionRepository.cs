@@ -70,8 +70,9 @@ namespace SessionLogger.Respositories
                 };
 
                 entityInfo.SearchFieldNames.Clear();
-                entityInfo.SearchFieldNames.Add("SessionDate");
-                entityInfo.SearchFieldNames.Add("Venue");
+                entityInfo.SearchFieldNames.Add("StartDateTime");
+                entityInfo.SearchFieldNames.Add("EndDateTime");
+                entityInfo.SearchFieldNames.Add("Venue.Name");
                 entityInfo.SearchFieldNames.Add("Duration");
 
 
@@ -79,7 +80,7 @@ namespace SessionLogger.Respositories
                 entityInfo.SortColumns.Clear();
                 entityInfo.SortColumns.Add(new SortField
                 {
-                    FieldName = "SessionDate"
+                    FieldName = "StartDateTime"
                 });
 
                 entityInfo.ColumnDefinitions = new List<ColumnInfo>
@@ -91,19 +92,30 @@ namespace SessionLogger.Respositories
                         Fixed = true,
                     },
                     new ColumnInfo{
-                        Title = "Session Date",
-                        ColumnName="SessionDate",
-                        ColumnAlias = "sessionDate",
+                        Title = "Start DateTime",
+                        ColumnName="StartDateTime",
+                        ColumnAlias = "startDateTime",
                         Sortable = true,
-                        Width = 100,
+                        Width = 150,
                         Selected = true,
                         DataType = ColumnDataType.Date,
-                        Format = "dd/MMM/yyyy",
-                        Description = "Session Date"
+                        Format = "dd/MMM/yyyy HH:mm",
+                        Description = "Session Start Date and Time"
+                    },
+                    new ColumnInfo{
+                        Title = "End DateTime",
+                        ColumnName="EndDateTime",
+                        ColumnAlias = "endDateTime",
+                        Sortable = true,
+                        Width = 150,
+                        Selected = true,
+                        DataType = ColumnDataType.Date,
+                        Format = "dd/MMM/yyyy HH:mm",
+                        Description = "Session End Date and Time"
                     },
                     new ColumnInfo{
                         Title = "Venue",
-                        ColumnName="Venue",
+                        ColumnName="Venue.Name",
                         ColumnAlias = "venue",
                         Sortable = true,
                         Width = 200,

@@ -9,17 +9,13 @@ public class CreateUpdateCatchDto
     public int SessionId { get; set; }
 
     [Required]
-    [StringLength(128)]
-    public string Venue { get; set; }
+    public int SpeciesId { get; set; }
 
-    [Required]
-    [StringLength(100)]
-    public string Species { get; set; }
+    public int? BaitId { get; set; }
 
-    [Required]
-    public float Weight { get; set; }
+    public float? Weight { get; set; }
 
-    [Required]
-    [StringLength(100)]
-    public string Bait { get; set; }
+    // Set to attach/replace the catch's photo; left null to leave it unchanged.
+    public byte[]? PhotoData { get; set; }
+    public string? PhotoFileName { get; set; }
 }

@@ -12,5 +12,7 @@ public class VenueDto : AuditedEntityDto<int>
 
     public string Postcode { get; set; }
 
-    public int TicketId { get; set; }
+    public int? TicketId { get; set; }
+
+    public string TicketName { get; set; }
 }

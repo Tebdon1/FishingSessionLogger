@@ -30,10 +30,10 @@ public class Venue : AuditedAggregateRoot<int>, IItem
     [MaxLength(8)]
     public string? Postcode { get; set; }
 
-    public int TicketId { get; set; }
+    public int? TicketId { get; set; }
 
     [ForeignKey("TicketId")]
-    public virtual Ticket Ticket { get; set; }
+    public virtual Ticket? Ticket { get; set; }
 
 
 }

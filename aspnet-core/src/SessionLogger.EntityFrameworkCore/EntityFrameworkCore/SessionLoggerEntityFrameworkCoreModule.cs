@@ -17,6 +17,9 @@ using Microsoft.EntityFrameworkCore;
 using SessionLogger.Domain.Sessions;
 using SessionLogger.Search;
 using SessionLogger.Domain.Catches;
+using SessionLogger.Domain.SpeciesTypes;
+using SessionLogger.Domain.Venues;
+using SessionLogger.Repositories;
 
 namespace SessionLogger.EntityFrameworkCore;
 
@@ -50,13 +53,25 @@ public class SessionLoggerEntityFrameworkCoreModule : AbpModule
             options.Entity<Session>(options =>
             {
                 options.DefaultWithDetailsFunc = query => query
-                .Include(o => o.Catches);
+                .Include(o => o.Venue)
+                .Include(o => o.Catches).ThenInclude(c => c.Species)
+                .Include(o => o.Catches).ThenInclude(c => c.Bait)
+                .Include(o => o.Catches).ThenInclude(c => c.Photo);
             });
 
             options.Entity<Catch>(options =>
             {
                 options.DefaultWithDetailsFunc = query => query
-                .Include(o => o.Session);
+                .Include(o => o.Session)
+                .Include(o => o.Species)
+                .Include(o => o.Bait)
+                .Include(o => o.Photo);
+            });
+
+            options.Entity<Venue>(options =>
+            {
+                options.DefaultWithDetailsFunc = query => query
+                .Include(o => o.Ticket);
             });
         });
 
@@ -69,5 +84,8 @@ public class SessionLoggerEntityFrameworkCoreModule : AbpModule
 
         // add noise service for use by search
         context.Services.AddSingleton<INoiseService, NoiseService>();
+        
+        // Register custom repositories
+        context.Services.AddTransient<ISpeciesRepository, EfCoreSpeciesRepository>();
     }
 }

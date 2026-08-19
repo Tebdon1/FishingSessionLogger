@@ -8,4 +8,5 @@ namespace SessionLogger.SpeciesTypes;
 public class SpeciesDto : AuditedEntityDto<int>
 {
     public string Name { get; set; }
+    public bool IsSaltwater { get; set; }
 }

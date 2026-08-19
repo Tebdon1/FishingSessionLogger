@@ -7,7 +7,7 @@ import { TenantManagementConfigModule } from '@abp/ng.tenant-management/config';
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'page-topbar-nav',
+  selector: 'app-page-topbar-nav',
   templateUrl: './page-topbar-nav.component.html',
   styleUrls: ['./page-topbar-nav.component.scss'],
   imports: [

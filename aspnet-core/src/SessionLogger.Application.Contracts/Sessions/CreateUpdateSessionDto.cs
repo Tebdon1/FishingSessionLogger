@@ -9,15 +9,20 @@ namespace SessionLogger.Sessions;
 public class CreateUpdateSessionDto
 {
     [Required]
-    [DataType(DataType.Date)]
-    public DateTime SessionDate { get; set; } = DateTime.Now;
+    [DataType(DataType.DateTime)]
+    public DateTime StartDateTime { get; set; } = DateTime.Now;
+    
+    [Required]
+    [DataType(DataType.DateTime)]
+    public DateTime EndDateTime { get; set; } = DateTime.Now;
 
     [Required]
-    [StringLength(128)]
-    public string Venue { get; set; }
+    public int VenueId { get; set; }
 
-    [Required]
-    public float Duration { get; set; }
+    [StringLength(2000)]
+    public string? Notes { get; set; }
+
+    // Duration is automatically calculated from StartDateTime and EndDateTime
 
     public virtual ICollection<CreateUpdateCatchDto> Catches { get; set; }
 }
