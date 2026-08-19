@@ -3,7 +3,16 @@
   <Import Project="..\..\common.props" />
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <!-- net7.0 is needed alongside netstandard2.0: ABP's request validation reads the
+         compiler-emitted nullable-reference-type metadata (NullableAttribute /
+         NullableContextAttribute) to infer which DTO properties are required. For
+         netstandard2.0 builds the compiler embeds a private copy of those attribute
+         types per-assembly (they aren't part of netstandard2.0's BCL), which ABP's
+         validator can't reliably see across the assembly boundary - every nullable
+         string/array/object DTO property then gets misread as required. net7.0.Host
+         picks up the net7.0 build via project reference TFM matching; the
+         netstandard2.0 build remains for HttpApi.Client/ConsoleApp. -->
+    <TargetFrameworks>netstandard2.0;net7.0</TargetFrameworks>
     <Nullable>enable</Nullable>
     <RootNamespace>SessionLogger</RootNamespace>
   </PropertyGroup>

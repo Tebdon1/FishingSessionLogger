@@ -1,9 +1,9 @@
 import { NgModule } from '@angular/core';
+import { ReactiveFormsModule } from '@angular/forms';
 import { BaitRoutingModule } from './bait-routing.module';
 import { BaitComponent } from './bait.component';
 import { SharedModule } from '../shared/shared.module';
-import { NgbDatepickerModule } from '@ng-bootstrap/ng-bootstrap';
-
+import { PageTopbarNavComponent } from '../components/page-topbar-nav/page-topbar-nav.component';
 
 @NgModule({
   declarations: [
@@ -12,7 +12,8 @@ import { NgbDatepickerModule } from '@ng-bootstrap/ng-bootstrap';
   imports: [
     SharedModule,
     BaitRoutingModule,
-    NgbDatepickerModule,
+    ReactiveFormsModule,
+    PageTopbarNavComponent
   ]
 })
 export class BaitModule { }

@@ -14,6 +14,6 @@ public class VenueUpdateDto
     [MaxLength(8)]
     public string Postcode { get; set; }
 
-    public int TicketId { get; set; }
+    public int? TicketId { get; set; }
 
 }

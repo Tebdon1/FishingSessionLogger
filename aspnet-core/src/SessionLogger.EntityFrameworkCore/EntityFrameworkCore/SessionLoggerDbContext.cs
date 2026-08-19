@@ -1,10 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
 using SessionLogger.Domain.Baits;
+using SessionLogger.Domain.Catches;
+using SessionLogger.Domain.Files;
 using SessionLogger.Domain.Folders;
 using SessionLogger.Domain.Sessions;
 using SessionLogger.Domain.Tickets;
 using SessionLogger.Domain.Venues;
+using SessionLogger.Domain.SpeciesTypes;
 
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
@@ -33,12 +36,12 @@ public class SessionLoggerDbContext :
 {
     /* Add DbSet properties for your Aggregate Roots / Entities here. */
     public DbSet<Session> Sessions { get; set; }
-    public DbSet<CatchSummary> CatchSummaries { get; set; }
-    public DbSet<CatchDetail> CatchDetails { get; set; }
-    public DbSet<CatchWeight> CatchWeights { get; set; }
+    public DbSet<Catch> Catches { get; set; }
     public DbSet<Venue> Venues { get; set; }
     public DbSet<Ticket> Tickets { get; set; }
     public DbSet<Bait> Baits { get; set; }
+    public DbSet<Species> Species { get; set; }
+    public DbSet<File> Files { get; set; }
 
     #region Entities from the modules
 
@@ -102,33 +105,67 @@ public class SessionLoggerDbContext :
         {
             b.ToTable(SessionLoggerConsts.DbTablePrefix + "Session", SessionLoggerConsts.DbSchema);
             b.ConfigureByConvention(); //auto configure for the base class props
-            b.Property(x => x.SessionDate).IsRequired();
-            b.Property(x => x.Venue).IsRequired().HasMaxLength(128);
+            b.Property(x => x.StartDateTime).IsRequired();
+            b.Property(x => x.EndDateTime).IsRequired();
+            b.Property(x => x.VenueId).IsRequired();
+            b.Property(x => x.Notes).HasMaxLength(2000);
+
+            // A venue with existing sessions logged against it can't be deleted
+            b.HasOne(x => x.Venue)
+                .WithMany()
+                .HasForeignKey(x => x.VenueId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
-        builder.Entity<CatchSummary>(b =>
+        builder.Entity<Catch>(b =>
         {
-            b.ToTable(SessionLoggerConsts.DbTablePrefix + "CatchSummary", SessionLoggerConsts.DbSchema);
+            b.ToTable(SessionLoggerConsts.DbTablePrefix + "Catch", SessionLoggerConsts.DbSchema);
             b.ConfigureByConvention(); //auto configure for the base class props
+            b.Property(x => x.SessionId).IsRequired();
+            b.Property(x => x.SpeciesId).IsRequired();
+
+            // Deleting a session deletes its catches
+            b.HasOne(x => x.Session)
+                .WithMany(x => x.Catches)
+                .HasForeignKey(x => x.SessionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // A species/bait with existing catches logged against it can't be deleted
+            b.HasOne(x => x.Species)
+                .WithMany()
+                .HasForeignKey(x => x.SpeciesId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            b.HasOne(x => x.Bait)
+                .WithMany()
+                .HasForeignKey(x => x.BaitId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
-        builder.Entity<CatchDetail>(b =>
+        builder.Entity<File>(b =>
         {
-            b.ToTable(SessionLoggerConsts.DbTablePrefix + "CatchDetail", SessionLoggerConsts.DbSchema);
+            b.ToTable(SessionLoggerConsts.DbTablePrefix + "File", SessionLoggerConsts.DbSchema);
             b.ConfigureByConvention(); //auto configure for the base class props
-        });
+            b.Property(x => x.CatchId).IsRequired();
+            b.Property(x => x.FileName).HasMaxLength(255);
+            b.Property(x => x.Extension).HasMaxLength(10);
 
-        builder.Entity<CatchWeight>(b =>
-        {
-            b.ToTable(SessionLoggerConsts.DbTablePrefix + "CatchWeight", SessionLoggerConsts.DbSchema);
-            b.ConfigureByConvention(); //auto configure for the base class props
+            // One photo per catch; deleting a catch deletes its photo
+            b.HasOne(x => x.Catch)
+                .WithOne(x => x.Photo)
+                .HasForeignKey<File>(x => x.CatchId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            b.HasIndex(x => x.CatchId).IsUnique();
         });
 
         builder.Entity<Bait>(b =>
         {
             b.ToTable(SessionLoggerConsts.DbTablePrefix + "Bait", SessionLoggerConsts.DbSchema);
-            b.Property(x => x.Name).IsRequired();
+            b.Property(x => x.Name).IsRequired().HasMaxLength(100);
             b.ConfigureByConvention(); //auto configure for the base class props
+
+            b.HasIndex(x => x.Name).IsUnique();
         });
 
         builder.Entity<Venue>(b =>
@@ -136,6 +173,12 @@ public class SessionLoggerDbContext :
             b.ToTable(SessionLoggerConsts.DbTablePrefix + "Venue", SessionLoggerConsts.DbSchema);
             b.Property(x => x.Name).IsRequired();
             b.ConfigureByConvention(); //auto configure for the base class props
+
+            // A ticket with existing venues referencing it can't be deleted
+            b.HasOne(x => x.Ticket)
+                .WithMany()
+                .HasForeignKey(x => x.TicketId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         builder.Entity<Ticket>(b =>
@@ -143,6 +186,16 @@ public class SessionLoggerDbContext :
             b.ToTable(SessionLoggerConsts.DbTablePrefix + "Ticket", SessionLoggerConsts.DbSchema);
             b.Property(x => x.Name).IsRequired();
             b.ConfigureByConvention(); //auto configure for the base class props
+        });
+
+        builder.Entity<Species>(b =>
+        {
+            b.ToTable(SessionLoggerConsts.DbTablePrefix + "Species", SessionLoggerConsts.DbSchema);
+            b.Property(x => x.Name).IsRequired().HasMaxLength(100);
+            b.Property(x => x.IsSaltwater).IsRequired().HasDefaultValue(false);
+            b.ConfigureByConvention(); //auto configure for the base class props
+
+            b.HasIndex(x => x.Name).IsUnique();
         });
     }
 }

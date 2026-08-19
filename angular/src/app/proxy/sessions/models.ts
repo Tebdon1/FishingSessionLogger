@@ -1,50 +1,41 @@
 import type { AuditedEntityDto } from '@abp/ng.core';
-import type { SpeciesType } from '../../home/enums/species-type.enum';
 
-export interface CatchDetailDto extends AuditedEntityDto<number> {
-  bait?: string;
-  quantity: number;
-  catchWeights: CatchWeightDto[];
+export interface CatchDto extends AuditedEntityDto<number> {
+  sessionId: number;
+  speciesId: number;
+  speciesName: string;
+  baitId?: number;
+  baitName?: string;
+  weight?: number;
+  photoId?: number;
+  photoFileName?: string;
 }
 
-export interface CatchSummaryDto extends AuditedEntityDto<number> {
-  species: SpeciesType;
-  quantity: number;
-  catchDetails: CatchDetailDto[];
-}
-
-export interface CatchWeightDto extends AuditedEntityDto<number> {
-  weight: number;
-}
-
-export interface CreateUpdateCatchDetailDto {
-  bait?: string;
-  quantity: number;
-  catchWeights: CreateUpdateCatchWeightDto[];
-}
-
-export interface CreateUpdateCatchSummaryDto {
-  quantity: number;
-  species: SpeciesType;
-  catchDetails: CreateUpdateCatchDetailDto[];
-}
-
-export interface CreateUpdateCatchWeightDto {
-  weight: number;
+export interface CreateUpdateCatchDto {
+  sessionId: number;
+  speciesId: number;
+  baitId?: number;
+  weight?: number;
+  photoData?: string;
+  photoFileName?: string;
 }
 
 export interface CreateUpdateSessionDto {
-  sessionDate: string;
-  venue: string;
-  duration: number;
-  catchSummaries: CreateUpdateCatchSummaryDto[];
+  startDateTime: string;
+  endDateTime: string;
+  venueId: number;
+  notes?: string;
+  catches: CreateUpdateCatchDto[];
 }
 
 export interface SessionDto extends AuditedEntityDto<number> {
-  sessionDate?: string;
-  venue?: string;
+  startDateTime: string;
+  endDateTime: string;
+  venueId: number;
+  venueName?: string;
+  notes?: string;
   duration: number;
-  catchSummaries: CatchSummaryDto[];
+  catches: CatchDto[];
 }
 
 export interface BaitDto extends AuditedEntityDto<number> {

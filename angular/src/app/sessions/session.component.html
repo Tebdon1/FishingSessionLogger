@@ -1,11 +1,11 @@
-<page-topbar-nav></page-topbar-nav>
+<app-page-topbar-nav></app-page-topbar-nav>
 
-<div *ngIf="view == ''" class="card mg-3">
+<div *ngIf="view === ''" class="card mg-3">
   <div class="card-header">
     <div class="row">
       <div class="col col-md-6">
         <h5 class="card-title">
-          {{ '::Menu:Sessions' | abpLocalization }} {{view}}
+          {{ '::Menu:Sessions' | abpLocalization }}
         </h5>
       </div>
       <div class="text-end col col-md-6"></div>
@@ -37,75 +37,95 @@
           </div>
         </ng-template>
       </ngx-datatable-column>
-      <ngx-datatable-column [name]="'::SessionDate' | abpLocalization" prop="sessionDate">
+      <ngx-datatable-column [name]="'::Start' | abpLocalization" prop="startDateTime">
         <ng-template let-row="row" ngx-datatable-cell-template>
-          {{ row.sessionDate | date }}
+          {{ row.startDateTime | date:'medium' }}
         </ng-template>
       </ngx-datatable-column>
-      <ngx-datatable-column [name]="'::Venue' | abpLocalization" prop="venue"></ngx-datatable-column>
+      <ngx-datatable-column [name]="'::Venue' | abpLocalization" prop="venueName"></ngx-datatable-column>
       <ngx-datatable-column [name]="'::Duration' | abpLocalization" prop="duration"></ngx-datatable-column>
-      <ngx-datatable-column [name]="'::Expand' | abpLocalization" [maxWidth]="78" [sortable]="false">
-        <ng-template
-          let-row="row" ngx-datatable-cell-template>
-          <div class="text-lg-end pt-2">
-            <button id="expand" class="btn mat-icon-button" (click)="expand(row)" type="button">
-              <i class="fa fa-bars me-1"></i>
-            </button>
-          </div>
-        </ng-template>
-      </ngx-datatable-column>
     </ngx-datatable>
   </div>
 </div>
 
-<div *ngIf="view == 'sessionForm'" class="card mg-3">
+<div *ngIf="view === 'sessionForm'" class="card mg-3">
   <div class="card-header">
-    <h3>Session</h3>
+    <h3>{{ (sessionItem ? '::EditSession' : '::NewSession') | abpLocalization }}</h3>
   </div>
 
   <div class="card-body">
-    <form *ngIf="sessionForm" [formGroup]="sessionForm" (ngSubmit)="save()">
+    <form *ngIf="sessionForm" [formGroup]="sessionForm">
       <div>
-        <label>Session date</label><span> * </span>
-        <input #datepicker="ngbDatepicker" class="form-control" name="datepicker"
-          formControlName="sessionDate" ngbDatepicker (click)="datepicker.toggle()" />
+        <label for="session-start">Start</label><span> * </span>
+        <input type="datetime-local" id="session-start" class="form-control" formControlName="startDateTime" />
+      </div>
+      <div class="mt-2">
+        <label for="session-end">End</label><span> * </span>
+        <input type="datetime-local" id="session-end" class="form-control" formControlName="endDateTime" />
       </div>
       <div class="mt-2">
         <label for="session-venue">Venue</label><span> * </span>
-        <input type="text" id="session-venue" class="form-control" formControlName="venue" autofocus />
+        <select class="form-control" id="session-venue" formControlName="venueId">
+          <option [ngValue]="null">Select a venue</option>
+          <option [ngValue]="venue.id" *ngFor="let venue of venueList">{{ venue.name }}</option>
+        </select>
+        <small class="text-muted" *ngIf="venueList.length === 0">
+          No venues yet - <a [routerLink]="['/venues']">add one</a> first.
+        </small>
       </div>
-
       <div class="mt-2">
-        <label for="session-duration">Duration (Hrs)</label><span> * </span>
-        <input type="number" id="session-duration" class="form-control" formControlName="duration" />
+        <label for="session-notes">Notes</label>
+        <textarea class="form-control" id="session-notes" rows="3" formControlName="notes"></textarea>
       </div>
     </form>
 
     <h3 class="pd-t-4">Catches</h3>
 
-    <button type="button" class="btn btn-primary btn-sm margin-bottom" (click)="addCatchSummary()">
-      Add Species
+    <button type="button" class="btn btn-primary btn-sm margin-bottom" (click)="addCatch()">
+      Add Catch
+    </button>
+    <button type="button" class="btn btn-secondary btn-sm margin-bottom ms-2" (click)="addBulkCatch()">
+      Bulk Add
     </button>
 
     <table class="table table-sm">
       <thead>
         <tr>
-          <th class="catch-species-table-headers">Species</th>
-          <th class="catch-species-table-headers">Quantity</th>
-          <th class="catch-species-table-headers">Details</th>
-          <th>Delete</th>
+          <th>Species</th>
+          <th>Count</th>
+          <th>Weights</th>
+          <th>Baits</th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let item of editSessionItem.catchSummaries">
-          <td>{{ '::Enum:SpeciesType.' + item.species | abpLocalization }}</td>  
-          <td>{{item.quantity}}</td> 
-          <td><button type="button" class="btn mat-icon-button" (click)="editCatchSummary(item)"><i class="fa fa-edit me-1"></i></button></td>
-          <td><button type="button" class="btn mat-icon-button" (click)="deleteCatchSummary(item)"><i class="fa fa-trash me-1"></i></button></td>
+        <tr *ngFor="let group of getSpeciesGroups()">
+          <td>{{ group.speciesName }}</td>
+          <td>{{ group.entries.length }}</td>
+          <td>{{ groupWeights(group) }}</td>
+          <td>{{ groupBaits(group) }}</td>
+          <td class="text-end">
+            <div ngbDropdown container="body" class="d-inline-block">
+              <button class="btn btn-sm btn-outline-secondary dropdown-toggle" ngbDropdownToggle>
+                {{ '::Actions' | abpLocalization }}
+              </button>
+              <div ngbDropdownMenu>
+                <button ngbDropdownItem *ngFor="let entry of group.entries" (click)="editCatch(entry.index)">
+                  Edit #{{ entry.index + 1 }} {{ entry.catchItem.weight ? '(' + entry.catchItem.weight + ')' : '' }}
+                </button>
+                <div class="dropdown-divider"></div>
+                <button ngbDropdownItem *ngFor="let entry of group.entries" (click)="deleteCatch(entry.index)">
+                  Delete #{{ entry.index + 1 }}
+                </button>
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="getSpeciesGroups().length === 0">
+          <td colspan="5" class="text-muted">No catches logged yet.</td>
         </tr>
       </tbody>
     </table>
-
   </div>
 
   <div class="card-footer">
@@ -119,114 +139,91 @@
   </div>
 </div>
 
-<div *ngIf="view == 'catchSummaryForm'" class="card mg-3">
+<div *ngIf="view === 'catchForm'" class="card mg-3">
   <div class="card-header">
-    <h3>Catch Summary</h3>
+    <h3>Catch</h3>
   </div>
 
   <div class="card-body">
-    <form *ngIf="catchSummaryForm" [formGroup]="catchSummaryForm" (ngSubmit)="saveCatchSummary()">
+    <form *ngIf="catchForm" [formGroup]="catchForm">
       <div class="mt-2">
-        <label for="catchSummary-speciesType">Species</label><span> * </span>
-        <select class="form-control" id="catchSummary-speciesType" formControlName="species">
+        <label for="catch-species">Species</label><span> * </span>
+        <select class="form-control" id="catch-species" formControlName="speciesId">
           <option [ngValue]="null">Select a species</option>
-          <option [ngValue]="species.value" *ngFor="let species of speciesTypes"> {{ '::Enum:SpeciesType.' + species.value | abpLocalization }}</option>
+          <option [ngValue]="species.id" *ngFor="let species of speciesList">{{ species.name }}</option>
         </select>
       </div>
       <div class="mt-2">
-        <label for="catchSummary-quantity">Number of Fish Caught</label><span> * </span>
-        <input type="number" id="catchSummary-quantity" class="form-control" formControlName="quantity" />
+        <label for="catch-bait">Bait</label>
+        <select class="form-control" id="catch-bait" formControlName="baitId">
+          <option [ngValue]="null">Unknown / not recorded</option>
+          <option [ngValue]="bait.id" *ngFor="let bait of baitList">{{ bait.name }}</option>
+        </select>
+      </div>
+      <div class="mt-2">
+        <label for="catch-weight">Weight</label>
+        <input type="number" step="0.01" id="catch-weight" class="form-control" formControlName="weight" />
+      </div>
+      <div class="mt-2">
+        <label for="catch-photo">Photo</label>
+        <input type="file" accept="image/*" id="catch-photo" class="form-control" (change)="onCatchPhotoSelected($event)" />
+        <img *ngIf="catchPhotoPreviewUrl" [src]="catchPhotoPreviewUrl" class="catch-photo-preview mt-2" />
+        <img *ngIf="!catchPhotoPreviewUrl && editCatchItem.photoFileName" [src]="photoUrl(editingCatchIndex !== null ? editSessionItem.catches[editingCatchIndex].photoId : null)" class="catch-photo-preview mt-2" />
       </div>
     </form>
-
-    <button type="button" class="btn btn-secondary add-detail btn-sm" (click)="addCatchDetail()">Add Detail</button>
-
-    <div class="table-responsive" *ngIf="editCatchSummaryItem.catchDetails.length > 0">
-      <table class="catchDetailsTable">
-        <thead>
-          <th><div class="bait-details-input">Bait</div></th>
-          <th><div class="bait-details-input">Number of Fish</div></th>
-          <th><div class="bait-details-input">Weights</div></th>
-        </thead>
-        <tbody>
-          <tr *ngFor="let item of editCatchSummaryItem.catchDetails; let i = index">
-            <td>
-              <div class="bait-details-input">
-                <input type="text" class="form-control" [(ngModel)]="item.bait" />
-              </div>
-            </td>
-            <td>
-              <div class="bait-details-input">
-                <input (input)="validateCatchTotals()" type="number" class="form-control" id="baitQuantity-{{i}}" [(ngModel)]="item.quantity" />
-              </div>
-            </td>
-            <td>
-              <div class="bait-details-input">
-                <input type="text" class="form-control" [(ngModel)]="item.weightString" />
-              </div>
-            </td>
-            <td><button type="button" class="btn mat-icon-button" (click)="deleteCatchDetail(i)"><i class="fa fa-trash me-1"></i></button></td>
-          </tr>
-        </tbody>
-      </table>
-      <div id="bait-details-error-message" style="display: none;">
-        <p style="color: rgb(173, 31, 31);">Number of Fish exceeds Number of Fish Caught</p>
-      </div>
-    </div>
   </div>
-  
 
   <div class="card-footer">
-    <button type="button" class="btn btn-secondary button-pad" (click)="closeCatchSummaryForm()">
+    <button type="button" class="btn btn-secondary button-pad" (click)="closeCatchForm()">
       {{ '::Close' | abpLocalization }}
     </button>
-    <button *ngIf="catchSummaryForm" class="btn btn-primary" (click)="saveCatchSummary()" [disabled]="catchSummaryForm.invalid">
+    <button *ngIf="catchForm" class="btn btn-primary" (click)="saveCatch()" [disabled]="catchForm.invalid">
       <i class="fa fa-check mr-1"></i>
       {{ '::Save' | abpLocalization }}
     </button>
   </div>
 </div>
 
-<div *ngIf="view == 'overview'" class="card mg-3">
+<div *ngIf="view === 'bulkCatchForm'" class="card mg-3">
   <div class="card-header">
-    <div class="row">
-      <h5 class="card-title">Overview</h5>
-    </div>
+    <h3>Bulk Add Catches</h3>
   </div>
 
-  <div class="card-body" style="margin-bottom: 25px;">
-      <kendo-grid scrollable="none" [data]="expandedRow">
-        <kendo-grid-column field="sessionDate" title="Session Date"> </kendo-grid-column>
-        <kendo-grid-column field="venue" title=Venue> </kendo-grid-column>
-        <kendo-grid-column field="duration" title="Duration"> </kendo-grid-column>
-        <kendo-grid-column field="totalCaught" title="Total Caught"> </kendo-grid-column>
-        <kendo-grid-column field="maxWeight" title="Largest (Lbs Oz)"> </kendo-grid-column>
-      </kendo-grid>
-    <!-- TODO we need to adjust the species names so they appear with the correcet localizations. Only tried a couple of things so far that didn't work.
-   Just needs a little trial and error I think. Might be best to do it in the typescript if possible-->
-    <div style="margin-top: 5px;">
-      <h5>Fish Caught</h5>
-      <kendo-grid scrollable="none" [kendoGridBinding]="kendoGridData" [kendoGridExpandDetailsBy]="expandDetailsBy" [sortable]="true" [(expandedDetailKeys)]="expandedDetailKeys">
-          <kendo-grid-column field="speciesName" title="Species"> </kendo-grid-column>
-          <kendo-grid-column field="quantity" title="Quantity"> </kendo-grid-column>
-          <kendo-grid-column field="maxWeight" title="Largest (Lbs Oz)"> </kendo-grid-column>
-          <ng-template kendoGridDetailTemplate let-kendoGridData>
-            <section *ngIf="kendoGridData.weightBaitDetails">
-              <kendo-grid [kendoGridBinding]="kendoGridData.weightBaitDetails" [sortable]="true" [style.maxHeight.px]="400">
-                <kendo-grid-column field="bait" title="Bait Used"> </kendo-grid-column>
-                <kendo-grid-column field="weight" title="Fish Weight"> </kendo-grid-column>
-              </kendo-grid>
-            </section>
-          </ng-template>
-        </kendo-grid>
-    </div>
+  <div class="card-body">
+    <form *ngIf="bulkForm" [formGroup]="bulkForm">
+      <div class="mt-2">
+        <label for="bulk-species">Species</label><span> * </span>
+        <select class="form-control" id="bulk-species" formControlName="speciesId">
+          <option [ngValue]="null">Select a species</option>
+          <option [ngValue]="species.id" *ngFor="let species of speciesList">{{ species.name }}</option>
+        </select>
+      </div>
+      <div class="mt-2">
+        <label for="bulk-bait">Bait</label>
+        <select class="form-control" id="bulk-bait" formControlName="baitId">
+          <option [ngValue]="null">Unknown / not recorded</option>
+          <option [ngValue]="bait.id" *ngFor="let bait of baitList">{{ bait.name }}</option>
+        </select>
+      </div>
+      <div class="mt-2">
+        <label for="bulk-count">Number caught</label><span> * </span>
+        <input type="number" min="1" max="200" id="bulk-count" class="form-control" formControlName="count" />
+      </div>
+      <div class="mt-2">
+        <label for="bulk-weight">Weight (each, if known)</label>
+        <input type="number" step="0.01" id="bulk-weight" class="form-control" formControlName="weightEach" />
+        <small class="text-muted">Leave blank if you didn't weigh these.</small>
+      </div>
+    </form>
   </div>
 
-  <div class="card-footer mg-3">
-    <button type="button" class="btn btn-secondary button-pad expanded-details-button" (click)="closeSessionForm()">
+  <div class="card-footer">
+    <button type="button" class="btn btn-secondary button-pad" (click)="closeBulkCatchForm()">
       {{ '::Close' | abpLocalization }}
     </button>
+    <button *ngIf="bulkForm" class="btn btn-primary" (click)="saveBulkCatch()" [disabled]="bulkForm.invalid">
+      <i class="fa fa-check mr-1"></i>
+      {{ '::Save' | abpLocalization }}
+    </button>
   </div>
-
 </div>
-

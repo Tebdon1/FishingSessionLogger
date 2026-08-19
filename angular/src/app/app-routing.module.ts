@@ -31,7 +31,15 @@ const routes: Routes = [
   },
   {
       path: 'baits',
-      loadChildren: () => import('./baits/baits.module').then(m => m.BaitsModule)
+      loadChildren: () => import('./baits/bait.module').then(m => m.BaitModule)
+  },
+  {
+      path: 'venues',
+      loadChildren: () => import('./venues/venue.module').then(m => m.VenueModule)
+  },
+  {
+      path: 'tickets',
+      loadChildren: () => import('./tickets/ticket.module').then(m => m.TicketModule)
   },
 
 ];

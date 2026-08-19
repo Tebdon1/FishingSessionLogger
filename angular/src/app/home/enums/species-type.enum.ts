@@ -28,6 +28,7 @@ export enum SpeciesType {
   Wrasse = 24,
   Zander = 25,
   RoachBreamHybrid = 26,
+  SeaBream = 27
 }
 
 export const speciesTypeOptions = mapEnumToOptions(SpeciesType);

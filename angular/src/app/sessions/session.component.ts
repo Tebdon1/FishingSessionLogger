@@ -1,13 +1,12 @@
 import { ListService, PagedResultDto } from '@abp/ng.core';
 import { Component, OnInit } from '@angular/core';
-import { CatchSummaryService, SessionService, SessionDto, speciesTypeOptions, SpeciesType } from '@proxy/sessions';
-import { ElementRef } from '@angular/core';
+import { SessionService, SessionDto, CatchDto, CreateUpdateCatchDto, BaitDto } from '@proxy/sessions';
+import { SpeciesService, SpeciesDto } from '@proxy/species';
+import { VenueService, VenueDto } from '@proxy/venues';
 import { ConfirmationService, Confirmation } from '@abp/ng.theme.shared';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { NgbDateNativeAdapter, NgbDateAdapter } from '@ng-bootstrap/ng-bootstrap';
-import * as _ from 'lodash'; 
 import { lastValueFrom } from 'rxjs';
-import { CatchDetails } from './session-models';
+import { BaitService } from '../home/services/bait.service';
 
 @Component({
   selector: 'app-session',
@@ -15,47 +14,65 @@ import { CatchDetails } from './session-models';
   styleUrls: ['./session.component.scss'],
   providers: [
     ListService,
-    { provide: NgbDateAdapter, useClass: NgbDateNativeAdapter }
   ],
 })
 export class SessionComponent implements OnInit {
-  sessionItem: any;
-  editSessionItem: any;
-  catchSummaryItem: any;
-  editCatchSummaryItem: any;
-  expandedRow: ExpandedRowDetails[] = [];
+  sessionItem: SessionDto;
+  editSessionItem: EditableSession;
 
-  kendoGridData: CatchExpandedDetails[] = [];
+  editCatchItem: EditableCatch;
+  editingCatchIndex: number | null = null;
+
+  bulkForm: FormGroup;
 
   session = { items: [], totalCount: 0 } as PagedResultDto<SessionDto>;
-  
-  sessionForm: FormGroup;
-  catchSummaryForm: FormGroup;
 
-  speciesTypes = speciesTypeOptions;
+  sessionForm: FormGroup;
+  catchForm: FormGroup;
+
+  speciesList: SpeciesDto[] = [];
+  baitList: BaitDto[] = [];
+  venueList: VenueDto[] = [];
 
   view = '';
-
-  public expandedDetailKeys: string[] = [];
-  public expandDetailsBy = (dataItem: CatchExpandedDetails): string => {
-    return dataItem.speciesName;
-  };
 
   constructor(
     public readonly list: ListService,
     private sessionService: SessionService,
-    private catchSummaryService: CatchSummaryService,
+    private speciesService: SpeciesService,
+    private baitService: BaitService,
+    private venueService: VenueService,
     private confirmation: ConfirmationService,
-    private fb: FormBuilder,
-    private elementRef: ElementRef<HTMLElement>) {
-      this.list.maxResultCount = 25
+    private fb: FormBuilder) {
+      this.list.maxResultCount = 25;
     }
 
   ngOnInit() {
     const sessionStreamCreator = (query) => this.sessionService.getList(query);
     this.list.hookToQuery(sessionStreamCreator).subscribe((response) => {
       this.session = response;
-    })
+    });
+    this.loadLookups();
+  }
+
+  async loadLookups() {
+    const [species, baits, venues] = await Promise.all([
+      lastValueFrom(this.speciesService.getList({ maxResultCount: 1000 })),
+      lastValueFrom(this.baitService.getList({ maxResultCount: 1000 })),
+      lastValueFrom(this.venueService.getList({ maxResultCount: 1000 })),
+    ]);
+    this.speciesList = species.items;
+    this.baitList = baits.items;
+    this.venueList = venues.items;
+  }
+
+  speciesName(speciesId: number): string {
+    return this.speciesList.find(s => s.id === speciesId)?.name ?? '';
+  }
+
+  baitName(baitId?: number): string {
+    if (baitId == null) return '';
+    return this.baitList.find(b => b.id === baitId)?.name ?? '';
   }
 
   deleteSession(id: number) {
@@ -66,23 +83,19 @@ export class SessionComponent implements OnInit {
     });
   }
 
-  deleteCatchSummary(catchSummary) {
-    this.confirmation.warn('::AreYouSureToDelete', '::AreYouSure').subscribe((status) => {
-      if (status === Confirmation.Status.confirm) {
-        this.catchSummaryService.delete(catchSummary).subscribe(() => this.list.get());
-      }
-    });
-  }
   // session level
 
   createSession() {
     this.sessionItem = null;
 
     this.editSessionItem = {
-      sessionDate: new Date(),
-      catchSummaries: []
-    }
-    
+      startDateTime: toLocalDateTimeInput(new Date()),
+      endDateTime: toLocalDateTimeInput(new Date()),
+      venueId: null,
+      notes: '',
+      catches: [],
+    };
+
     this.buildSessionForm(this.editSessionItem);
     this.view = 'sessionForm';
   }
@@ -90,19 +103,31 @@ export class SessionComponent implements OnInit {
   async editSession(id) {
     this.sessionItem = await lastValueFrom(this.sessionService.get(id));
 
-    this.editSessionItem = JSON.parse(JSON.stringify(this.sessionItem));
-
-    this.editSessionItem.catchSummaries.sort((a,b) => a.species - b.species); // b - a for reverse sort
+    this.editSessionItem = {
+      startDateTime: toLocalDateTimeInput(new Date(this.sessionItem.startDateTime)),
+      endDateTime: toLocalDateTimeInput(new Date(this.sessionItem.endDateTime)),
+      venueId: this.sessionItem.venueId,
+      notes: this.sessionItem.notes ?? '',
+      catches: this.sessionItem.catches.map(c => ({
+        sessionId: c.sessionId,
+        speciesId: c.speciesId,
+        baitId: c.baitId,
+        weight: c.weight,
+        photoId: c.photoId,
+        photoFileName: c.photoFileName,
+      })),
+    };
 
     this.buildSessionForm(this.editSessionItem);
     this.view = 'sessionForm';
   }
 
-  buildSessionForm(sessionItem: any) {
+  buildSessionForm(sessionItem: EditableSession) {
     this.sessionForm = this.fb.group({
-      sessionDate: [sessionItem.sessionDate == null ? new Date() : new Date(sessionItem.sessionDate), Validators.required],
-      venue: [sessionItem.venue || '', Validators.required],
-      duration: [sessionItem.duration, Validators.required],
+      startDateTime: [sessionItem.startDateTime, Validators.required],
+      endDateTime: [sessionItem.endDateTime, Validators.required],
+      venueId: [sessionItem.venueId, Validators.required],
+      notes: [sessionItem.notes || ''],
     });
   }
 
@@ -112,424 +137,221 @@ export class SessionComponent implements OnInit {
     }
 
     const formValue = this.sessionForm.value;
-    
-    formValue.catchSummaries = this.editSessionItem.catchSummaries;
+
+    const payload = {
+      startDateTime: new Date(formValue.startDateTime).toISOString(),
+      endDateTime: new Date(formValue.endDateTime).toISOString(),
+      venueId: formValue.venueId,
+      notes: formValue.notes,
+      catches: this.editSessionItem.catches,
+    };
 
     if (this.sessionItem) {
-      await lastValueFrom(this.sessionService.update(this.sessionItem.id, formValue));
+      await lastValueFrom(this.sessionService.update(this.sessionItem.id, payload));
     }
     else {
-      await lastValueFrom(this.sessionService.create(formValue));
+      await lastValueFrom(this.sessionService.create(payload));
     }
 
     this.view = '';
     this.sessionForm.reset();
     this.list.get();
-}
+  }
 
   closeSessionForm() {
     this.view = '';
   }
 
-  addCatchSummary() {
-    this.catchSummaryItem = null;
+  // grouping catches by species for display
 
-    this.editCatchSummaryItem = {
-      catchDetails: []
+  getSpeciesGroups(): SpeciesGroup[] {
+    if (!this.editSessionItem) return [];
+
+    const groups = new Map<number, SpeciesGroup>();
+    this.editSessionItem.catches.forEach((c, index) => {
+      let group = groups.get(c.speciesId);
+      if (!group) {
+        group = { speciesId: c.speciesId, speciesName: this.speciesName(c.speciesId), entries: [] };
+        groups.set(c.speciesId, group);
+      }
+      group.entries.push({ index, catchItem: c });
+    });
+
+    return Array.from(groups.values()).sort((a, b) => a.speciesName.localeCompare(b.speciesName));
+  }
+
+  groupWeights(group: SpeciesGroup): string {
+    const weights = group.entries.map(e => e.catchItem.weight).filter(w => w != null);
+    return weights.length ? weights.join(', ') : '-';
+  }
+
+  groupBaits(group: SpeciesGroup): string {
+    const baits = Array.from(new Set(group.entries
+      .map(e => this.baitName(e.catchItem.baitId))
+      .filter(b => b)));
+    return baits.length ? baits.join(', ') : '-';
+  }
+
+  // single catch entry
+
+  addCatch() {
+    this.editingCatchIndex = null;
+    this.editCatchItem = { speciesId: null, baitId: null, weight: null, photoData: null, photoFileName: null };
+    this.buildCatchForm(this.editCatchItem);
+    this.view = 'catchForm';
+  }
+
+  editCatch(index: number) {
+    this.editingCatchIndex = index;
+    const existing = this.editSessionItem.catches[index];
+    this.editCatchItem = {
+      speciesId: existing.speciesId,
+      baitId: existing.baitId ?? null,
+      weight: existing.weight ?? null,
+      photoData: null,
+      photoFileName: existing.photoFileName ?? null,
     };
-    this.buildCatchSummaryForm(this.editCatchSummaryItem);
-    this.view = 'catchSummaryForm';
+    this.buildCatchForm(this.editCatchItem);
+    this.view = 'catchForm';
   }
 
-  // catchSummary level
-
-  buildCatchSummaryForm(catchSummaryItem: any) {
-    this.catchSummaryForm = this.fb.group({
-      species: [catchSummaryItem.species, Validators.required],
-      quantity: [catchSummaryItem.quantity || 1, Validators.required],
+  buildCatchForm(catchItem: EditableCatch) {
+    this.catchForm = this.fb.group({
+      speciesId: [catchItem.speciesId, Validators.required],
+      baitId: [catchItem.baitId],
+      weight: [catchItem.weight],
     });
   }
 
-  closeCatchSummaryForm() {
-    this.view = 'sessionForm';
+  async onCatchPhotoSelected(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+
+    this.editCatchItem.photoData = await fileToBase64(file);
+    this.editCatchItem.photoFileName = file.name;
+    this.editCatchItem.photoMimeType = file.type || 'image/jpeg';
   }
 
-  validateCatchTotals() {
-    var catchDetailQuantities: number = 0;
-    this.editCatchSummaryItem.catchDetails.forEach(element => {
-      catchDetailQuantities += element.quantity;
-    });
-    if(catchDetailQuantities != this.catchSummaryForm.value.quantity) {
-      this.udpateBaitCatchDetailElements(true);
-      return;
-    }
-    else if (catchDetailQuantities == this.catchSummaryForm.value.quantity) {
-      this.udpateBaitCatchDetailElements(false);
-      return;
-    }
+  get catchPhotoPreviewUrl(): string | null {
+    if (!this.editCatchItem?.photoData) return null;
+    return `data:${this.editCatchItem.photoMimeType};base64,${this.editCatchItem.photoData}`;
   }
 
-  saveCatchSummary() {
-    if (this.catchSummaryForm.invalid) {
+  photoUrl(photoId?: number): string | null {
+    return photoId ? `/api/app/catch-photo/${photoId}` : null;
+  }
+
+  saveCatch() {
+    if (this.catchForm.invalid) {
       return;
     }
 
-    const formValue = this.catchSummaryForm.value;
-    
-    formValue.catchDetails = [];
+    const formValue = this.catchForm.value;
 
-    var catchDetailQuantities: number = 0;
+    const catchEntry: CreateUpdateCatchDto = {
+      sessionId: this.sessionItem?.id ?? 0,
+      speciesId: formValue.speciesId,
+      baitId: formValue.baitId || null,
+      weight: formValue.weight === '' || formValue.weight == null ? null : formValue.weight,
+      photoData: this.editCatchItem.photoData ?? undefined,
+      photoFileName: this.editCatchItem.photoFileName ?? undefined,
+    };
 
-    if (this.editCatchSummaryItem.catchDetails.length > 0) {
-      this.editCatchSummaryItem.catchDetails.forEach(element => {
-        catchDetailQuantities += element.quantity;
-      });
-
-      if(catchDetailQuantities != formValue.quantity) {
-        this.udpateBaitCatchDetailElements(true);
-        return;
-      }
-    }
-    
-    for (const item of this.editCatchSummaryItem.catchDetails) {
-      let newDetail: CatchDetails = {
-        bait: item.bait,
-        quantity: item.quantity,
-        catchWeights: []
-      }
-
-      let weightString = item.weightString.trim(); 
-      if (weightString != '') {
-        for (const stringWeight of weightString.split(',')) {
-          newDetail.catchWeights.push(
-            {
-              weight:parseFloat(stringWeight)
-            });
-        }
-      }
-
-      formValue.catchDetails.push(newDetail);
-    }
-
-    if (this.catchSummaryItem) {
-      this.catchSummaryItem = _.extend(this.catchSummaryItem, formValue);
+    if (this.editingCatchIndex != null) {
+      this.editSessionItem.catches[this.editingCatchIndex] = catchEntry;
     }
     else {
-      console.log('pushing catchSummary', formValue);
-      this.editSessionItem.catchSummaries.push(formValue);
+      this.editSessionItem.catches.push(catchEntry);
     }
 
     this.view = 'sessionForm';
   }
 
-  //I'm not thrilled about doing this like this. There is probably a clever angular method I don't know about?
-  // Maybe making the inputs a form but that seems to break the dynamic adding of rows
-  // Man I'm bad at angular now
-  udpateBaitCatchDetailElements(error: boolean) {
-    if(error) {
-      for(let i = 0; i < this.editCatchSummaryItem.catchDetails.length; i++){
-        document.getElementById(`baitQuantity-${i}`)
-          .setAttribute('class', 'form-control is-invalid ng-dirty ng-invalid ng-touched');
-      }
-      document.getElementById('bait-details-error-message').setAttribute('style', '');
-      return;
-    }
-    else if (!error){
-      for(let i = 0; i < this.editCatchSummaryItem.catchDetails.length; i++){
-        document.getElementById(`baitQuantity-${i}`)
-          .setAttribute('class', 'form-control');
-      }
-      document.getElementById('bait-details-error-message').setAttribute('style', 'display: none;');
-      return;
-    }
+  closeCatchForm() {
+    this.view = 'sessionForm';
   }
 
-  editCatchSummary(catchSummary) {
-    console.log('editCatchSummary', catchSummary);
+  deleteCatch(index: number) {
+    this.confirmation.warn('::AreYouSureToDelete', '::AreYouSure').subscribe((status) => {
+      if (status === Confirmation.Status.confirm) {
+        this.editSessionItem.catches.splice(index, 1);
+      }
+    });
+  }
 
-    if (catchSummary.catchDetails == null) {
-      catchSummary.catchDetails = [];
+  // bulk entry - fans out into N individual catch rows, no quantity stored
+
+  addBulkCatch() {
+    this.bulkForm = this.fb.group({
+      speciesId: [null, Validators.required],
+      baitId: [null],
+      count: [1, [Validators.required, Validators.min(1), Validators.max(200)]],
+      weightEach: [null],
+    });
+    this.view = 'bulkCatchForm';
+  }
+
+  saveBulkCatch() {
+    if (this.bulkForm.invalid) {
+      return;
     }
 
-    this.catchSummaryItem = catchSummary;
+    const formValue = this.bulkForm.value;
+    const weight = formValue.weightEach === '' || formValue.weightEach == null ? null : formValue.weightEach;
 
-    this.editCatchSummaryItem = JSON.parse(JSON.stringify(catchSummary));
-
-    if (this.editCatchSummaryItem.catchDetails.length == 0) {
-      this.editCatchSummaryItem.catchDetails.push({
-        bait: '',
-        quantity: 1,
-        catchWeights: []
+    for (let i = 0; i < formValue.count; i++) {
+      this.editSessionItem.catches.push({
+        sessionId: this.sessionItem?.id ?? 0,
+        speciesId: formValue.speciesId,
+        baitId: formValue.baitId || null,
+        weight,
       });
     }
 
-    for (const item of this.editCatchSummaryItem.catchDetails) {
-      if (item.catchWeights) {
-        let weights = [];
-        for (const catchWeight of item.catchWeights){
-          weights.push(catchWeight.weight)
-          weights.sort((a,b) => b-a);
-        };
-        item.weightString = weights.join(',');
-      }
-    }
-
-    this.buildCatchSummaryForm(this.editCatchSummaryItem);
-
-    this.view = 'catchSummaryForm';    
+    this.view = 'sessionForm';
   }
 
-  // catchDetails level
-
-  addCatchDetail() {
-    this.editCatchSummaryItem.catchDetails.push({
-        bait: '',
-        quantity: 1,
-        weightString: '',
-    });
-    
-    console.log(this.editCatchSummaryItem.catchDetails);
+  closeBulkCatchForm() {
+    this.view = 'sessionForm';
   }
-
-  deleteCatchDetail(i: number) {
-    console.log(i)
-    if (i > -1){
-      this.editCatchSummaryItem.catchDetails.splice(i, 1);
-    }
-    //this.confirmation.warn('::AreYouSureToDelete', '::AreYouSure').subscribe((status) => {
-      //if (status === Confirmation.Status.confirm) {
-        //this.catchDetailService.delete(id).subscribe(() => this.list.get());
-      //}
-    //});
-  }
-
-  //TODO is this used? can't find a reference in the HTML
-  deleteDetailRow(row) {
-    this.editCatchSummaryItem.catchDetails.remove(row); // may need to amend  
-  }
-
-  // Overview level
-
-  async expand(row) {
-    this.sessionItem = await lastValueFrom(this.sessionService.get(row.id));
-    this.createExpandedDetails(this.sessionItem);
-    this.expandedRow = [];
-    this.expandedRow.push({
-      sessionDate: row.sessionDate.split("T")[0],
-      venue: row.venue,
-      duration: row.duration,
-      maxWeight: this.maximumCatchWeight(),
-      totalCaught: this.calculateSessionTotal(this.sessionItem)
-    });
-    console.log(this.expandedRow);
-    this.view = 'overview';
-  }
-
-  calculateSessionTotal(session: { catchSummaries: any; }) {
-    let totalQuantity = 0;
-    for (const catchSummary of session.catchSummaries) {
-      totalQuantity += catchSummary.quantity;
-    }
-    return totalQuantity;
-    
-  }
-
-  createExpandedDetails(sessionItem: any) {
-    let weightMax = 0;
-    this.kendoGridData = [];
-    //Order first. this will help with creating the array of the WeightBaitInfo. Can create a singular array,
-    // then wipe it when moving onto a new 
-  
-    //Sort ascending
-    sessionItem.catchSummaries.sort((a, b) => 
-      (a.speciesName > b.speciesName) ? 1 : (
-        (a.speciesName < b.speciesName) ? -1 : (
-          (b.weightValue > a.weightValue) ? 1 : (
-            (b.weightValue < a.weightValue) ? -1 : (
-              (a.bait > b.bait) ? 1 : (
-                (a.bait < b.bait) ? -1 : 0
-              )
-            )
-          )
-        )
-      )
-    );
-  
-    for (const catchSummary of sessionItem.catchSummaries) {
-  
-      catchSummary.weightMax = 0;
-      if (catchSummary.catchDetails.length == 0 && catchSummary.quantity > 0) {
-        for (const _ of this.counter(catchSummary.quantity)) {
-  
-          let newWeightBaitInfo = {
-            weight: "0",
-            bait: "N/A"
-          }
-  
-          this.addOrUpdateCatchExpandedDetailsArray(
-            catchSummary.species,
-            catchSummary.speciesName,
-            newWeightBaitInfo
-          );
-        }
-      }
-      for (const catchDetail of catchSummary.catchDetails) {
-        if (catchDetail.catchWeights?.length > 0) {
-          for (const catchWeight of catchDetail.catchWeights) {
-            console.log(catchDetail.bait);
-            let newWeightBaitInfo = {
-              weight: catchWeight.weight,
-              bait: (catchDetail.bait && catchDetail.bait != "") ? catchDetail.bait : "N/A"
-            }
-  
-            this.addOrUpdateCatchExpandedDetailsArray(
-              catchSummary.species,
-              catchSummary.speciesName,
-              newWeightBaitInfo
-            );
-  
-            weightMax = catchWeight.weight > weightMax ? catchWeight.weight : weightMax;
-  
-            catchSummary.weightMax = catchWeight.weight > catchSummary.weightMax ? catchWeight.weight : catchSummary.weightMax;
-          }
-        }
-        if (catchDetail.catchWeights?.length < catchDetail.quantity && catchDetail.catchWeights.length != 0) {
-          for (const noWeight of this.counter(catchDetail.quantity - catchDetail.catchWeights?.length)) {
-            let newWeightBaitInfo = {
-              weight: "0",
-              bait: (catchDetail.bait && catchDetail.bait != "") ? catchDetail.bait : "N/A"
-            }
-  
-            this.addOrUpdateCatchExpandedDetailsArray(
-              catchSummary.species,
-              catchSummary.speciesName,
-              newWeightBaitInfo
-            );
-          }
-        }
-        if (catchDetail.catchWeights?.length < catchDetail.quantity && catchDetail.catchWeights.length == 0) {
-          for (const noWeight of this.counter(catchDetail.quantity - catchDetail. catchWeights?.length)) {
-            let newWeightBaitInfo = {
-              weight: "0",
-              bait: (catchDetail.bait && catchDetail.bait != "") ? catchDetail.bait : "N/A"
-            }
-  
-            this.addOrUpdateCatchExpandedDetailsArray(
-              catchSummary.species,
-              catchSummary.speciesName,
-              newWeightBaitInfo
-            );
-          }
-        }
-      }
-    }
-  }
-  
-  private addOrUpdateCatchExpandedDetailsArray(
-    species: number,
-    speciesName: string,
-    catchInfoToMatch: { weight: string, bait: string },
-   )
-  {
-    //If a catch entry already exists we simply add an element of { weight: number, bait: string } to the ArrayForTryingToGetThingsIntoMatTable.weightBaitDetails
-    if (this.kendoGridData && this.kendoGridData.findIndex((catchEntry) => catchEntry.species === species) !== -1)
-    {
-      var catchDetails = this.kendoGridData.find((catchEntry) => catchEntry.species === species);
-  
-      if (catchDetails.weightBaitDetails && Array.isArray(catchDetails.weightBaitDetails))
-      {
-        catchDetails.weightBaitDetails.push(catchInfoToMatch);
-        catchDetails.quantity++;
-      }
-      else 
-      {
-        catchDetails.weightBaitDetails.push(catchInfoToMatch);
-        catchDetails.quantity++;
-      }
-
-      if (catchDetails.maxWeight < catchInfoToMatch.weight)
-        catchDetails.maxWeight = parseFloat(catchInfoToMatch.weight).toFixed(2);
-   }
-   else 
-   {
-    speciesName = SpeciesType[species];
-
-    this.kendoGridData.push({
-        species: species,
-        speciesName: SpeciesType[species],
-        maxWeight: catchInfoToMatch.weight != "0" ? parseFloat(catchInfoToMatch.weight).toFixed(2) : "0",
-        quantity: 1,
-        weightBaitDetails: [catchInfoToMatch]
-      });
-   }
-  }
-
-  private maximumCatchWeight()
-  {
-    let maxWeight: string = "0.00";
-    this.kendoGridData.forEach(element => {
-      if (element.maxWeight > maxWeight)
-        {
-          maxWeight = element.maxWeight;
-        }
-    });
-    return maxWeight
-  }
-
-  private counter(count) {
-    return new Array(count);
-  }  
 }
 
-/*
-* Formatting will be as follows. This is for formatting data to use in the kendo table
-*  var TableArray: CatchExpandedDetails[] = [
-    {
-      species: enum value here
-      speciesName: 'Fishy name',
-      weightBaitDetails: [
-        {
-          weight: 458,
-          bait: 'An extra baity bait',
-        },
-      ],
-    },
-    {
-      species: enum value here
-      speciesName: 'Fishy name 2',
-      weightBaitDetails: [
-        {
-          weight: 95000,
-          bait: 'A baity bait',
-        },
-        {
-          weight: 95000,
-          bait: '',
-        },
-      ],
-    },
-*/
-
-export interface CatchExpandedDetails
-{
-  species: number,
-  speciesName: string,
-  maxWeight: string;
-  quantity: number;
-  weightBaitDetails: WeightBaitDetails[];
+function toLocalDateTimeInput(date: Date): string {
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
-export interface WeightBaitDetails
-{
-  weight: string;
-  bait: string;
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      resolve(result.substring(result.indexOf(',') + 1));
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 }
 
-export interface ExpandedRowDetails
-{
-  sessionDate: string,
-  venue: string,
-  duration: number,
-  totalCaught: number,
-  maxWeight: string
+export interface EditableSession {
+  startDateTime: string;
+  endDateTime: string;
+  venueId: number;
+  notes: string;
+  catches: CreateUpdateCatchDto[];
+}
+
+export interface EditableCatch {
+  speciesId: number;
+  baitId?: number;
+  weight?: number;
+  photoData?: string;
+  photoFileName?: string;
+  photoMimeType?: string;
+}
+
+export interface SpeciesGroup {
+  speciesId: number;
+  speciesName: string;
+  entries: { index: number; catchItem: CreateUpdateCatchDto }[];
 }

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using SessionLogger.Contracts.Search;
 using SessionLogger.Domain.Baits;
+using SessionLogger.Domain.Files;
 using SessionLogger.Domain.Folders;
 using SessionLogger.Domain.Sessions;
 using SessionLogger.Folders;
@@ -13,6 +14,10 @@ using SessionLogger.Sessions;
 using SessionLogger.Baits;
 using SessionLogger.Tickets;
 using SessionLogger.Venues;
+using SessionLogger.Domain.Catches;
+using SessionLogger.Catches;
+using SessionLogger.Domain.SpeciesTypes;
+using SessionLogger.SpeciesTypes;
 
 namespace SessionLogger;
 
@@ -30,17 +35,23 @@ public class SessionLoggerApplicationAutoMapperProfile : Profile
         CreateMap<UserView, UserViewVM>();
 
         CreateMap<Session, SessionDto>();
-            ;
         CreateMap<CreateUpdateSessionDto, Session>();
 
-        CreateMap<CatchSummary, CatchSummaryDto>();
-        CreateMap<CreateUpdateCatchSummaryDto, CatchSummary>();
-
-        CreateMap<CatchDetail, CatchDetailDto>();
-        CreateMap<CreateUpdateCatchDetailDto, CatchDetail>();
-
-        CreateMap<CatchWeight, CatchWeightDto>();
-        CreateMap<CreateUpdateCatchWeightDto, CatchWeight>();
+        CreateMap<Catch, CatchDto>();
+        CreateMap<CreateUpdateCatchDto, Catch>()
+            .ForMember(dest => dest.Photo, opt =>
+            {
+                // PhotoData is only set when the caller wants to attach/replace a photo;
+                // null means "leave the existing photo as-is" (matters for updates).
+                opt.Condition(src => src.PhotoData != null);
+                opt.MapFrom(src => new File
+                {
+                    FileData = src.PhotoData,
+                    FileName = src.PhotoFileName,
+                    Extension = System.IO.Path.GetExtension(src.PhotoFileName),
+                    Size = src.PhotoData.Length
+                });
+            });
 
         CreateMap<Bait, BaitDto>();
         CreateMap<BaitUpdateDto, Bait>();
@@ -50,6 +61,9 @@ public class SessionLoggerApplicationAutoMapperProfile : Profile
 
         CreateMap<Venue, VenueDto>();
         CreateMap<VenueUpdateDto, Venue>();
+
+        CreateMap<Species, SpeciesDto>();
+        CreateMap<SpeciesUpdateDto, Species>();
 
     }
 }
