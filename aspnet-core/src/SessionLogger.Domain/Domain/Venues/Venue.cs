@@ -1,18 +1,11 @@
-﻿using SessionLogger.Domain.Sessions;
-using SessionLogger.Search;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Volo.Abp.Domain.Entities.Auditing;
 using SessionLogger.Domain.Tickets;
 
 namespace SessionLogger.Domain.Venues;
 
-public class Venue : AuditedAggregateRoot<int>, IItem
+public class Venue : AuditedAggregateRoot<int>
 {
     public Venue(int id) : base(id)
     {
@@ -35,5 +28,6 @@ public class Venue : AuditedAggregateRoot<int>, IItem
     [ForeignKey("TicketId")]
     public virtual Ticket? Ticket { get; set; }
 
+    public WaterType? WaterType { get; set; }
 
 }

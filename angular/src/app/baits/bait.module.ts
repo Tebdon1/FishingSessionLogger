@@ -4,6 +4,7 @@ import { BaitRoutingModule } from './bait-routing.module';
 import { BaitComponent } from './bait.component';
 import { SharedModule } from '../shared/shared.module';
 import { PageTopbarNavComponent } from '../components/page-topbar-nav/page-topbar-nav.component';
+import { BaitFormComponent } from './bait-form/bait-form.component';
 
 @NgModule({
   declarations: [
@@ -13,7 +14,8 @@ import { PageTopbarNavComponent } from '../components/page-topbar-nav/page-topba
     SharedModule,
     BaitRoutingModule,
     ReactiveFormsModule,
-    PageTopbarNavComponent
+    PageTopbarNavComponent,
+    BaitFormComponent
   ]
 })
 export class BaitModule { }

@@ -1,0 +1,69 @@
+<app-page-topbar-nav></app-page-topbar-nav>
+
+<div *ngIf="view === ''" class="card mg-3">
+  <div class="card-header">
+    <div class="row">
+      <div class="col col-md-6">
+        <h5 class="card-title">
+          {{ '::Menu:Rigs' | abpLocalization }}
+        </h5>
+      </div>
+      <div class="text-lg-end pt-2">
+        <button id="create" class="btn btn-primary" type="button" (click)="createRig()">
+          <i class="fa fa-plus me-1"></i>
+          <span>{{ "::NewRig" | abpLocalization }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="card-body">
+    <ngx-datatable [rows]="rig.items" [count]="rig.totalCount" [list]="list" [columnMode]="'force'" default>
+      <ngx-datatable-column [name]="'::Name' | abpLocalization" prop="name"></ngx-datatable-column>
+      <ngx-datatable-column [name]="'::Length' | abpLocalization" prop="lengthMm">
+        <ng-template let-row="row" ngx-datatable-cell-template>
+          {{ lengthDisplay(row.lengthMm, row.lengthUnit) }}
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column [name]="'::HookSize' | abpLocalization" prop="hookSize" [width]="90" [minWidth]="70"></ngx-datatable-column>
+      <ngx-datatable-column [name]="'::HookWeight' | abpLocalization" prop="hookWeightG" [width]="90" [minWidth]="70">
+        <ng-template let-row="row" ngx-datatable-cell-template>
+          {{ hookWeightDisplay(row.hookWeightG, row.hookWeightUnit) }}
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column [name]="'::HookPattern' | abpLocalization" prop="hookPattern"></ngx-datatable-column>
+      <ngx-datatable-column [name]="'::Materials' | abpLocalization" prop="materials"></ngx-datatable-column>
+      <ngx-datatable-column [name]="'::Actions' | abpLocalization" [width]="100" [minWidth]="100" [maxWidth]="100" [resizeable]="false" [sortable]="false">
+        <ng-template let-row="row" ngx-datatable-cell-template>
+          <div class="row-actions">
+            <button class="btn btn-sm btn-outline-primary" [title]="'::Edit' | abpLocalization" (click)="editRig(row.id)">
+              <i class="fa fa-pencil"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-danger" [title]="'::Delete' | abpLocalization" (click)="deleteRig(row.id)">
+              <i class="fa fa-trash"></i>
+            </button>
+          </div>
+        </ng-template>
+      </ngx-datatable-column>
+    </ngx-datatable>
+  </div>
+</div>
+
+<div *ngIf="view === 'rigForm'" class="card mg-3">
+  <div class="card-header">
+    <h3>{{ (rigItem ? '::EditRig' : '::NewRig') | abpLocalization }}</h3>
+  </div>
+
+  <div class="card-body">
+    <app-rig-form #rigFormRef [rig]="rigItem" (saved)="onRigSaved()" (cancelled)="closeRigForm()"></app-rig-form>
+  </div>
+
+  <div class="card-footer">
+    <button type="button" class="btn btn-secondary button-pad" (click)="closeRigForm()" abpClose>
+      {{ '::Close' | abpLocalization }}
+    </button>
+    <button class="btn btn-primary" (click)="rigFormRef.save()" [disabled]="rigFormRef.form?.invalid">
+      <i class="fa fa-check mr-1"></i>
+      {{ '::Save' | abpLocalization }}
+    </button>
+  </div>
+</div>

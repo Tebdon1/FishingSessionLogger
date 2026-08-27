@@ -18,25 +18,7 @@
     </div>
   </div>
   <div class="card-body">
-    <ngx-datatable [rows]="session.items" [count]="session.totalCount" [list]="list" default>
-      <ngx-datatable-column [name]="'::Actions' | abpLocalization" [maxWidth]="150" [sortable]="false">
-        <ng-template let-row="row" ngx-datatable-cell-template>
-          <div ngbDropdown container="body" class="d-inline-block">
-            <button class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
-              ngbDropdownToggle>
-              <i class="fa fa-cog me-1"></i>{{ '::Actions' | abpLocalization }}
-            </button>
-            <div ngbDropdownMenu>
-              <button ngbDropdownItem (click)="editSession(row.id)">
-                {{ '::Edit' | abpLocalization }}
-              </button>
-              <button ngbDropdownItem (click)="deleteSession(row.id)">
-                {{ '::Delete' | abpLocalization }}
-              </button>
-            </div>
-          </div>
-        </ng-template>
-      </ngx-datatable-column>
+    <ngx-datatable [rows]="session.items" [count]="session.totalCount" [list]="list" [columnMode]="'force'" default>
       <ngx-datatable-column [name]="'::Start' | abpLocalization" prop="startDateTime">
         <ng-template let-row="row" ngx-datatable-cell-template>
           {{ row.startDateTime | date:'medium' }}
@@ -44,6 +26,18 @@
       </ngx-datatable-column>
       <ngx-datatable-column [name]="'::Venue' | abpLocalization" prop="venueName"></ngx-datatable-column>
       <ngx-datatable-column [name]="'::Duration' | abpLocalization" prop="duration"></ngx-datatable-column>
+      <ngx-datatable-column [name]="'::Actions' | abpLocalization" [width]="100" [minWidth]="100" [maxWidth]="100" [resizeable]="false" [sortable]="false">
+        <ng-template let-row="row" ngx-datatable-cell-template>
+          <div class="row-actions">
+            <button class="btn btn-sm btn-outline-primary" [title]="'::Edit' | abpLocalization" (click)="editSession(row.id)">
+              <i class="fa fa-pencil"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-danger" [title]="'::Delete' | abpLocalization" (click)="deleteSession(row.id)">
+              <i class="fa fa-trash"></i>
+            </button>
+          </div>
+        </ng-template>
+      </ngx-datatable-column>
     </ngx-datatable>
   </div>
 </div>
@@ -65,13 +59,13 @@
       </div>
       <div class="mt-2">
         <label for="session-venue">Venue</label><span> * </span>
-        <select class="form-control" id="session-venue" formControlName="venueId">
-          <option [ngValue]="null">Select a venue</option>
-          <option [ngValue]="venue.id" *ngFor="let venue of venueList">{{ venue.name }}</option>
-        </select>
-        <small class="text-muted" *ngIf="venueList.length === 0">
-          No venues yet - <a [routerLink]="['/venues']">add one</a> first.
-        </small>
+        <div class="picker-row">
+          <ng-select id="session-venue" class="flex-grow-1" [items]="venueList" bindLabel="name" bindValue="id"
+            formControlName="venueId" placeholder="Select a venue"></ng-select>
+          <button type="button" class="btn btn-outline-secondary btn-sm" (click)="addVenueQuickAdd()">
+            <i class="fa fa-plus me-1"></i>New Venue
+          </button>
+        </div>
       </div>
       <div class="mt-2">
         <label for="session-notes">Notes</label>
@@ -91,6 +85,7 @@
     <table class="table table-sm">
       <thead>
         <tr>
+          <th></th>
           <th>Species</th>
           <th>Count</th>
           <th>Weights</th>
@@ -99,30 +94,70 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let group of getSpeciesGroups()">
-          <td>{{ group.speciesName }}</td>
-          <td>{{ group.entries.length }}</td>
-          <td>{{ groupWeights(group) }}</td>
-          <td>{{ groupBaits(group) }}</td>
-          <td class="text-end">
-            <div ngbDropdown container="body" class="d-inline-block">
-              <button class="btn btn-sm btn-outline-secondary dropdown-toggle" ngbDropdownToggle>
-                {{ '::Actions' | abpLocalization }}
-              </button>
-              <div ngbDropdownMenu>
-                <button ngbDropdownItem *ngFor="let entry of group.entries" (click)="editCatch(entry.index)">
-                  Edit #{{ entry.index + 1 }} {{ entry.catchItem.weight ? '(' + entry.catchItem.weight + ')' : '' }}
-                </button>
-                <div class="dropdown-divider"></div>
-                <button ngbDropdownItem *ngFor="let entry of group.entries" (click)="deleteCatch(entry.index)">
-                  Delete #{{ entry.index + 1 }}
-                </button>
-              </div>
-            </div>
-          </td>
-        </tr>
+        <ng-container *ngFor="let group of getSpeciesGroups()">
+          <tr class="species-group-row" (click)="expandedSpeciesId = expandedSpeciesId === group.speciesId ? null : group.speciesId">
+            <td>
+              <i class="fa" [ngClass]="expandedSpeciesId === group.speciesId ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
+            </td>
+            <td>
+              {{ group.speciesName }}
+              <i *ngIf="groupHasPhotos(group)" class="fa fa-camera text-muted ms-1" title="Has photos"></i>
+              <i *ngIf="groupHasNotes(group)" class="fa fa-sticky-note-o text-muted ms-1" title="Has notes"></i>
+            </td>
+            <td>{{ group.entries.length }}</td>
+            <td>{{ groupWeights(group) }}</td>
+            <td>{{ groupBaits(group) }}</td>
+            <td></td>
+          </tr>
+          <tr *ngIf="expandedSpeciesId === group.speciesId">
+            <td></td>
+            <td colspan="5">
+              <table class="table table-sm catch-detail-table mb-0">
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th>Weight</th>
+                    <th>Length</th>
+                    <th>Bait</th>
+                    <th>Method</th>
+                    <th>Rig</th>
+                    <th>Time</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let entry of group.entries">
+                    <td class="catch-detail-photo">
+                      <i *ngIf="hasPhoto(entry.catchItem)" class="fa fa-camera text-muted" title="Has a photo"></i>
+                      <i *ngIf="entry.catchItem.notes" class="fa fa-sticky-note-o text-muted ms-1" [title]="entry.catchItem.notes"></i>
+                    </td>
+                    <td>{{ weightDisplay(entry.catchItem.weightG, entry.catchItem.weightUnit) || '-' }}</td>
+                    <td>{{ lengthDisplay(entry.catchItem.lengthMm, entry.catchItem.lengthUnit) || '-' }}</td>
+                    <td>{{ baitName(entry.catchItem.baitId) || '-' }}</td>
+                    <td>{{ methodName(entry.catchItem.methodId) || '-' }}</td>
+                    <td>{{ rigName(entry.catchItem.rigId) || '-' }}</td>
+                    <td>{{ entry.catchItem.catchTime?.substring(0, 5) || '-' }}</td>
+                    <td class="text-end">
+                      <div class="row-actions justify-content-end">
+                        <button *ngIf="hasPhoto(entry.catchItem)" type="button" class="btn btn-sm btn-outline-secondary" [title]="'::ViewPhoto' | abpLocalization" (click)="viewPhoto(entry.catchItem)">
+                          <i class="fa fa-camera"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" [title]="'::Edit' | abpLocalization" (click)="editCatch(entry.index)">
+                          <i class="fa fa-pencil"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-danger" [title]="'::Delete' | abpLocalization" (click)="deleteCatch(entry.index)">
+                          <i class="fa fa-trash"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </td>
+          </tr>
+        </ng-container>
         <tr *ngIf="getSpeciesGroups().length === 0">
-          <td colspan="5" class="text-muted">No catches logged yet.</td>
+          <td colspan="6" class="text-muted">No catches logged yet.</td>
         </tr>
       </tbody>
     </table>
@@ -139,91 +174,256 @@
   </div>
 </div>
 
-<div *ngIf="view === 'catchForm'" class="card mg-3">
-  <div class="card-header">
-    <h3>Catch</h3>
+<ng-template #catchModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Catch</h5>
+    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
   </div>
-
-  <div class="card-body">
+  <div class="modal-body">
     <form *ngIf="catchForm" [formGroup]="catchForm">
       <div class="mt-2">
         <label for="catch-species">Species</label><span> * </span>
-        <select class="form-control" id="catch-species" formControlName="speciesId">
-          <option [ngValue]="null">Select a species</option>
-          <option [ngValue]="species.id" *ngFor="let species of speciesList">{{ species.name }}</option>
-        </select>
+        <ng-select id="catch-species" [items]="speciesList" bindLabel="name" bindValue="id"
+          formControlName="speciesId" placeholder="Select a species"></ng-select>
       </div>
       <div class="mt-2">
         <label for="catch-bait">Bait</label>
-        <select class="form-control" id="catch-bait" formControlName="baitId">
-          <option [ngValue]="null">Unknown / not recorded</option>
-          <option [ngValue]="bait.id" *ngFor="let bait of baitList">{{ bait.name }}</option>
-        </select>
+        <div class="picker-row">
+          <ng-select id="catch-bait" class="flex-grow-1" [items]="baitList" bindLabel="name" bindValue="id"
+            formControlName="baitId" placeholder="Unknown / not recorded"></ng-select>
+          <button type="button" class="btn btn-outline-secondary btn-sm" (click)="addBaitQuickAdd()">
+            <i class="fa fa-plus me-1"></i>New Bait
+          </button>
+        </div>
       </div>
       <div class="mt-2">
-        <label for="catch-weight">Weight</label>
-        <input type="number" step="0.01" id="catch-weight" class="form-control" formControlName="weight" />
+        <label for="catch-weight-unit">Weight</label>
+        <div class="weight-input-row">
+          <ng-container *ngIf="catchWeightIsLbOz; else catchWeightValueInput">
+            <input type="number" min="0" id="catch-weight-lbs" class="form-control" formControlName="weightLbs" placeholder="lb" />
+            <input type="number" min="0" max="15" id="catch-weight-oz" class="form-control" formControlName="weightOz" placeholder="oz" />
+          </ng-container>
+          <ng-template #catchWeightValueInput>
+            <input type="number" step="0.01" min="0" id="catch-weight-value" class="form-control" formControlName="weightValue" />
+          </ng-template>
+          <select class="form-control" id="catch-weight-unit" formControlName="weightUnit">
+            <option [ngValue]="WeightUnit.LbOz">lb/oz</option>
+            <option [ngValue]="WeightUnit.Kilograms">kg</option>
+            <option [ngValue]="WeightUnit.Grams">g</option>
+          </select>
+        </div>
+      </div>
+      <div class="mt-2">
+        <label for="catch-length-value">Length</label>
+        <div class="size-input-row">
+          <input type="number" step="0.01" min="0" id="catch-length-value" class="form-control" formControlName="lengthValue" />
+          <select class="form-control" id="catch-length-unit" formControlName="lengthUnit">
+            <option [ngValue]="SizeUnit.Millimetres">mm</option>
+            <option [ngValue]="SizeUnit.Centimetres">cm</option>
+            <option [ngValue]="SizeUnit.Inches">inch</option>
+          </select>
+        </div>
+      </div>
+      <div class="mt-2">
+        <label for="catch-method">Method</label>
+        <div class="picker-row">
+          <ng-select id="catch-method" class="flex-grow-1" [items]="methodList" bindLabel="name" bindValue="id"
+            formControlName="methodId" placeholder="Unknown / not recorded"></ng-select>
+          <button type="button" class="btn btn-outline-secondary btn-sm" (click)="addMethodQuickAdd()">
+            <i class="fa fa-plus me-1"></i>New Method
+          </button>
+        </div>
+      </div>
+      <div class="mt-2">
+        <label for="catch-rig">Rig</label>
+        <div class="picker-row">
+          <ng-select id="catch-rig" class="flex-grow-1" [items]="rigList" bindLabel="displayLabel" bindValue="id"
+            formControlName="rigId" placeholder="Unknown / not recorded"></ng-select>
+          <button type="button" class="btn btn-outline-secondary btn-sm" (click)="addRigQuickAdd()">
+            <i class="fa fa-plus me-1"></i>New Rig
+          </button>
+        </div>
+      </div>
+      <div class="mt-2">
+        <label for="catch-time">Time of catch</label>
+        <input type="time" id="catch-time" class="form-control" formControlName="catchTime" />
       </div>
       <div class="mt-2">
         <label for="catch-photo">Photo</label>
-        <input type="file" accept="image/*" id="catch-photo" class="form-control" (change)="onCatchPhotoSelected($event)" />
+        <input #catchPhotoInput type="file" accept="image/*" id="catch-photo" class="d-none" (change)="onCatchPhotoSelected($event)" />
+        <div class="photo-input-row">
+          <button type="button" class="btn btn-outline-secondary btn-sm" (click)="catchPhotoInput.click()">
+            {{ hasCatchPhoto ? 'Change Photo' : 'Choose Photo' }}
+          </button>
+          <button *ngIf="hasCatchPhoto" type="button" class="btn btn-outline-danger btn-sm" title="Remove photo" (click)="removeCatchPhoto(catchPhotoInput)">
+            <i class="fa fa-times"></i>
+          </button>
+        </div>
         <img *ngIf="catchPhotoPreviewUrl" [src]="catchPhotoPreviewUrl" class="catch-photo-preview mt-2" />
-        <img *ngIf="!catchPhotoPreviewUrl && editCatchItem.photoFileName" [src]="photoUrl(editingCatchIndex !== null ? editSessionItem.catches[editingCatchIndex].photoId : null)" class="catch-photo-preview mt-2" />
+        <img *ngIf="!catchPhotoPreviewUrl && editCatchItem.existingPhotoUrl" [src]="editCatchItem.existingPhotoUrl" class="catch-photo-preview mt-2" />
+      </div>
+      <div class="mt-2">
+        <label for="catch-notes">Notes</label>
+        <textarea class="form-control" id="catch-notes" rows="2" formControlName="notes"></textarea>
       </div>
     </form>
   </div>
-
-  <div class="card-footer">
-    <button type="button" class="btn btn-secondary button-pad" (click)="closeCatchForm()">
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary button-pad" (click)="modal.dismiss()">
       {{ '::Close' | abpLocalization }}
     </button>
-    <button *ngIf="catchForm" class="btn btn-primary" (click)="saveCatch()" [disabled]="catchForm.invalid">
+    <button *ngIf="catchForm" class="btn btn-primary" (click)="saveCatch(modal)" [disabled]="catchForm.invalid">
       <i class="fa fa-check mr-1"></i>
       {{ '::Save' | abpLocalization }}
     </button>
   </div>
-</div>
+</ng-template>
 
-<div *ngIf="view === 'bulkCatchForm'" class="card mg-3">
-  <div class="card-header">
-    <h3>Bulk Add Catches</h3>
+<ng-template #bulkModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Bulk Add Catches</h5>
+    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
   </div>
-
-  <div class="card-body">
+  <div class="modal-body">
     <form *ngIf="bulkForm" [formGroup]="bulkForm">
       <div class="mt-2">
         <label for="bulk-species">Species</label><span> * </span>
-        <select class="form-control" id="bulk-species" formControlName="speciesId">
-          <option [ngValue]="null">Select a species</option>
-          <option [ngValue]="species.id" *ngFor="let species of speciesList">{{ species.name }}</option>
-        </select>
+        <ng-select id="bulk-species" [items]="speciesList" bindLabel="name" bindValue="id"
+          formControlName="speciesId" placeholder="Select a species"></ng-select>
       </div>
       <div class="mt-2">
         <label for="bulk-bait">Bait</label>
-        <select class="form-control" id="bulk-bait" formControlName="baitId">
-          <option [ngValue]="null">Unknown / not recorded</option>
-          <option [ngValue]="bait.id" *ngFor="let bait of baitList">{{ bait.name }}</option>
-        </select>
+        <ng-select id="bulk-bait" [items]="baitList" bindLabel="name" bindValue="id"
+          formControlName="baitId" placeholder="Unknown / not recorded"></ng-select>
+      </div>
+      <div class="mt-2">
+        <label for="bulk-method">Method</label>
+        <ng-select id="bulk-method" [items]="methodList" bindLabel="name" bindValue="id"
+          formControlName="methodId" placeholder="Unknown / not recorded"></ng-select>
+      </div>
+      <div class="mt-2">
+        <label for="bulk-rig">Rig</label>
+        <ng-select id="bulk-rig" [items]="rigList" bindLabel="displayLabel" bindValue="id"
+          formControlName="rigId" placeholder="Unknown / not recorded"></ng-select>
       </div>
       <div class="mt-2">
         <label for="bulk-count">Number caught</label><span> * </span>
         <input type="number" min="1" max="200" id="bulk-count" class="form-control" formControlName="count" />
       </div>
       <div class="mt-2">
-        <label for="bulk-weight">Weight (each, if known)</label>
-        <input type="number" step="0.01" id="bulk-weight" class="form-control" formControlName="weightEach" />
+        <label for="bulk-weight-unit">Weight (each, if known)</label>
+        <div class="weight-input-row">
+          <ng-container *ngIf="bulkWeightIsLbOz; else bulkWeightValueInput">
+            <input type="number" min="0" id="bulk-weight-lbs" class="form-control" formControlName="weightLbsEach" placeholder="lb" />
+            <input type="number" min="0" max="15" id="bulk-weight-oz" class="form-control" formControlName="weightOzEach" placeholder="oz" />
+          </ng-container>
+          <ng-template #bulkWeightValueInput>
+            <input type="number" step="0.01" min="0" id="bulk-weight-value" class="form-control" formControlName="weightValueEach" />
+          </ng-template>
+          <select class="form-control" id="bulk-weight-unit" formControlName="weightUnitEach">
+            <option [ngValue]="WeightUnit.LbOz">lb/oz</option>
+            <option [ngValue]="WeightUnit.Kilograms">kg</option>
+            <option [ngValue]="WeightUnit.Grams">g</option>
+          </select>
+        </div>
         <small class="text-muted">Leave blank if you didn't weigh these.</small>
       </div>
     </form>
   </div>
-
-  <div class="card-footer">
-    <button type="button" class="btn btn-secondary button-pad" (click)="closeBulkCatchForm()">
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary button-pad" (click)="modal.dismiss()">
       {{ '::Close' | abpLocalization }}
     </button>
-    <button *ngIf="bulkForm" class="btn btn-primary" (click)="saveBulkCatch()" [disabled]="bulkForm.invalid">
+    <button *ngIf="bulkForm" class="btn btn-primary" (click)="saveBulkCatch(modal)" [disabled]="bulkForm.invalid">
       <i class="fa fa-check mr-1"></i>
       {{ '::Save' | abpLocalization }}
     </button>
   </div>
-</div>
+</ng-template>
+
+<ng-template #photoModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Photo</h5>
+    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body text-center">
+    <div *ngIf="!viewingPhotoUrl" class="text-muted">Loading...</div>
+    <img *ngIf="viewingPhotoUrl" [src]="viewingPhotoUrl" class="catch-photo-full" />
+  </div>
+</ng-template>
+
+<ng-template #venueModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">New Venue</h5>
+    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <app-venue-form #quickVenueForm (saved)="onVenueQuickAddSaved($event, modal)" (cancelled)="modal.dismiss()"></app-venue-form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary button-pad" (click)="modal.dismiss()">
+      {{ '::Close' | abpLocalization }}
+    </button>
+    <button class="btn btn-primary" (click)="quickVenueForm.save()" [disabled]="quickVenueForm.form?.invalid">
+      <i class="fa fa-check mr-1"></i>
+      {{ '::Save' | abpLocalization }}
+    </button>
+  </div>
+</ng-template>
+
+<ng-template #baitModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">New Bait</h5>
+    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <app-bait-form #quickBaitForm (saved)="onBaitQuickAddSaved($event, modal)" (cancelled)="modal.dismiss()"></app-bait-form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary button-pad" (click)="modal.dismiss()">
+      {{ '::Close' | abpLocalization }}
+    </button>
+    <button class="btn btn-primary" (click)="quickBaitForm.save()" [disabled]="quickBaitForm.invalid">
+      <i class="fa fa-check mr-1"></i>
+      {{ '::Save' | abpLocalization }}
+    </button>
+  </div>
+</ng-template>
+
+<ng-template #methodModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">New Method</h5>
+    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <app-method-form #quickMethodForm (saved)="onMethodQuickAddSaved($event, modal)" (cancelled)="modal.dismiss()"></app-method-form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary button-pad" (click)="modal.dismiss()">
+      {{ '::Close' | abpLocalization }}
+    </button>
+    <button class="btn btn-primary" (click)="quickMethodForm.save()" [disabled]="quickMethodForm.form?.invalid">
+      <i class="fa fa-check mr-1"></i>
+      {{ '::Save' | abpLocalization }}
+    </button>
+  </div>
+</ng-template>
+
+<ng-template #rigModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">New Rig</h5>
+    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <app-rig-form #quickRigForm (saved)="onRigQuickAddSaved($event, modal)" (cancelled)="modal.dismiss()"></app-rig-form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary button-pad" (click)="modal.dismiss()">
+      {{ '::Close' | abpLocalization }}
+    </button>
+    <button class="btn btn-primary" (click)="quickRigForm.save()" [disabled]="quickRigForm.form?.invalid">
+      <i class="fa fa-check mr-1"></i>
+      {{ '::Save' | abpLocalization }}
+    </button>
+  </div>
+</ng-template>

@@ -1,0 +1,43 @@
+<form *ngIf="form" [formGroup]="form">
+  <div class="mt-2">
+    <label for="rig-form-name">Name</label><span> * </span>
+    <input type="text" id="rig-form-name" class="form-control" formControlName="name" autofocus />
+  </div>
+  <div class="mt-2">
+    <label for="rig-form-length-value">Length</label>
+    <div class="size-input-row">
+      <input type="number" step="0.01" min="0" id="rig-form-length-value" class="form-control" formControlName="lengthValue" />
+      <select class="form-control" id="rig-form-length-unit" formControlName="lengthUnit">
+        <option [ngValue]="SizeUnit.Millimetres">mm</option>
+        <option [ngValue]="SizeUnit.Centimetres">cm</option>
+        <option [ngValue]="SizeUnit.Inches">inch</option>
+      </select>
+    </div>
+  </div>
+  <div class="mt-2">
+    <label for="rig-form-hook-size">Hook Size</label>
+    <input type="text" id="rig-form-hook-size" class="form-control" formControlName="hookSize" placeholder="e.g. 6, 1/0" />
+  </div>
+  <div class="mt-2">
+    <label for="rig-form-hook-weight-value">Hook Weight</label>
+    <div class="size-input-row">
+      <input type="number" step="0.01" min="0" id="rig-form-hook-weight-value" class="form-control" formControlName="hookWeightValue" placeholder="Jighead weight, if any" />
+      <select class="form-control" id="rig-form-hook-weight-unit" formControlName="hookWeightUnit">
+        <option [ngValue]="HookWeightUnit.Grams">g</option>
+        <option [ngValue]="HookWeightUnit.Ounces">oz</option>
+      </select>
+    </div>
+  </div>
+  <div class="mt-2">
+    <label for="rig-form-hook-pattern">Hook Pattern</label>
+    <input type="text" id="rig-form-hook-pattern" class="form-control" formControlName="hookPattern" />
+  </div>
+  <div class="mt-2">
+    <label for="rig-form-materials">Materials</label>
+    <input type="text" id="rig-form-materials" class="form-control" formControlName="materials" />
+  </div>
+  <div class="mt-2">
+    <label for="rig-form-notes">Notes</label>
+    <textarea class="form-control" id="rig-form-notes" rows="2" formControlName="notes"></textarea>
+  </div>
+</form>

@@ -1,0 +1,6 @@
+<form *ngIf="form" [formGroup]="form">
+  <div>
+    <label for="method-form-name">Name</label><span> * </span>
+    <input type="text" id="method-form-name" class="form-control" formControlName="name" autofocus />
+  </div>
+</form>

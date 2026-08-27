@@ -1,4 +1,4 @@
-import type { SpeciesDto } from './models';
+import type { SpeciesDto, CreateUpdateSpeciesDto } from './models';
 import { RestService } from '@abp/ng.core';
 import type { PagedAndSortedResultRequestDto, PagedResultDto } from '@abp/ng.core';
 import { Injectable } from '@angular/core';
@@ -8,16 +8,15 @@ import { Injectable } from '@angular/core';
 })
 export class SpeciesService {
   apiName = 'Default';
-  
 
-  create = (input: any) =>
+  create = (input: CreateUpdateSpeciesDto) =>
     this.restService.request<any, SpeciesDto>({
       method: 'POST',
       url: '/api/app/species',
       body: input,
     },
     { apiName: this.apiName });
-  
+
 
   delete = (id: number) =>
     this.restService.request<any, void>({
@@ -44,7 +43,7 @@ export class SpeciesService {
     { apiName: this.apiName });
   
 
-  update = (id: number, input: any) =>
+  update = (id: number, input: CreateUpdateSpeciesDto) =>
     this.restService.request<any, SpeciesDto>({
       method: 'PUT',
       url: `/api/app/species/${id}`,

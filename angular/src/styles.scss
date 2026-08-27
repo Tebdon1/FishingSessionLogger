@@ -1,5 +1,17 @@
 /* You can add global styles to this file, and also import other style files */
 @import url('https://fonts.googleapis.com/css2?family=Titillium+Web&display=swap');
+@import "@ng-select/ng-select/themes/default.theme.css";
+
+// Always reserve the vertical scrollbar gutter, even on pages short enough not to
+// need it. Without this, a page's available width differs depending on whether it's
+// tall enough to scroll - and ngx-datatable's columnMode="force" measures that width
+// once and doesn't reliably re-measure when a page-level scrollbar appears/disappears
+// (that's a content-height change, not a window resize, so its resize listener misses
+// it). The result: on any list with enough rows to make the page scroll, the rightmost
+// column overflows past the visible table edge by exactly the scrollbar's width.
+html {
+    overflow-y: scroll;
+}
 
 @keyframes donut-spin {
   0% {
@@ -367,4 +379,21 @@ a:hover {
 
 .mg-b-4 {
     margin-bottom: 2rem;
+}
+
+// Shared "value + unit selector" row layout, used by every value-with-unit field
+// (length, weight, hook weight, etc.) across the various lookup edit forms.
+.size-input-row, .weight-input-row {
+    display: flex;
+    gap: 8px;
+
+    input {
+        flex-grow: 1;
+        min-width: 0;
+    }
+
+    select {
+        width: 90px;
+        flex-shrink: 0;
+    }
 }

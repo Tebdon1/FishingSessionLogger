@@ -29,3 +29,59 @@
     max-height: 200px;
     display: block;
 }
+
+.catch-photo-full {
+    max-width: 100%;
+    max-height: 70vh;
+}
+
+.photo-input-row {
+    display: flex;
+    gap: 8px;
+}
+
+// Dropdown + "New X" quick-add button, used for Venue/Bait/Method/Rig on the catch form.
+.picker-row {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+
+    ::ng-deep .ng-select {
+        flex-grow: 1;
+    }
+}
+
+.species-group-row {
+    cursor: pointer;
+
+    &:hover {
+        background-color: rgba(0, 0, 0, 0.03);
+    }
+}
+
+.catch-detail-table {
+    background-color: rgba(0, 0, 0, 0.02);
+
+    td {
+        border-top: none;
+    }
+
+    th {
+        font-size: 0.75rem;
+        font-weight: 400;
+        color: #6c757d;
+        border-top: none;
+        padding-top: 4px;
+        padding-bottom: 4px;
+    }
+}
+
+.catch-detail-photo {
+    width: 45px;
+    white-space: nowrap;
+}
+
+.row-actions {
+    display: flex;
+    gap: 4px;
+}
