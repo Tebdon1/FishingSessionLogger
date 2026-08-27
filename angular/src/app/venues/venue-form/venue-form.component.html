@@ -1,0 +1,31 @@
+<form *ngIf="form" [formGroup]="form">
+  <div>
+    <label for="venue-form-name">Name</label><span> * </span>
+    <input type="text" id="venue-form-name" class="form-control" formControlName="name" autofocus />
+  </div>
+  <div class="mt-2">
+    <label for="venue-form-postcode">Postcode</label>
+    <input type="text" id="venue-form-postcode" class="form-control" formControlName="postcode" />
+  </div>
+  <div class="mt-2">
+    <label for="venue-form-ticket">Ticket / club membership required</label>
+    <ng-select id="venue-form-ticket" [items]="ticketList" bindLabel="name" bindValue="id"
+      formControlName="ticketId" placeholder="None"></ng-select>
+    <small class="text-muted" *ngIf="ticketList.length === 0">
+      No tickets yet - <a [routerLink]="['/tickets']">add one</a> if this venue needs one.
+    </small>
+  </div>
+  <div class="mt-2">
+    <label for="venue-form-water-type">Water type</label>
+    <select class="form-control" id="venue-form-water-type" formControlName="waterType">
+      <option [ngValue]="null">Not specified</option>
+      <option [ngValue]="WaterType.River">River</option>
+      <option [ngValue]="WaterType.Lake">Lake</option>
+      <option [ngValue]="WaterType.Reservoir">Reservoir</option>
+      <option [ngValue]="WaterType.Canal">Canal</option>
+      <option [ngValue]="WaterType.Pond">Pond</option>
+      <option [ngValue]="WaterType.Sea">Sea</option>
+      <option [ngValue]="WaterType.Other">Other</option>
+    </select>
+  </div>
+</form>

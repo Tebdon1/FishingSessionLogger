@@ -1,9 +1,7 @@
 import { ListService, PagedResultDto } from '@abp/ng.core';
 import { Component, OnInit } from '@angular/core';
-import { VenueService, VenueDto } from '@proxy/venues';
-import { TicketService, TicketDto } from '@proxy/tickets';
+import { VenueService, VenueDto, WaterType } from '@proxy/venues';
 import { ConfirmationService, Confirmation } from '@abp/ng.theme.shared';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { lastValueFrom } from 'rxjs';
 
 @Component({
@@ -16,22 +14,17 @@ import { lastValueFrom } from 'rxjs';
 })
 export class VenueComponent implements OnInit {
   venueItem: VenueDto;
-  editVenueItem: any;
 
   venue = { items: [], totalCount: 0 } as PagedResultDto<VenueDto>;
 
-  venueForm: FormGroup;
-
-  ticketList: TicketDto[] = [];
+  WaterType = WaterType;
 
   view = '';
 
   constructor(
     public readonly list: ListService,
     private venueService: VenueService,
-    private ticketService: TicketService,
-    private confirmation: ConfirmationService,
-    private fb: FormBuilder) {
+    private confirmation: ConfirmationService) {
       this.list.maxResultCount = 25;
     }
 
@@ -40,52 +33,33 @@ export class VenueComponent implements OnInit {
     this.list.hookToQuery(venueStreamCreator).subscribe((response) => {
       this.venue = response;
     });
-    this.loadTickets();
   }
 
-  async loadTickets() {
-    const tickets = await lastValueFrom(this.ticketService.getList({ maxResultCount: 1000 }));
-    this.ticketList = tickets.items;
+  waterTypeLabel(waterType?: WaterType): string {
+    switch (waterType) {
+      case WaterType.River: return 'River';
+      case WaterType.Lake: return 'Lake';
+      case WaterType.Reservoir: return 'Reservoir';
+      case WaterType.Canal: return 'Canal';
+      case WaterType.Pond: return 'Pond';
+      case WaterType.Sea: return 'Sea';
+      case WaterType.Other: return 'Other';
+      default: return '';
+    }
   }
 
   createVenue() {
     this.venueItem = null;
-    this.editVenueItem = { name: '', postcode: '', ticketId: null };
-    this.buildVenueForm(this.editVenueItem);
     this.view = 'venueForm';
   }
 
   async editVenue(id) {
     this.venueItem = await lastValueFrom(this.venueService.get(id));
-    this.editVenueItem = JSON.parse(JSON.stringify(this.venueItem));
-    this.buildVenueForm(this.editVenueItem);
     this.view = 'venueForm';
   }
 
-  buildVenueForm(venueItem: any) {
-    this.venueForm = this.fb.group({
-      name: [venueItem.name || '', [Validators.required, Validators.maxLength(255)]],
-      postcode: [venueItem.postcode || '', Validators.maxLength(8)],
-      ticketId: [venueItem.ticketId ?? null],
-    });
-  }
-
-  async saveVenue() {
-    if (this.venueForm.invalid) {
-      return;
-    }
-
-    const formValue = this.venueForm.value;
-
-    if (this.venueItem) {
-      await lastValueFrom(this.venueService.update(this.venueItem.id, formValue));
-    }
-    else {
-      await lastValueFrom(this.venueService.create(formValue));
-    }
-
+  onVenueSaved() {
     this.view = '';
-    this.venueForm.reset();
     this.list.get();
   }
 

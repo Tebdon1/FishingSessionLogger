@@ -15,11 +15,8 @@ using Volo.Abp.TenantManagement.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.EntityFrameworkCore;
 using SessionLogger.Domain.Sessions;
-using SessionLogger.Search;
 using SessionLogger.Domain.Catches;
-using SessionLogger.Domain.SpeciesTypes;
 using SessionLogger.Domain.Venues;
-using SessionLogger.Repositories;
 
 namespace SessionLogger.EntityFrameworkCore;
 
@@ -56,6 +53,8 @@ public class SessionLoggerEntityFrameworkCoreModule : AbpModule
                 .Include(o => o.Venue)
                 .Include(o => o.Catches).ThenInclude(c => c.Species)
                 .Include(o => o.Catches).ThenInclude(c => c.Bait)
+                .Include(o => o.Catches).ThenInclude(c => c.Method)
+                .Include(o => o.Catches).ThenInclude(c => c.Rig)
                 .Include(o => o.Catches).ThenInclude(c => c.Photo);
             });
 
@@ -65,6 +64,8 @@ public class SessionLoggerEntityFrameworkCoreModule : AbpModule
                 .Include(o => o.Session)
                 .Include(o => o.Species)
                 .Include(o => o.Bait)
+                .Include(o => o.Method)
+                .Include(o => o.Rig)
                 .Include(o => o.Photo);
             });
 
@@ -81,11 +82,5 @@ public class SessionLoggerEntityFrameworkCoreModule : AbpModule
                  * See also SessionLoggerMigrationsDbContextFactory for EF Core tooling. */
             options.UseSqlServer();
         });
-
-        // add noise service for use by search
-        context.Services.AddSingleton<INoiseService, NoiseService>();
-        
-        // Register custom repositories
-        context.Services.AddTransient<ISpeciesRepository, EfCoreSpeciesRepository>();
     }
 }

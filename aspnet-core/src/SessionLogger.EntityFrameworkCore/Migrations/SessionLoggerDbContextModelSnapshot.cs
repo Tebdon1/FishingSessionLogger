@@ -32,6 +32,17 @@ namespace SessionLogger.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("BaitType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Brand")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("Colour")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasMaxLength(40)
@@ -50,6 +61,10 @@ namespace SessionLogger.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("ExtraProperties");
 
+                    b.Property<string>("Flavour")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<DateTime?>("LastModificationTime")
                         .HasColumnType("datetime2")
                         .HasColumnName("LastModificationTime");
@@ -60,8 +75,19 @@ namespace SessionLogger.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("Range")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<decimal?>("SizeMm")
+                        .HasPrecision(8, 2)
+                        .HasColumnType("decimal(8,2)");
+
+                    b.Property<int?>("SizeUnit")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -82,6 +108,9 @@ namespace SessionLogger.Migrations
                     b.Property<int?>("BaitId")
                         .HasColumnType("int");
 
+                    b.Property<TimeSpan?>("CatchTime")
+                        .HasColumnType("time");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasMaxLength(40)
@@ -108,18 +137,43 @@ namespace SessionLogger.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("LastModifierId");
 
+                    b.Property<decimal?>("LengthMm")
+                        .HasPrecision(8, 2)
+                        .HasColumnType("decimal(8,2)");
+
+                    b.Property<int?>("LengthUnit")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("MethodId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<int?>("RigId")
+                        .HasColumnType("int");
+
                     b.Property<int>("SessionId")
                         .HasColumnType("int");
 
                     b.Property<int>("SpeciesId")
                         .HasColumnType("int");
 
-                    b.Property<float?>("Weight")
-                        .HasColumnType("real");
+                    b.Property<decimal?>("WeightG")
+                        .HasPrecision(8, 2)
+                        .HasColumnType("decimal(8,2)");
+
+                    b.Property<int?>("WeightUnit")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("BaitId");
+
+                    b.HasIndex("MethodId");
+
+                    b.HasIndex("RigId");
 
                     b.HasIndex("SessionId");
 
@@ -197,7 +251,7 @@ namespace SessionLogger.Migrations
                     b.ToTable("AppFile", (string)null);
                 });
 
-            modelBuilder.Entity("SessionLogger.Domain.Folders.UserView", b =>
+            modelBuilder.Entity("SessionLogger.Domain.Methods.Method", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -219,36 +273,9 @@ namespace SessionLogger.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("CreatorId");
 
-                    b.Property<Guid?>("DeleterId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("DeleterId");
-
-                    b.Property<DateTime?>("DeletionTime")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("DeletionTime");
-
-                    b.Property<string>("EntityInfoId")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("EntityType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
                     b.Property<string>("ExtraProperties")
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("ExtraProperties");
-
-                    b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false)
-                        .HasColumnName("IsDeleted");
-
-                    b.Property<bool>("IsPublic")
-                        .HasColumnType("bit");
 
                     b.Property<DateTime?>("LastModificationTime")
                         .HasColumnType("datetime2")
@@ -263,13 +290,88 @@ namespace SessionLogger.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<string>("UserViewJson")
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("AppMethod", (string)null);
+                });
+
+            modelBuilder.Entity("SessionLogger.Domain.Rigs.Rig", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)")
+                        .HasColumnName("ConcurrencyStamp");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("CreationTime");
+
+                    b.Property<Guid?>("CreatorId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("CreatorId");
+
+                    b.Property<string>("ExtraProperties")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("ExtraProperties");
+
+                    b.Property<string>("HookPattern")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("HookSize")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<decimal?>("HookWeightG")
+                        .HasPrecision(8, 2)
+                        .HasColumnType("decimal(8,2)");
+
+                    b.Property<int?>("HookWeightUnit")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("LastModificationTime");
+
+                    b.Property<Guid?>("LastModifierId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("LastModifierId");
+
+                    b.Property<decimal?>("LengthMm")
+                        .HasPrecision(8, 2)
+                        .HasColumnType("decimal(8,2)");
+
+                    b.Property<int?>("LengthUnit")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Materials")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("UserViews");
+                    b.HasIndex("Name");
+
+                    b.ToTable("AppRig", (string)null);
                 });
 
             modelBuilder.Entity("SessionLogger.Domain.Sessions.Session", b =>
@@ -466,6 +568,9 @@ namespace SessionLogger.Migrations
                         .HasColumnType("nvarchar(8)");
 
                     b.Property<int?>("TicketId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("WaterType")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -2106,6 +2211,16 @@ namespace SessionLogger.Migrations
                         .HasForeignKey("BaitId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("SessionLogger.Domain.Methods.Method", "Method")
+                        .WithMany()
+                        .HasForeignKey("MethodId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("SessionLogger.Domain.Rigs.Rig", "Rig")
+                        .WithMany()
+                        .HasForeignKey("RigId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("SessionLogger.Domain.Sessions.Session", "Session")
                         .WithMany("Catches")
                         .HasForeignKey("SessionId")
@@ -2119,6 +2234,10 @@ namespace SessionLogger.Migrations
                         .IsRequired();
 
                     b.Navigation("Bait");
+
+                    b.Navigation("Method");
+
+                    b.Navigation("Rig");
 
                     b.Navigation("Session");
 

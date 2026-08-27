@@ -5,6 +5,7 @@ import { VenueRoutingModule } from './venue-routing.module';
 import { VenueComponent } from './venue.component';
 import { SharedModule } from '../shared/shared.module';
 import { PageTopbarNavComponent } from '../components/page-topbar-nav/page-topbar-nav.component';
+import { VenueFormComponent } from './venue-form/venue-form.component';
 
 @NgModule({
   declarations: [
@@ -15,7 +16,8 @@ import { PageTopbarNavComponent } from '../components/page-topbar-nav/page-topba
     VenueRoutingModule,
     RouterModule,
     ReactiveFormsModule,
-    PageTopbarNavComponent
+    PageTopbarNavComponent,
+    VenueFormComponent
   ]
 })
 export class VenueModule { }

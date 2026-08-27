@@ -3,7 +3,8 @@
 using SessionLogger.Domain.Baits;
 using SessionLogger.Domain.Catches;
 using SessionLogger.Domain.Files;
-using SessionLogger.Domain.Folders;
+using SessionLogger.Domain.Methods;
+using SessionLogger.Domain.Rigs;
 using SessionLogger.Domain.Sessions;
 using SessionLogger.Domain.Tickets;
 using SessionLogger.Domain.Venues;
@@ -41,6 +42,8 @@ public class SessionLoggerDbContext :
     public DbSet<Ticket> Tickets { get; set; }
     public DbSet<Bait> Baits { get; set; }
     public DbSet<Species> Species { get; set; }
+    public DbSet<Method> Methods { get; set; }
+    public DbSet<Rig> Rigs { get; set; }
     public DbSet<File> Files { get; set; }
 
     #region Entities from the modules
@@ -63,8 +66,6 @@ public class SessionLoggerDbContext :
     public DbSet<OrganizationUnit> OrganizationUnits { get; set; }
     public DbSet<IdentitySecurityLog> SecurityLogs { get; set; }
     public DbSet<IdentityLinkUser> LinkUsers { get; set; }
-
-    public DbSet<UserView> UserViews { get; set; }
 
     // Tenant Management
     public DbSet<Tenant> Tenants { get; set; }
@@ -140,6 +141,22 @@ public class SessionLoggerDbContext :
                 .WithMany()
                 .HasForeignKey(x => x.BaitId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            b.Property(x => x.LengthMm).HasPrecision(8, 2);
+            b.Property(x => x.WeightG).HasPrecision(8, 2);
+            b.Property(x => x.Notes).HasMaxLength(2000);
+
+            // A method with existing catches logged against it can't be deleted
+            b.HasOne(x => x.Method)
+                .WithMany()
+                .HasForeignKey(x => x.MethodId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // A rig with existing catches logged against it can't be deleted
+            b.HasOne(x => x.Rig)
+                .WithMany()
+                .HasForeignKey(x => x.RigId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         builder.Entity<File>(b =>
@@ -162,7 +179,13 @@ public class SessionLoggerDbContext :
         builder.Entity<Bait>(b =>
         {
             b.ToTable(SessionLoggerConsts.DbTablePrefix + "Bait", SessionLoggerConsts.DbSchema);
-            b.Property(x => x.Name).IsRequired().HasMaxLength(100);
+            b.Property(x => x.Name).IsRequired().HasMaxLength(255);
+            b.Property(x => x.BaitType).IsRequired();
+            b.Property(x => x.Brand).HasMaxLength(255);
+            b.Property(x => x.Range).HasMaxLength(255);
+            b.Property(x => x.Colour).HasMaxLength(100);
+            b.Property(x => x.Flavour).HasMaxLength(100);
+            b.Property(x => x.SizeMm).HasPrecision(8, 2);
             b.ConfigureByConvention(); //auto configure for the base class props
 
             b.HasIndex(x => x.Name).IsUnique();
@@ -196,6 +219,33 @@ public class SessionLoggerDbContext :
             b.ConfigureByConvention(); //auto configure for the base class props
 
             b.HasIndex(x => x.Name).IsUnique();
+        });
+
+        builder.Entity<Method>(b =>
+        {
+            b.ToTable(SessionLoggerConsts.DbTablePrefix + "Method", SessionLoggerConsts.DbSchema);
+            b.Property(x => x.Name).IsRequired().HasMaxLength(255);
+            b.ConfigureByConvention(); //auto configure for the base class props
+
+            b.HasIndex(x => x.Name).IsUnique();
+        });
+
+        builder.Entity<Rig>(b =>
+        {
+            b.ToTable(SessionLoggerConsts.DbTablePrefix + "Rig", SessionLoggerConsts.DbSchema);
+            b.Property(x => x.Name).IsRequired().HasMaxLength(255);
+            b.Property(x => x.LengthMm).HasPrecision(8, 2);
+            b.Property(x => x.HookSize).HasMaxLength(50);
+            b.Property(x => x.HookWeightG).HasPrecision(8, 2);
+            b.Property(x => x.HookPattern).HasMaxLength(100);
+            b.Property(x => x.Materials).HasMaxLength(255);
+            b.Property(x => x.Notes).HasMaxLength(2000);
+            b.ConfigureByConvention(); //auto configure for the base class props
+
+            // Not unique, unlike the other lookups - the same rig pattern name (e.g.
+            // "Ronnie Rig") is legitimately used for multiple variations that differ
+            // by length/hook/materials, so name alone can't be a unique key.
+            b.HasIndex(x => x.Name);
         });
     }
 }

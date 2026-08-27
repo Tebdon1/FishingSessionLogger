@@ -1,0 +1,54 @@
+<app-page-topbar-nav></app-page-topbar-nav>
+
+<div *ngIf="view === ''" class="card mg-3">
+  <div class="card-header">
+    <div class="row">
+      <div class="col col-md-6">
+        <h5 class="card-title">{{ '::Menu:Methods' | abpLocalization }}</h5>
+      </div>
+      <div class="text-lg-end pt-2">
+        <button id="create" class="btn btn-primary" type="button" (click)="createMethod()">
+          <i class="fa fa-plus me-1"></i>
+          <span>{{ "::NewMethod" | abpLocalization }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="card-body">
+    <ngx-datatable [rows]="method.items" [count]="method.totalCount" [list]="list" [columnMode]="'force'" default>
+      <ngx-datatable-column [name]="'::Name' | abpLocalization" prop="name"></ngx-datatable-column>
+      <ngx-datatable-column [name]="'::Actions' | abpLocalization" [width]="100" [minWidth]="100" [maxWidth]="100" [resizeable]="false" [sortable]="false">
+        <ng-template let-row="row" ngx-datatable-cell-template>
+          <div class="row-actions">
+            <button class="btn btn-sm btn-outline-primary" [title]="'::Edit' | abpLocalization" (click)="editMethod(row.id)">
+              <i class="fa fa-pencil"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-danger" [title]="'::Delete' | abpLocalization" (click)="deleteMethod(row.id)">
+              <i class="fa fa-trash"></i>
+            </button>
+          </div>
+        </ng-template>
+      </ngx-datatable-column>
+    </ngx-datatable>
+  </div>
+</div>
+
+<div *ngIf="view === 'methodForm'" class="card mg-3">
+  <div class="card-header">
+    <h3>{{ (methodItem ? '::EditMethod' : '::NewMethod') | abpLocalization }}</h3>
+  </div>
+
+  <div class="card-body">
+    <app-method-form #methodFormRef [method]="methodItem" (saved)="onMethodSaved()" (cancelled)="closeMethodForm()"></app-method-form>
+  </div>
+
+  <div class="card-footer">
+    <button type="button" class="btn btn-secondary button-pad" (click)="closeMethodForm()">
+      {{ '::Close' | abpLocalization }}
+    </button>
+    <button class="btn btn-primary" (click)="methodFormRef.save()" [disabled]="methodFormRef.form?.invalid">
+      <i class="fa fa-check mr-1"></i>
+      {{ '::Save' | abpLocalization }}
+    </button>
+  </div>
+</div>

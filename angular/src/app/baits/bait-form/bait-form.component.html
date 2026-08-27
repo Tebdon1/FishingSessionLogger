@@ -1,0 +1,49 @@
+<form *ngIf="form" [formGroup]="form">
+  <div class="mt-2">
+    <label for="bait-form-type">Type</label><span> * </span>
+    <select class="form-control" id="bait-form-type" formControlName="baitType">
+      <option [ngValue]="BaitType.Lure">Lure (artificial)</option>
+      <option [ngValue]="BaitType.Bait">Bait (manufactured - boilie, pellet, pop-up...)</option>
+      <option [ngValue]="BaitType.Natural">Natural (worm, maggot, sweetcorn...)</option>
+    </select>
+  </div>
+
+  <div class="mt-2" *ngIf="isNatural">
+    <label for="bait-form-name">Name</label><span> * </span>
+    <input type="text" id="bait-form-name" class="form-control" formControlName="name" autofocus />
+  </div>
+
+  <ng-container *ngIf="!isNatural">
+    <div class="mt-2">
+      <label for="bait-form-brand">Brand</label><span> * </span>
+      <input type="text" id="bait-form-brand" class="form-control" formControlName="brand" autofocus />
+    </div>
+    <div class="mt-2">
+      <label for="bait-form-range">Range / Model</label>
+      <input type="text" id="bait-form-range" class="form-control" formControlName="range" />
+    </div>
+    <div class="mt-2" *ngIf="isLure">
+      <label for="bait-form-colour">Colour</label>
+      <input type="text" id="bait-form-colour" class="form-control" formControlName="colour" />
+    </div>
+    <div class="mt-2" *ngIf="isManufacturedBait">
+      <label for="bait-form-flavour">Flavour</label>
+      <input type="text" id="bait-form-flavour" class="form-control" formControlName="flavour" />
+    </div>
+    <div class="mt-2">
+      <label for="bait-form-size-value">Size</label>
+      <div class="size-input-row">
+        <input type="number" step="0.01" min="0" id="bait-form-size-value" class="form-control" formControlName="sizeValue" />
+        <select class="form-control" id="bait-form-size-unit" formControlName="sizeUnit">
+          <option [ngValue]="SizeUnit.Millimetres">mm</option>
+          <option [ngValue]="SizeUnit.Centimetres">cm</option>
+          <option [ngValue]="SizeUnit.Inches">inch</option>
+        </select>
+      </div>
+    </div>
+  </ng-container>
+
+  <div class="mt-2 text-muted" *ngIf="!isNatural">
+    Name will be set automatically from the fields above. Size is converted and stored in millimetres.
+  </div>
+</form>
