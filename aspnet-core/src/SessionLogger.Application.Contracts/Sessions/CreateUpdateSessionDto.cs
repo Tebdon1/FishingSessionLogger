@@ -22,6 +22,9 @@ public class CreateUpdateSessionDto
     [StringLength(2000)]
     public string? Notes { get; set; }
 
+    // IsBlank isn't here - it's derived server-side in SessionAppService from whether
+    // Catches ends up empty, not supplied by the client.
+
     // Duration is automatically calculated from StartDateTime and EndDateTime
 
     public virtual ICollection<CreateUpdateCatchDto> Catches { get; set; }

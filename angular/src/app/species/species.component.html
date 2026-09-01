@@ -1,68 +1,78 @@
-<app-page-topbar-nav></app-page-topbar-nav>
-
-<div *ngIf="view === ''" class="card mg-3">
-  <div class="card-header">
-    <div class="row">
-      <div class="col col-md-6">
-        <h5 class="card-title">{{ '::Menu:Species' | abpLocalization }}</h5>
-      </div>
-      <div class="text-lg-end pt-2">
-        <button id="create" class="btn btn-primary" type="button" (click)="createSpecies()">
-          <i class="fa fa-plus me-1"></i>
-          <span>{{ "::NewSpecies" | abpLocalization }}</span>
-        </button>
-      </div>
+<div *ngIf="view === ''" class="page">
+  <div class="page-head">
+    <div class="page-heading">
+      <span class="page-eyebrow">Reference</span>
+      <h1 class="page-title">{{ '::Menu:Species' | abpLocalization }}</h1>
+      <p class="page-subtitle">The fish you can record against a catch.</p>
+    </div>
+    <div class="page-actions">
+      <button id="create" class="btn btn-primary" type="button" (click)="createSpecies()">
+        <i class="fa fa-plus me-1"></i>
+        <span>{{ "::NewSpecies" | abpLocalization }}</span>
+      </button>
     </div>
   </div>
-  <div class="card-body">
-    <ngx-datatable [rows]="species.items" [count]="species.totalCount" [list]="list" [columnMode]="'force'" default>
-      <ngx-datatable-column [name]="'::Name' | abpLocalization" prop="name"></ngx-datatable-column>
-      <ngx-datatable-column [name]="'::Saltwater' | abpLocalization" prop="isSaltwater">
-        <ng-template let-row="row" ngx-datatable-cell-template>
-          {{ row.isSaltwater ? 'Yes' : 'No' }}
-        </ng-template>
-      </ngx-datatable-column>
-      <ngx-datatable-column [name]="'::Actions' | abpLocalization" [width]="100" [minWidth]="100" [maxWidth]="100" [resizeable]="false" [sortable]="false">
-        <ng-template let-row="row" ngx-datatable-cell-template>
-          <div class="row-actions">
-            <button class="btn btn-sm btn-outline-primary" [title]="'::Edit' | abpLocalization" (click)="editSpecies(row.id)">
-              <i class="fa fa-pencil"></i>
-            </button>
-            <button class="btn btn-sm btn-outline-danger" [title]="'::Delete' | abpLocalization" (click)="deleteSpecies(row.id)">
-              <i class="fa fa-trash"></i>
-            </button>
-          </div>
-        </ng-template>
-      </ngx-datatable-column>
-    </ngx-datatable>
+
+  <div class="entity-grid">
+    <article *ngFor="let row of species.items" class="entity-card" [class.is-accent]="row.isSaltwater">
+      <h2 class="entity-card-title">{{ row.name }}</h2>
+      <div class="entity-card-meta">
+        <span class="chip" [class.chip-accent]="row.isSaltwater" [class.chip-primary]="!row.isSaltwater">
+          <i class="fa" [ngClass]="row.isSaltwater ? 'fa-ship' : 'fa-tint'"></i>
+          {{ row.isSaltwater ? 'Saltwater' : 'Freshwater' }}
+        </span>
+      </div>
+      <div class="entity-card-actions">
+        <button class="icon-btn" [title]="'::Edit' | abpLocalization" (click)="editSpecies(row.id)">
+          <i class="fa fa-pencil"></i>
+        </button>
+        <button class="icon-btn icon-btn-danger" [title]="'::Delete' | abpLocalization" (click)="deleteSpecies(row.id)">
+          <i class="fa fa-trash"></i>
+        </button>
+      </div>
+    </article>
+
+    <div *ngIf="species.items.length === 0" class="empty-state">
+      <i class="fa fa-fish empty-state-icon"></i>
+      <h2 class="empty-state-title">No species yet</h2>
+      <p class="empty-state-text">Add the fish you target and they'll be selectable when you log a catch.</p>
+      <button class="btn btn-primary" type="button" (click)="createSpecies()">
+        <i class="fa fa-plus me-1"></i> Add your first species
+      </button>
+    </div>
   </div>
 </div>
 
-<div *ngIf="view === 'speciesForm'" class="card mg-3">
-  <div class="card-header">
-    <h3>{{ (speciesItem ? '::EditSpecies' : '::NewSpecies') | abpLocalization }}</h3>
+<div *ngIf="view === 'speciesForm'" class="page">
+  <div class="page-head">
+    <div class="page-heading">
+      <span class="page-eyebrow">Species</span>
+      <h1 class="page-title">{{ (speciesItem ? '::EditSpecies' : '::NewSpecies') | abpLocalization }}</h1>
+    </div>
   </div>
 
-  <div class="card-body">
-    <form *ngIf="speciesForm" [formGroup]="speciesForm">
-      <div>
-        <label for="species-name">Name</label><span> * </span>
-        <input type="text" id="species-name" class="form-control" formControlName="name" autofocus />
-      </div>
-      <div class="mt-2 form-check">
-        <input type="checkbox" id="species-saltwater" class="form-check-input" formControlName="isSaltwater" />
-        <label for="species-saltwater" class="form-check-label">Saltwater species</label>
-      </div>
-    </form>
-  </div>
+  <div class="panel">
+    <div class="panel-body">
+      <form *ngIf="speciesForm" [formGroup]="speciesForm">
+        <div class="field">
+          <label for="species-name">Name<span class="required-mark">*</span></label>
+          <input type="text" id="species-name" class="form-control" formControlName="name" autofocus />
+        </div>
+        <div class="field form-check">
+          <input type="checkbox" id="species-saltwater" class="form-check-input" formControlName="isSaltwater" />
+          <label for="species-saltwater" class="form-check-label">Saltwater species</label>
+        </div>
+      </form>
+    </div>
 
-  <div class="card-footer">
-    <button type="button" class="btn btn-secondary button-pad" (click)="closeSpeciesForm()">
-      {{ '::Close' | abpLocalization }}
-    </button>
-    <button class="btn btn-primary" (click)="saveSpecies()" [disabled]="speciesForm.invalid">
-      <i class="fa fa-check mr-1"></i>
-      {{ '::Save' | abpLocalization }}
-    </button>
+    <div class="panel-foot">
+      <button type="button" class="btn btn-secondary" (click)="closeSpeciesForm()">
+        {{ '::Close' | abpLocalization }}
+      </button>
+      <button class="btn btn-primary" (click)="saveSpecies()" [disabled]="speciesForm.invalid">
+        <i class="fa fa-check me-1"></i>
+        {{ '::Save' | abpLocalization }}
+      </button>
+    </div>
   </div>
 </div>

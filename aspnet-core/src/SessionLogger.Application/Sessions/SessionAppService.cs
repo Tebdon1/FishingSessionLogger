@@ -39,11 +39,19 @@ public class SessionAppService :
         DeletePolicyName = SessionLoggerPermissions.SessionConfig.Delete;
     }
 
-    // The paged list doesn't use includeDetails, but the grid still needs the venue name
+    // The paged list doesn't use includeDetails, but the cards still need the venue name
+    // and each catch's species/bait/method/rig names - without these, every session in
+    // the list comes back with an empty Catches collection (0 fish, no species chips).
     protected override async Task<IQueryable<Session>> CreateFilteredQueryAsync(PagedAndSortedResultRequestDto input)
     {
         var query = await base.CreateFilteredQueryAsync(input);
-        return query.Include(x => x.Venue).Where(x => x.CreatorId == CurrentUser.Id);
+        return query
+            .Include(x => x.Venue)
+            .Include(x => x.Catches).ThenInclude(c => c.Species)
+            .Include(x => x.Catches).ThenInclude(c => c.Bait)
+            .Include(x => x.Catches).ThenInclude(c => c.Method)
+            .Include(x => x.Catches).ThenInclude(c => c.Rig)
+            .Where(x => x.CreatorId == CurrentUser.Id);
     }
 
     protected override async Task<Session> GetEntityByIdAsync(int id)
@@ -61,6 +69,7 @@ public class SessionAppService :
     {
         var entity = await base.MapToEntityAsync(createInput);
         await ReconcileCatches(createInput.Catches, entity);
+        entity.IsBlank = entity.Catches.Count == 0;
         return entity;
     }
 
@@ -68,6 +77,7 @@ public class SessionAppService :
     {
         await base.MapToEntityAsync(updateInput, entity);
         await ReconcileCatches(updateInput.Catches, entity);
+        entity.IsBlank = entity.Catches.Count == 0;
     }
 
     // AutoMapper's default list-mapping would delete and recreate every catch (and

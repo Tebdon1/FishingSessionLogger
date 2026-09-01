@@ -1,75 +1,67 @@
-.button-pad {
-    margin-right: 10px;
-}
-.add-detail {
-    margin-top: 10px;
-}
-.margin-bottom {
-    margin-bottom: 10px;
-}
-.th-species {
-    width: 10%;
-}
-.expanded-details-button{
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    margin-bottom: 10px;
-}
-.bait-details-input {
-    padding: 10px;
+// --- Session editor -------------------------------------------------------
+.panel-wide {
+    max-width: 900px;
 }
 
-.catch-species-table-headers {
-    width: 30%;
-}
-
-.catch-photo-preview {
-    max-width: 200px;
-    max-height: 200px;
-    display: block;
-}
-
-.catch-photo-full {
-    max-width: 100%;
-    max-height: 70vh;
-}
-
-.photo-input-row {
+.field-row {
     display: flex;
-    gap: 8px;
-}
+    gap: 1rem;
 
-// Dropdown + "New X" quick-add button, used for Venue/Bait/Method/Rig on the catch form.
-.picker-row {
-    display: flex;
-    gap: 8px;
-    align-items: flex-start;
-
-    ::ng-deep .ng-select {
-        flex-grow: 1;
+    > .field {
+        flex: 1;
+        min-width: 0;
     }
+}
+
+@media (max-width: 560px) {
+    .field-row {
+        flex-direction: column;
+        gap: 0;
+    }
+}
+
+.catches-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin: 2rem 0 0.85rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-border);
+}
+
+.catches-title {
+    font-family: var(--font-heading);
+    font-size: 1.25rem;
+    margin: 0;
+}
+
+.catches-actions {
+    display: flex;
+    gap: 0.5rem;
 }
 
 .species-group-row {
     cursor: pointer;
 
     &:hover {
-        background-color: rgba(0, 0, 0, 0.03);
+        background-color: var(--color-primary-soft);
     }
 }
 
 .catch-detail-table {
-    background-color: rgba(0, 0, 0, 0.02);
+    background-color: var(--color-bg-alt);
+    border-radius: var(--radius-sm);
 
     td {
         border-top: none;
     }
 
     th {
-        font-size: 0.75rem;
-        font-weight: 400;
-        color: #6c757d;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--color-text-muted);
         border-top: none;
         padding-top: 4px;
         padding-bottom: 4px;
@@ -81,7 +73,16 @@
     white-space: nowrap;
 }
 
-.row-actions {
-    display: flex;
-    gap: 4px;
+.catch-photo-preview {
+    max-width: 200px;
+    max-height: 200px;
+    display: block;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+}
+
+.catch-photo-full {
+    max-width: 100%;
+    max-height: 70vh;
+    border-radius: var(--radius-sm);
 }

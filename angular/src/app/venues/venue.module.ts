@@ -4,7 +4,6 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { VenueRoutingModule } from './venue-routing.module';
 import { VenueComponent } from './venue.component';
 import { SharedModule } from '../shared/shared.module';
-import { PageTopbarNavComponent } from '../components/page-topbar-nav/page-topbar-nav.component';
 import { VenueFormComponent } from './venue-form/venue-form.component';
 
 @NgModule({
@@ -16,7 +15,6 @@ import { VenueFormComponent } from './venue-form/venue-form.component';
     VenueRoutingModule,
     RouterModule,
     ReactiveFormsModule,
-    PageTopbarNavComponent,
     VenueFormComponent
   ]
 })

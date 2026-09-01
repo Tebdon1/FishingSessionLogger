@@ -110,6 +110,7 @@ public class SessionLoggerDbContext :
             b.Property(x => x.EndDateTime).IsRequired();
             b.Property(x => x.VenueId).IsRequired();
             b.Property(x => x.Notes).HasMaxLength(2000);
+            b.Property(x => x.IsBlank).IsRequired().HasDefaultValue(false);
 
             // A venue with existing sessions logged against it can't be deleted
             b.HasOne(x => x.Venue)

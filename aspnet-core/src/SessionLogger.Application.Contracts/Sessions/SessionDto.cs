@@ -17,6 +17,8 @@ public class SessionDto : AuditedEntityDto<int>
 
     public string Notes { get; set; }
 
+    public bool IsBlank { get; set; }
+
     // Duration in hours, calculated from start and end times
     public float Duration => (float)(EndDateTime - StartDateTime).TotalHours;
 

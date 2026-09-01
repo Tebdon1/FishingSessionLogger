@@ -48,6 +48,19 @@ export class VenueComponent implements OnInit {
     }
   }
 
+  /** Row icon standing in for the water type - lets a list of venues be told apart at a glance. */
+  waterTypeIcon(waterType?: WaterType): string {
+    switch (waterType) {
+      case WaterType.River: return 'fa-water';
+      case WaterType.Lake: return 'fa-tint';
+      case WaterType.Reservoir: return 'fa-database';
+      case WaterType.Canal: return 'fa-road';
+      case WaterType.Pond: return 'fa-dot-circle-o';
+      case WaterType.Sea: return 'fa-anchor';
+      default: return 'fa-map-marker';
+    }
+  }
+
   createVenue() {
     this.venueItem = null;
     this.view = 'venueForm';

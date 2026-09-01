@@ -1,61 +1,76 @@
-<app-page-topbar-nav></app-page-topbar-nav>
-
-<div *ngIf="view === ''" class="card mg-3">
-  <div class="card-header">
-    <div class="row">
-      <div class="col col-md-6">
-        <h5 class="card-title">{{ '::Menu:Venues' | abpLocalization }}</h5>
-      </div>
-      <div class="text-lg-end pt-2">
-        <button id="create" class="btn btn-primary" type="button" (click)="createVenue()">
-          <i class="fa fa-plus me-1"></i>
-          <span>{{ "::NewVenue" | abpLocalization }}</span>
-        </button>
-      </div>
+<div *ngIf="view === ''" class="page">
+  <div class="page-head">
+    <div class="page-heading">
+      <span class="page-eyebrow">Your waters</span>
+      <h1 class="page-title">{{ '::Menu:Venues' | abpLocalization }}</h1>
+      <p class="page-subtitle">Every lake, river and mark you fish.</p>
+    </div>
+    <div class="page-actions">
+      <button id="create" class="btn btn-primary" type="button" (click)="createVenue()">
+        <i class="fa fa-plus me-1"></i>
+        <span>{{ "::NewVenue" | abpLocalization }}</span>
+      </button>
     </div>
   </div>
-  <div class="card-body">
-    <ngx-datatable [rows]="venue.items" [count]="venue.totalCount" [list]="list" [columnMode]="'force'" default>
-      <ngx-datatable-column [name]="'::Name' | abpLocalization" prop="name"></ngx-datatable-column>
-      <ngx-datatable-column [name]="'::Postcode' | abpLocalization" prop="postcode"></ngx-datatable-column>
-      <ngx-datatable-column [name]="'::Ticket' | abpLocalization" prop="ticketName"></ngx-datatable-column>
-      <ngx-datatable-column [name]="'::WaterType' | abpLocalization" prop="waterType">
-        <ng-template let-row="row" ngx-datatable-cell-template>
-          {{ waterTypeLabel(row.waterType) }}
-        </ng-template>
-      </ngx-datatable-column>
-      <ngx-datatable-column [name]="'::Actions' | abpLocalization" [width]="100" [minWidth]="100" [maxWidth]="100" [resizeable]="false" [sortable]="false">
-        <ng-template let-row="row" ngx-datatable-cell-template>
-          <div class="row-actions">
-            <button class="btn btn-sm btn-outline-primary" [title]="'::Edit' | abpLocalization" (click)="editVenue(row.id)">
-              <i class="fa fa-pencil"></i>
-            </button>
-            <button class="btn btn-sm btn-outline-danger" [title]="'::Delete' | abpLocalization" (click)="deleteVenue(row.id)">
-              <i class="fa fa-trash"></i>
-            </button>
-          </div>
-        </ng-template>
-      </ngx-datatable-column>
-    </ngx-datatable>
+
+  <div class="entity-row-list">
+    <article *ngFor="let row of venue.items" class="entity-row">
+      <div class="entity-row-icon" [title]="waterTypeLabel(row.waterType) || 'Water type not set'">
+        <i class="fa" [ngClass]="waterTypeIcon(row.waterType)"></i>
+      </div>
+      <div class="entity-row-body">
+        <h2 class="entity-row-title">{{ row.name }}</h2>
+        <div class="entity-row-meta">
+          <span *ngIf="row.postcode" class="chip">
+            <i class="fa fa-map-marker"></i> {{ row.postcode }}
+          </span>
+          <span *ngIf="row.ticketName" class="chip chip-accent">
+            <i class="fa fa-ticket"></i> {{ row.ticketName }}
+          </span>
+        </div>
+      </div>
+      <div class="entity-row-actions">
+        <button class="icon-btn" [title]="'::Edit' | abpLocalization" (click)="editVenue(row.id)">
+          <i class="fa fa-pencil"></i>
+        </button>
+        <button class="icon-btn icon-btn-danger" [title]="'::Delete' | abpLocalization" (click)="deleteVenue(row.id)">
+          <i class="fa fa-trash"></i>
+        </button>
+      </div>
+    </article>
+
+    <div *ngIf="venue.items.length === 0" class="empty-state">
+      <i class="fa fa-map-marker empty-state-icon"></i>
+      <h2 class="empty-state-title">No venues yet</h2>
+      <p class="empty-state-text">Add the waters you fish so you can log sessions against them.</p>
+      <button class="btn btn-primary" type="button" (click)="createVenue()">
+        <i class="fa fa-plus me-1"></i> Add your first venue
+      </button>
+    </div>
   </div>
 </div>
 
-<div *ngIf="view === 'venueForm'" class="card mg-3">
-  <div class="card-header">
-    <h3>{{ (venueItem ? '::EditVenue' : '::NewVenue') | abpLocalization }}</h3>
+<div *ngIf="view === 'venueForm'" class="page">
+  <div class="page-head">
+    <div class="page-heading">
+      <span class="page-eyebrow">Venue</span>
+      <h1 class="page-title">{{ (venueItem ? '::EditVenue' : '::NewVenue') | abpLocalization }}</h1>
+    </div>
   </div>
 
-  <div class="card-body">
-    <app-venue-form #venueFormRef [venue]="venueItem" (saved)="onVenueSaved()" (cancelled)="closeVenueForm()"></app-venue-form>
-  </div>
+  <div class="panel">
+    <div class="panel-body">
+      <app-venue-form #venueFormRef [venue]="venueItem" (saved)="onVenueSaved()" (cancelled)="closeVenueForm()"></app-venue-form>
+    </div>
 
-  <div class="card-footer">
-    <button type="button" class="btn btn-secondary button-pad" (click)="closeVenueForm()">
-      {{ '::Close' | abpLocalization }}
-    </button>
-    <button class="btn btn-primary" (click)="venueFormRef.save()" [disabled]="venueFormRef.form?.invalid">
-      <i class="fa fa-check mr-1"></i>
-      {{ '::Save' | abpLocalization }}
-    </button>
+    <div class="panel-foot">
+      <button type="button" class="btn btn-secondary" (click)="closeVenueForm()">
+        {{ '::Close' | abpLocalization }}
+      </button>
+      <button class="btn btn-primary" (click)="venueFormRef.save()" [disabled]="venueFormRef.form?.invalid">
+        <i class="fa fa-check me-1"></i>
+        {{ '::Save' | abpLocalization }}
+      </button>
+    </div>
   </div>
 </div>

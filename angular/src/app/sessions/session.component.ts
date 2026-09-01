@@ -15,6 +15,7 @@ import { map } from 'rxjs/operators';
 import { BaitService } from '@proxy/baits';
 import { UrlService } from '../services/url.service';
 import { lengthDisplay as formatLength, weightDisplay as formatWeight, hookWeightDisplay as formatHookWeight, lengthMmToInput, weightGToInput, lengthInputToMm, weightInputToGrams } from '../shared/unit-display';
+import { sessionCatchCount, sessionSpeciesSummary as sharedSpeciesSummary, sessionBestCatch as sharedBestCatch } from '../shared/session-summary';
 
 @Component({
   selector: 'app-session',
@@ -130,6 +131,23 @@ export class SessionComponent implements OnInit {
 
   weightDisplay(weightG?: number, unit?: WeightUnit): string {
     return formatWeight(weightG, unit);
+  }
+
+  // --- Summary helpers for the session list cards -------------------------
+  // The list response embeds each session's catches, so a card can show what
+  // was actually caught rather than just a start time and a duration. Shared
+  // with the home page's recent-activity preview - see ../shared/session-summary.
+
+  catchCount(session: SessionDto): number {
+    return sessionCatchCount(session);
+  }
+
+  sessionSpeciesSummary(session: SessionDto): { name: string; count: number }[] {
+    return sharedSpeciesSummary(session, id => this.speciesName(id));
+  }
+
+  sessionBestCatch(session: SessionDto): string {
+    return sharedBestCatch(session, id => this.speciesName(id));
   }
 
   get catchWeightIsLbOz(): boolean {

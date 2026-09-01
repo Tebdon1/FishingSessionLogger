@@ -1,44 +1,138 @@
-//topbar
-.home-topbar-items {
-    width: 100%;
+.app-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background-color: var(--color-surface-alt);
+    border-bottom: 1px solid var(--color-border);
+    box-shadow: var(--shadow-sm);
+}
+
+.app-header-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-} 
-.home-title-grid {
-    grid-template-columns: auto auto;
-}
-.thumbnail-image {
-    width: 25px;
-    height: 25px;
+    gap: 1rem;
+    max-width: var(--page-max);
+    margin: 0 auto;
+    padding: 0.7rem 1.25rem;
 }
 
-//Topbar buttons styling
-.btn.btn-login {
-    --bs-btn-padding-x: 1rem !important;
-    --bs-btn-padding-y: 0.25rem !important;
-    transition: .6s;
+.app-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    text-decoration: none;
+    color: var(--color-text);
+
+    &:hover {
+        color: var(--color-text);
+        text-decoration: none;
+    }
 }
 
-.btn.btn-login:hover {
-    background-color:  #1db309;
-}
-
-.nav-button {
-    height: 100%;
-    min-width: 4rem;
-    border: none;
-    background-color: transparent;
-    transition: box-shadow .6s ease-in-out;
-}
-
-.nav-button:hover {
-    box-shadow: inset 0 -40px 0 -1px rgb(0, 110, 0);
-}
-
-//navigation
-.homepage-navigation {
+.app-brand-logo {
+    width: 30px;
     height: 30px;
-    width: 100%;
-    background-color: #1db309;
+    object-fit: contain;
+}
+
+.app-brand-name {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 1.15rem;
+    letter-spacing: 0.01em;
+}
+
+.app-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid var(--color-border-strong);
+    background-color: var(--color-surface);
+    color: var(--color-text-muted);
+    transition: background-color .15s ease, color .15s ease, transform .15s ease;
+
+    &:hover {
+        background-color: var(--color-primary-soft);
+        color: var(--color-primary);
+        transform: rotate(-8deg);
+    }
+}
+
+.app-login-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+}
+
+.app-nav-wrap {
+    background-color: var(--color-bg-alt);
+    border-top: 1px solid var(--color-border);
+}
+
+.app-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    max-width: var(--page-max);
+    margin: 0 auto;
+    padding: 0.4rem 1rem;
+    overflow-x: auto;
+
+    // Hide the scrollbar on the nav strip itself; it scrolls by drag/swipe on
+    // narrow screens and a visible bar under the tabs looks broken.
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+.app-nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.42rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background-color .15s ease, color .15s ease;
+
+    i {
+        font-size: 0.85rem;
+        opacity: 0.85;
+    }
+
+    &:hover {
+        background-color: var(--color-surface);
+        color: var(--color-text);
+        text-decoration: none;
+    }
+
+    &.active {
+        background-color: var(--color-primary);
+        color: var(--color-text-on-primary);
+
+        i {
+            opacity: 1;
+        }
+    }
+}
+
+@media (max-width: 576px) {
+    .app-brand-name {
+        display: none;
+    }
 }

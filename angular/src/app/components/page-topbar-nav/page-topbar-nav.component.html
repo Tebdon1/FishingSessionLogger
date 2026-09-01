@@ -1,27 +1,52 @@
 <!DOCTYPE html>
-<div class="home-topbar-items">
-  <div class="home-title-grid">
-    <h4 class="mg-t-3 mg-b-3 mg-l-2">
-      {{ '::SessionLogger' | abpLocalization }} <img src="/assets/images/logo/logo-light-thumbnail.png" class="thumbnail-image">
-    </h4>
-  </div>
-  <div class="login-button mg-r-2">
-    <btn *ngIf="!hasLoggedIn" (click)="login()" class="btn btn-login ms-1">
-      <i class="fa fa-sign-in"></i> {{ 'AbpAccount::Login' | abpLocalization }}
-    </btn>
-  </div>
-</div>
+<header class="app-header">
+  <div class="app-header-row">
+    <a class="app-brand" [routerLink]="['/']">
+      <img src="/assets/images/logo/logo-light-thumbnail.png" class="app-brand-logo" alt="" />
+      <span class="app-brand-name">{{ '::SessionLogger' | abpLocalization }}</span>
+    </a>
 
-<div class="homepage-navigation mg-b-2" style="display: flex; justify-content: center;">
-  <div style="width: 85%; height: inherit;">
-    <button class="nav-button" [routerLink]="['']">Home</button>
-    <!--TODO create a dropdown on hover and have Sessions and baits(baits only show when logged in)-->
-    <button class="nav-button" [routerLink]="['/sessions']">Sessions</button>
-    <button class="nav-button" [routerLink]="['/venues']">Venues</button>
-    <button class="nav-button" [routerLink]="['/tickets']">Tickets</button>
-    <button class="nav-button" [routerLink]="['/baits']">Baits</button>
-    <button class="nav-button" [routerLink]="['/methods']">Methods</button>
-    <button class="nav-button" [routerLink]="['/species']">Species</button>
-    <button class="nav-button" [routerLink]="['/rigs']">Rigs</button>
+    <div class="app-header-actions">
+      <button
+        type="button"
+        class="theme-toggle"
+        (click)="toggleTheme()"
+        [title]="themeMode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
+      >
+        <i class="fa" [ngClass]="themeMode === 'dark' ? 'fa-sun-o' : 'fa-moon-o'"></i>
+      </button>
+      <btn *ngIf="!hasLoggedIn" (click)="login()" class="btn btn-primary btn-sm app-login-btn">
+        <i class="fa fa-sign-in"></i> {{ 'AbpAccount::Login' | abpLocalization }}
+      </btn>
+    </div>
   </div>
-</div>
+
+  <div class="app-nav-wrap">
+  <nav class="app-nav">
+    <a class="app-nav-link" [routerLink]="['']" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+      <i class="fa fa-home"></i><span>Home</span>
+    </a>
+    <a class="app-nav-link" [routerLink]="['/sessions']" routerLinkActive="active">
+      <i class="fa fa-calendar"></i><span>Sessions</span>
+    </a>
+    <a class="app-nav-link" [routerLink]="['/venues']" routerLinkActive="active">
+      <i class="fa fa-map-marker"></i><span>Venues</span>
+    </a>
+    <a class="app-nav-link" [routerLink]="['/tickets']" routerLinkActive="active">
+      <i class="fa fa-ticket"></i><span>Tickets</span>
+    </a>
+    <a class="app-nav-link" [routerLink]="['/baits']" routerLinkActive="active">
+      <i class="fa fa-flask"></i><span>Baits</span>
+    </a>
+    <a class="app-nav-link" [routerLink]="['/methods']" routerLinkActive="active">
+      <i class="fa fa-cog"></i><span>Methods</span>
+    </a>
+    <a class="app-nav-link" [routerLink]="['/species']" routerLinkActive="active">
+      <i class="fa fa-fish"></i><span>Species</span>
+    </a>
+    <a class="app-nav-link" [routerLink]="['/rigs']" routerLinkActive="active">
+      <i class="fa fa-link"></i><span>Rigs</span>
+    </a>
+  </nav>
+  </div>
+</header>
