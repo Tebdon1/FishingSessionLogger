@@ -54,6 +54,7 @@ export interface SessionDto extends AuditedEntityDto<number> {
   venueId: number;
   venueName?: string;
   notes?: string;
+  isBlank: boolean;
   duration: number;
   catches: CatchDto[];
 }

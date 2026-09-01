@@ -29,6 +29,11 @@ public class Session : AuditedAggregateRoot<int>
 
     public string? Notes { get; set; }
 
+    // Set by SessionAppService whenever catches are saved - true whenever the session
+    // ends up with zero catches. Not a client-supplied input: the angler shouldn't have
+    // to separately declare a blank, the absence of any catch already says it.
+    public bool IsBlank { get; set; }
+
     public float Duration => (float)(EndDateTime - StartDateTime).TotalHours;
 
     public virtual ICollection<Catch> Catches { get; set; }

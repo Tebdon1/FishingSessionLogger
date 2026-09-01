@@ -1,86 +1,125 @@
-<app-page-topbar-nav></app-page-topbar-nav>
-
-<div *ngIf="view === ''" class="card mg-3">
-  <div class="card-header">
-    <div class="row">
-      <div class="col col-md-6">
-        <h5 class="card-title">
-          {{ '::Menu:Sessions' | abpLocalization }}
-        </h5>
-      </div>
-      <div class="text-end col col-md-6"></div>
-      <div class="text-lg-end pt-2">
-        <button id="create" class="btn btn-primary" type="button" (click)="createSession()">
-          <i class="fa fa-plus me-1"></i>
-          <span>{{ "::NewSession" | abpLocalization }}</span>
-        </button>
-      </div>
+<div *ngIf="view === ''" class="page">
+  <div class="page-head">
+    <div class="page-heading">
+      <span class="page-eyebrow">Your log</span>
+      <h1 class="page-title">{{ '::Menu:Sessions' | abpLocalization }}</h1>
+      <p class="page-subtitle">Every trip you've recorded, most recent first.</p>
+    </div>
+    <div class="page-actions">
+      <button id="create" class="btn btn-primary" type="button" (click)="createSession()">
+        <i class="fa fa-plus me-1"></i>
+        <span>{{ "::NewSession" | abpLocalization }}</span>
+      </button>
     </div>
   </div>
-  <div class="card-body">
-    <ngx-datatable [rows]="session.items" [count]="session.totalCount" [list]="list" [columnMode]="'force'" default>
-      <ngx-datatable-column [name]="'::Start' | abpLocalization" prop="startDateTime">
-        <ng-template let-row="row" ngx-datatable-cell-template>
-          {{ row.startDateTime | date:'medium' }}
-        </ng-template>
-      </ngx-datatable-column>
-      <ngx-datatable-column [name]="'::Venue' | abpLocalization" prop="venueName"></ngx-datatable-column>
-      <ngx-datatable-column [name]="'::Duration' | abpLocalization" prop="duration"></ngx-datatable-column>
-      <ngx-datatable-column [name]="'::Actions' | abpLocalization" [width]="100" [minWidth]="100" [maxWidth]="100" [resizeable]="false" [sortable]="false">
-        <ng-template let-row="row" ngx-datatable-cell-template>
-          <div class="row-actions">
-            <button class="btn btn-sm btn-outline-primary" [title]="'::Edit' | abpLocalization" (click)="editSession(row.id)">
-              <i class="fa fa-pencil"></i>
-            </button>
-            <button class="btn btn-sm btn-outline-danger" [title]="'::Delete' | abpLocalization" (click)="deleteSession(row.id)">
-              <i class="fa fa-trash"></i>
-            </button>
-          </div>
-        </ng-template>
-      </ngx-datatable-column>
-    </ngx-datatable>
+
+  <div class="session-list">
+    <article *ngFor="let row of session.items" class="session-card">
+      <div class="session-date" [class.is-blank]="row.isBlank">
+        <span class="session-date-day">{{ row.startDateTime | date:'d' }}</span>
+        <span class="session-date-month">{{ row.startDateTime | date:'MMM' }}</span>
+        <span class="session-date-year">{{ row.startDateTime | date:'yyyy' }}</span>
+      </div>
+
+      <div class="session-body">
+        <h2 class="session-venue">{{ row.venueName || 'Unknown venue' }}</h2>
+
+        <div class="session-facts">
+          <span class="session-fact">
+            <i class="fa fa-clock-o"></i> {{ row.startDateTime | date:'HH:mm' }} &ndash; {{ row.endDateTime | date:'HH:mm' }}
+          </span>
+          <span class="session-fact"><i class="fa fa-hourglass-half"></i> {{ row.duration }} hrs</span>
+          <span *ngIf="row.isBlank" class="session-fact session-fact-blank">
+            <i class="fa fa-ban"></i> Blank
+          </span>
+          <span *ngIf="!row.isBlank" class="session-fact session-fact-catch">
+            <i class="fa fa-fish"></i>
+            {{ catchCount(row) }} fish
+          </span>
+        </div>
+
+        <div *ngIf="sessionSpeciesSummary(row).length || sessionBestCatch(row)" class="entity-card-meta">
+          <span *ngFor="let s of sessionSpeciesSummary(row)" class="chip chip-primary">
+            {{ s.name }} <strong>&times;{{ s.count }}</strong>
+          </span>
+          <span *ngIf="sessionBestCatch(row)" class="chip chip-best">
+            <i class="fa fa-trophy"></i> {{ sessionBestCatch(row) }}
+          </span>
+        </div>
+
+        <p *ngIf="row.notes" class="entity-card-note">{{ row.notes }}</p>
+      </div>
+
+      <div class="session-actions">
+        <button class="icon-btn" [title]="'::Edit' | abpLocalization" (click)="editSession(row.id)">
+          <i class="fa fa-pencil"></i>
+        </button>
+        <button class="icon-btn icon-btn-danger" [title]="'::Delete' | abpLocalization" (click)="deleteSession(row.id)">
+          <i class="fa fa-trash"></i>
+        </button>
+      </div>
+    </article>
+
+    <div *ngIf="session.items.length === 0" class="empty-state">
+      <i class="fa fa-water empty-state-icon"></i>
+      <h2 class="empty-state-title">No sessions logged yet</h2>
+      <p class="empty-state-text">Record your first trip and start building a picture of what works, where and when.</p>
+      <button class="btn btn-primary" type="button" (click)="createSession()">
+        <i class="fa fa-plus me-1"></i> Log your first session
+      </button>
+    </div>
   </div>
 </div>
 
-<div *ngIf="view === 'sessionForm'" class="card mg-3">
-  <div class="card-header">
-    <h3>{{ (sessionItem ? '::EditSession' : '::NewSession') | abpLocalization }}</h3>
+<div *ngIf="view === 'sessionForm'" class="page">
+  <div class="page-head">
+    <div class="page-heading">
+      <span class="page-eyebrow">Session</span>
+      <h1 class="page-title">{{ (sessionItem ? '::EditSession' : '::NewSession') | abpLocalization }}</h1>
+    </div>
   </div>
 
-  <div class="card-body">
-    <form *ngIf="sessionForm" [formGroup]="sessionForm">
-      <div>
-        <label for="session-start">Start</label><span> * </span>
-        <input type="datetime-local" id="session-start" class="form-control" formControlName="startDateTime" />
-      </div>
-      <div class="mt-2">
-        <label for="session-end">End</label><span> * </span>
-        <input type="datetime-local" id="session-end" class="form-control" formControlName="endDateTime" />
-      </div>
-      <div class="mt-2">
-        <label for="session-venue">Venue</label><span> * </span>
-        <div class="picker-row">
-          <ng-select id="session-venue" class="flex-grow-1" [items]="venueList" bindLabel="name" bindValue="id"
-            formControlName="venueId" placeholder="Select a venue"></ng-select>
-          <button type="button" class="btn btn-outline-secondary btn-sm" (click)="addVenueQuickAdd()">
-            <i class="fa fa-plus me-1"></i>New Venue
+  <div class="panel panel-wide">
+    <div class="panel-body">
+      <form *ngIf="sessionForm" [formGroup]="sessionForm">
+        <div class="field-row">
+          <div class="field">
+            <label for="session-start">Start<span class="required-mark">*</span></label>
+            <input type="datetime-local" id="session-start" class="form-control" formControlName="startDateTime" />
+          </div>
+          <div class="field">
+            <label for="session-end">End<span class="required-mark">*</span></label>
+            <input type="datetime-local" id="session-end" class="form-control" formControlName="endDateTime" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="session-venue">Venue<span class="required-mark">*</span></label>
+          <div class="picker-row">
+            <ng-select id="session-venue" class="flex-grow-1" [items]="venueList" bindLabel="name" bindValue="id"
+              formControlName="venueId" placeholder="Select a venue"></ng-select>
+            <button type="button" class="btn btn-outline-secondary btn-sm" (click)="addVenueQuickAdd()">
+              <i class="fa fa-plus me-1"></i>New Venue
+            </button>
+          </div>
+        </div>
+        <div class="field">
+          <label for="session-notes">Notes</label>
+          <textarea class="form-control" id="session-notes" rows="3" formControlName="notes"
+            placeholder="Conditions, swim, what you'd do differently..."></textarea>
+        </div>
+      </form>
+
+      <div class="catches-head">
+        <h2 class="catches-title">Catches</h2>
+        <div class="catches-actions">
+          <button type="button" class="btn btn-primary btn-sm" (click)="addCatch()">
+            <i class="fa fa-plus me-1"></i> Add Catch
+          </button>
+          <button type="button" class="btn btn-secondary btn-sm" (click)="addBulkCatch()">
+            Bulk Add
           </button>
         </div>
       </div>
-      <div class="mt-2">
-        <label for="session-notes">Notes</label>
-        <textarea class="form-control" id="session-notes" rows="3" formControlName="notes"></textarea>
-      </div>
-    </form>
-
-    <h3 class="pd-t-4">Catches</h3>
-
-    <button type="button" class="btn btn-primary btn-sm margin-bottom" (click)="addCatch()">
-      Add Catch
-    </button>
-    <button type="button" class="btn btn-secondary btn-sm margin-bottom ms-2" (click)="addBulkCatch()">
-      Bulk Add
-    </button>
 
     <table class="table table-sm">
       <thead>
@@ -161,16 +200,17 @@
         </tr>
       </tbody>
     </table>
-  </div>
+    </div>
 
-  <div class="card-footer">
-    <button type="button" class="btn btn-secondary button-pad" (click)="closeSessionForm()" abpClose>
-      {{ '::Close' | abpLocalization }}
-    </button>
-    <button class="btn btn-primary" (click)="saveSession()" [disabled]="sessionForm.invalid">
-      <i class="fa fa-check mr-1"></i>
-      {{ '::Save' | abpLocalization }}
-    </button>
+    <div class="panel-foot">
+      <button type="button" class="btn btn-secondary" (click)="closeSessionForm()">
+        {{ '::Close' | abpLocalization }}
+      </button>
+      <button class="btn btn-primary" (click)="saveSession()" [disabled]="sessionForm.invalid">
+        <i class="fa fa-check me-1"></i>
+        {{ '::Save' | abpLocalization }}
+      </button>
+    </div>
   </div>
 </div>
 

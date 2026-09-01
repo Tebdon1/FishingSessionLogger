@@ -44,6 +44,27 @@ export class BaitComponent implements OnInit {
     }
   }
 
+  /** Row icon standing in for the type label - lets a list of baits be told apart at a glance. */
+  baitTypeIcon(baitType: BaitType): string {
+    switch (baitType) {
+      case BaitType.Lure: return 'fa-magnet';
+      case BaitType.Bait: return 'fa-circle';
+      case BaitType.Natural: return 'fa-leaf';
+      default: return 'fa-flask';
+    }
+  }
+
+  /** Row accent colour by type: lures keep the section's terracotta, naturals
+   * are green, manufactured baits use the brass/yellow shared with Rigs. */
+  baitTypeRowClass(baitType: BaitType): string {
+    switch (baitType) {
+      case BaitType.Lure: return 'is-accent';
+      case BaitType.Bait: return 'is-brass';
+      case BaitType.Natural: return '';
+      default: return 'is-accent';
+    }
+  }
+
   sizeDisplay(sizeMm?: number, sizeUnit?: SizeUnit): string {
     return lengthDisplay(sizeMm, sizeUnit);
   }

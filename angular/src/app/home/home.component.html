@@ -1,54 +1,150 @@
-<!DOCTYPE html>
-<app-page-topbar-nav></app-page-topbar-nav>
+<section class="hero">
+  <div class="hero-inner">
+    <span class="hero-eyebrow">Fishing Session Logger</span>
+    <h1 class="hero-title">Log every session.<br />Remember every catch.</h1>
+    <p class="hero-subtitle">
+      Track venues, rigs, baits and methods alongside every fish you land so you can spot
+      what's actually working.
+    </p>
+    <div class="hero-actions">
+      <a class="btn btn-primary btn-lg" [routerLink]="['/sessions']">
+        <i class="fa fa-plus me-1"></i> Log a session
+      </a>
+    </div>
+  </div>
+</section>
 
-<div class="grid-container pd-l-2 pd-r-2">
-  <div class="grid-item">
-    <img src="/assets/images/homepage-grid-images/perch.jpg" class="homepage-grid-image-style">
-    <h3 class="grid-item-text">Perch</h3>
-  </div>
-  <div class="grid-item">
-    <img src="/assets/images/homepage-grid-images/northern-pike.jpg" class="homepage-grid-image-style">
-    <h3 class="grid-item-text">Northern Pike</h3>
-  </div>
-  <div class="grid-item">
-    <img src="/assets/images/homepage-grid-images/common-carp.jpg" class="homepage-grid-image-style">
-    <h3 class="grid-item-text">Common Carp</h3>
-  </div>
-  <div class="grid-item">
-    <img src="/assets/images/homepage-grid-images/barbel.jpg" class="homepage-grid-image-style">
-    <h3 class="grid-item-text">Barbel</h3>
-  </div>
-  <div class="grid-item">
-    <img src="/assets/images/homepage-grid-images/chub.jpg" class="homepage-grid-image-style">
-    <h3 class="grid-item-text">Chub</h3>
-  </div>
-  <div class="grid-item">
-    <img src="/assets/images/homepage-grid-images/tench.jpg" class="homepage-grid-image-style">
-    <h3 class="grid-item-text">Tench</h3>
+<section class="page recent-section" *ngIf="hasLoggedIn && !loadingRecent">
+  <div class="section-head">
+    <h2 class="section-title">Recent activity</h2>
+    <p class="section-subtitle" *ngIf="totalSessions">
+      {{ totalSessions }} session{{ totalSessions === 1 ? '' : 's' }} logged so far.
+    </p>
   </div>
 
-  <div class="grid-item">
-    <img src="/assets/images/homepage-grid-images/common-bream.jpg" class="homepage-grid-image-style">
-    <h3 class="grid-item-text">Bream</h3>
+  <div class="session-list" *ngIf="recentSessions.length; else noRecentSessions">
+    <a class="session-card" *ngFor="let row of recentSessions" [routerLink]="['/sessions']">
+      <div class="session-date" [class.is-blank]="row.isBlank">
+        <span class="session-date-day">{{ row.startDateTime | date:'d' }}</span>
+        <span class="session-date-month">{{ row.startDateTime | date:'MMM' }}</span>
+        <span class="session-date-year">{{ row.startDateTime | date:'yyyy' }}</span>
+      </div>
+
+      <div class="session-body">
+        <h3 class="session-venue">{{ row.venueName || 'Unknown venue' }}</h3>
+
+        <div class="session-facts">
+          <span *ngIf="row.isBlank" class="session-fact session-fact-blank">
+            <i class="fa fa-ban"></i> Blank
+          </span>
+          <span *ngIf="!row.isBlank" class="session-fact session-fact-catch">
+            <i class="fa fa-fish"></i> {{ catchCount(row) }} fish
+          </span>
+        </div>
+
+        <div *ngIf="speciesSummary(row).length || bestCatch(row)" class="entity-card-meta">
+          <span class="chip chip-primary" *ngFor="let s of speciesSummary(row)">
+            {{ s.name }} <strong>&times;{{ s.count }}</strong>
+          </span>
+          <span class="chip chip-best" *ngIf="bestCatch(row)">
+            <i class="fa fa-trophy"></i> {{ bestCatch(row) }}
+          </span>
+        </div>
+      </div>
+    </a>
   </div>
-  <div class="grid-item">
-    <img src="/assets/images/homepage-grid-images/atlantic-cod.jpg" class="homepage-grid-image-style">
-    <h3 class="grid-item-text">Cod</h3>
+
+  <ng-template #noRecentSessions>
+    <div class="empty-state">
+      <i class="fa fa-water empty-state-icon"></i>
+      <h3 class="empty-state-title">No sessions logged yet</h3>
+      <p class="empty-state-text">Log your first trip and start building a picture of what works, where and when.</p>
+      <a class="btn btn-primary" [routerLink]="['/sessions']">
+        <i class="fa fa-plus me-1"></i> Log a session
+      </a>
+    </div>
+  </ng-template>
+</section>
+
+<section class="page">
+  <div class="quick-links">
+    <a class="quick-link" [routerLink]="['/sessions']">
+      <i class="fa fa-calendar quick-link-icon"></i>
+      <span class="quick-link-title">Sessions</span>
+      <span class="quick-link-text">Your trip log</span>
+    </a>
+    <a class="quick-link" [routerLink]="['/venues']">
+      <i class="fa fa-map-marker quick-link-icon"></i>
+      <span class="quick-link-title">Venues</span>
+      <span class="quick-link-text">Where you fish</span>
+    </a>
+    <a class="quick-link" [routerLink]="['/baits']">
+      <i class="fa fa-flask quick-link-icon"></i>
+      <span class="quick-link-title">Baits</span>
+      <span class="quick-link-text">What you catch on</span>
+    </a>
+    <a class="quick-link" [routerLink]="['/rigs']">
+      <i class="fa fa-link quick-link-icon"></i>
+      <span class="quick-link-title">Rigs</span>
+      <span class="quick-link-text">Your end tackle</span>
+    </a>
   </div>
-  <div class="grid-item">
-    <img src="/assets/images/homepage-grid-images/smoothhound.jpg" class="homepage-grid-image-style">
-    <h3 class="grid-item-text">Smoothhound</h3>
+</section>
+
+<section class="page species-section">
+  <div class="section-head">
+    <h2 class="section-title">What you've been catching</h2>
+    <p class="section-subtitle">Your recent catches</p>
   </div>
-  <div class="grid-item">
-    <img src="/assets/images/homepage-grid-images/lesser-spotted-dogfish.jpg" class="homepage-grid-image-style">
-    <h3 class="grid-item-text">Dogfish</h3>
+
+  <div class="species-grid">
+    <a class="species-tile" [routerLink]="['/species']">
+      <img src="/assets/images/homepage-grid-images/perch.jpg" alt="Perch" class="species-image">
+      <span class="species-name">Perch</span>
+    </a>
+    <a class="species-tile" [routerLink]="['/species']">
+      <img src="/assets/images/homepage-grid-images/northern-pike.jpg" alt="Northern Pike" class="species-image">
+      <span class="species-name">Northern Pike</span>
+    </a>
+    <a class="species-tile" [routerLink]="['/species']">
+      <img src="/assets/images/homepage-grid-images/common-carp.jpg" alt="Common Carp" class="species-image">
+      <span class="species-name">Common Carp</span>
+    </a>
+    <a class="species-tile" [routerLink]="['/species']">
+      <img src="/assets/images/homepage-grid-images/barbel.jpg" alt="Barbel" class="species-image">
+      <span class="species-name">Barbel</span>
+    </a>
+    <a class="species-tile" [routerLink]="['/species']">
+      <img src="/assets/images/homepage-grid-images/chub.jpg" alt="Chub" class="species-image">
+      <span class="species-name">Chub</span>
+    </a>
+    <a class="species-tile" [routerLink]="['/species']">
+      <img src="/assets/images/homepage-grid-images/tench.jpg" alt="Tench" class="species-image">
+      <span class="species-name">Tench</span>
+    </a>
+    <a class="species-tile" [routerLink]="['/species']">
+      <img src="/assets/images/homepage-grid-images/common-bream.jpg" alt="Bream" class="species-image">
+      <span class="species-name">Bream</span>
+    </a>
+    <a class="species-tile" [routerLink]="['/species']">
+      <img src="/assets/images/homepage-grid-images/atlantic-cod.jpg" alt="Cod" class="species-image">
+      <span class="species-name">Cod</span>
+    </a>
+    <a class="species-tile" [routerLink]="['/species']">
+      <img src="/assets/images/homepage-grid-images/smoothhound.jpg" alt="Smoothhound" class="species-image">
+      <span class="species-name">Smoothhound</span>
+    </a>
+    <a class="species-tile" [routerLink]="['/species']">
+      <img src="/assets/images/homepage-grid-images/lesser-spotted-dogfish.jpg" alt="Dogfish" class="species-image">
+      <span class="species-name">Dogfish</span>
+    </a>
+    <a class="species-tile" [routerLink]="['/species']">
+      <img src="/assets/images/homepage-grid-images/zander.jpg" alt="Zander" class="species-image">
+      <span class="species-name">Zander</span>
+    </a>
+    <a class="species-tile" [routerLink]="['/species']">
+      <img src="/assets/images/homepage-grid-images/rainbow-trout.jpg" alt="Rainbow Trout" class="species-image">
+      <span class="species-name">Rainbow Trout</span>
+    </a>
   </div>
-  <div class="grid-item">
-    <img src="/assets/images/homepage-grid-images/zander.jpg" class="homepage-grid-image-style">
-    <h3 class="grid-item-text">Zander</h3>
-  </div>
-  <div class="grid-item">
-    <img src="/assets/images/homepage-grid-images/rainbow-trout.jpg" class="homepage-grid-image-style">
-    <h3 class="grid-item-text">Rainbow Trout</h3>
-  </div>
-</div>
+</section>
