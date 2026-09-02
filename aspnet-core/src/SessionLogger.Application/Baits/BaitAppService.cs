@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using SessionLogger.Domain.Baits;
 using SessionLogger.Permissions;
+using Volo.Abp;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Repositories;
@@ -36,6 +37,7 @@ public class BaitAppService :
         // silently reformatted to mm - see Bait.SizeUnit.
         entity.SizeUnit = entity.SizeMm != null ? createInput.SizeUnit : null;
         entity.Name = ComputeName(createInput, entity.SizeMm);
+        await ValidateUniqueNameAsync(entity.Name);
         return entity;
     }
 
@@ -45,6 +47,25 @@ public class BaitAppService :
         entity.SizeMm = ToMillimetres(updateInput);
         entity.SizeUnit = entity.SizeMm != null ? updateInput.SizeUnit : null;
         entity.Name = ComputeName(updateInput, entity.SizeMm);
+        await ValidateUniqueNameAsync(entity.Name, entity.Id);
+    }
+
+    // Name also has a unique index at the DB level (see SessionLoggerDbContext), but
+    // relying on that alone means a duplicate surfaces as a raw constraint-violation
+    // exception - an opaque 500 to the user instead of a message saying what's wrong.
+    // Checked here rather than in CreateAsync/UpdateAsync since Name is only known
+    // once ComputeName has run above.
+    private async Task ValidateUniqueNameAsync(string name, int? excludingId = null)
+    {
+        var query = await Repository.GetQueryableAsync();
+        var nameTaken = excludingId.HasValue
+            ? query.Any(x => x.Name == name && x.Id != excludingId.Value)
+            : query.Any(x => x.Name == name);
+
+        if (nameTaken)
+        {
+            throw new UserFriendlyException($"A bait named \"{name}\" already exists.");
+        }
     }
 
     // Converted once, at write time, to a single canonical unit - so every future

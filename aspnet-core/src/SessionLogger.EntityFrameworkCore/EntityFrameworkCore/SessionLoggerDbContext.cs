@@ -9,6 +9,7 @@ using SessionLogger.Domain.Sessions;
 using SessionLogger.Domain.Tickets;
 using SessionLogger.Domain.Venues;
 using SessionLogger.Domain.SpeciesTypes;
+using SessionLogger.Domain.UserPreferences;
 
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
@@ -45,6 +46,7 @@ public class SessionLoggerDbContext :
     public DbSet<Method> Methods { get; set; }
     public DbSet<Rig> Rigs { get; set; }
     public DbSet<File> Files { get; set; }
+    public DbSet<UserPreference> UserPreferences { get; set; }
 
     #region Entities from the modules
 
@@ -216,7 +218,9 @@ public class SessionLoggerDbContext :
         {
             b.ToTable(SessionLoggerConsts.DbTablePrefix + "Species", SessionLoggerConsts.DbSchema);
             b.Property(x => x.Name).IsRequired().HasMaxLength(100);
-            b.Property(x => x.IsSaltwater).IsRequired().HasDefaultValue(false);
+            b.Property(x => x.WaterType).IsRequired().HasDefaultValue(SpeciesWaterType.Freshwater);
+            b.Property(x => x.PhotoFileName).HasMaxLength(255);
+            b.Property(x => x.PhotoExtension).HasMaxLength(10);
             b.ConfigureByConvention(); //auto configure for the base class props
 
             b.HasIndex(x => x.Name).IsUnique();
@@ -247,6 +251,16 @@ public class SessionLoggerDbContext :
             // "Ronnie Rig") is legitimately used for multiple variations that differ
             // by length/hook/materials, so name alone can't be a unique key.
             b.HasIndex(x => x.Name);
+        });
+
+        builder.Entity<UserPreference>(b =>
+        {
+            b.ToTable(SessionLoggerConsts.DbTablePrefix + "UserPreference", SessionLoggerConsts.DbSchema);
+            b.ConfigureByConvention(); //auto configure for the base class props
+
+            // Id is the user's own Id, assigned explicitly rather than generated.
+            b.Property(x => x.Id).ValueGeneratedNever();
+            b.Property(x => x.PersonalBestMetric).IsRequired().HasDefaultValue(PersonalBestMetric.Weight);
         });
     }
 }

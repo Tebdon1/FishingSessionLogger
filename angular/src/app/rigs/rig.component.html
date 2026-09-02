@@ -13,8 +13,30 @@
     </div>
   </div>
 
+  <div class="filter-bar" *ngIf="rig.items.length > 0">
+    <div class="filter-field filter-field-grow">
+      <i class="fa fa-search filter-field-icon"></i>
+      <input
+        type="text"
+        class="form-control"
+        placeholder="Search by name, hook pattern or materials..."
+        [(ngModel)]="nameFilter"
+        (ngModelChange)="applyFilters()"
+      />
+    </div>
+    <div class="filter-field">
+      <select class="form-control" [(ngModel)]="sortBy" (ngModelChange)="applyFilters()">
+        <option value="name">Name (A-Z)</option>
+        <option value="length">Longest first</option>
+      </select>
+    </div>
+    <button type="button" class="btn btn-secondary btn-sm" (click)="clearFilters()">
+      <i class="fa fa-times me-1"></i> Clear filters
+    </button>
+  </div>
+
   <div class="entity-row-list">
-    <article *ngFor="let row of rig.items" class="entity-row is-brass">
+    <article *ngFor="let row of displayedRig" class="entity-row is-brass">
       <div class="entity-row-body">
         <h2 class="entity-row-title">{{ row.name }}</h2>
         <div class="entity-row-meta">
@@ -46,6 +68,13 @@
       <button class="btn btn-primary" type="button" (click)="createRig()">
         <i class="fa fa-plus me-1"></i> Add your first rig
       </button>
+    </div>
+
+    <div *ngIf="rig.items.length > 0 && displayedRig.length === 0" class="empty-state">
+      <i class="fa fa-filter empty-state-icon"></i>
+      <h2 class="empty-state-title">No rigs match your filters</h2>
+      <p class="empty-state-text">Try adjusting or clearing the filters above.</p>
+      <button class="btn btn-secondary" type="button" (click)="clearFilters()">Clear filters</button>
     </div>
   </div>
 </div>

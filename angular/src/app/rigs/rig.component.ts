@@ -19,20 +19,68 @@ export class RigComponent implements OnInit {
 
   rig = { items: [], totalCount: 0 } as PagedResultDto<RigDto>;
 
+  // The rig page loads everything at once (no pager), so filtering/sorting is
+  // just an in-memory transform of `rig.items` rather than a server round trip.
+  displayedRig: RigDto[] = [];
+
+  nameFilter = '';
+  sortBy: 'name' | 'length' = 'name';
+
   view = '';
 
   constructor(
     public readonly list: ListService,
     private rigService: RigService,
     private confirmation: ConfirmationService) {
-      this.list.maxResultCount = 25;
+      // A reference pick-list, not paginated data - raised well past the old 25-row
+      // cap (which had no pager, so anything past it was just invisible) so every
+      // rig actually shows up.
+      this.list.maxResultCount = 1000;
     }
 
   ngOnInit() {
     const rigStreamCreator = (query) => this.rigService.getList(query);
     this.list.hookToQuery(rigStreamCreator).subscribe((response) => {
       this.rig = response;
+      this.applyFilters();
     });
+  }
+
+  // Search also checks hookPattern and materials, since those are shown right on
+  // the row and are just as likely to be what someone remembers about a rig as its name.
+  applyFilters() {
+    let items = [...this.rig.items];
+
+    const term = this.nameFilter.trim().toLowerCase();
+    if (term) {
+      items = items.filter((r) =>
+        r.name.toLowerCase().includes(term) ||
+        (r.hookPattern ?? '').toLowerCase().includes(term) ||
+        (r.materials ?? '').toLowerCase().includes(term)
+      );
+    }
+
+    items.sort((a, b) => {
+      if (this.sortBy === 'length') {
+        const aValue = a.lengthMm ?? -Infinity;
+        const bValue = b.lengthMm ?? -Infinity;
+        // Equality check first - two -Infinity values (neither has a length) would
+        // otherwise subtract to NaN, which Array.sort treats unpredictably rather
+        // than as "equal, fall through to the alphabetical tiebreaker".
+        if (aValue !== bValue) {
+          return bValue - aValue;
+        }
+      }
+      return a.name.localeCompare(b.name);
+    });
+
+    this.displayedRig = items;
+  }
+
+  clearFilters() {
+    this.nameFilter = '';
+    this.sortBy = 'name';
+    this.applyFilters();
   }
 
   lengthDisplay(lengthMm?: number, lengthUnit?: SizeUnit): string {

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Shouldly;
 using SessionLogger.Catches;
 using SessionLogger.Domain.Catches;
+using SessionLogger.Domain.SpeciesTypes;
 using SessionLogger.SpeciesTypes;
 using SessionLogger.Venues;
 using Volo.Abp.Application.Dtos;
@@ -33,7 +34,7 @@ public class SessionAppServiceTests : SessionLoggerApplicationTestBase
     public async Task GetListAsync_Should_Include_Each_Session_Catches_With_Species_Name()
     {
         var venue = await _venueAppService.CreateAsync(new VenueUpdateDto { Name = "Willow Park Lake " + Guid.NewGuid() });
-        var species = await _speciesAppService.CreateAsync(new SpeciesUpdateDto { Name = "Common Carp " + Guid.NewGuid(), IsSaltwater = false });
+        var species = await _speciesAppService.CreateAsync(new SpeciesUpdateDto { Name = "Common Carp " + Guid.NewGuid(), WaterType = SpeciesWaterType.Freshwater });
 
         var created = await _sessionAppService.CreateAsync(new CreateUpdateSessionDto
         {
@@ -85,7 +86,7 @@ public class SessionAppServiceTests : SessionLoggerApplicationTestBase
     public async Task IsBlank_Should_Be_Recomputed_Whenever_A_Session_Is_Updated()
     {
         var venue = await _venueAppService.CreateAsync(new VenueUpdateDto { Name = "Ufton Canal " + Guid.NewGuid() });
-        var species = await _speciesAppService.CreateAsync(new SpeciesUpdateDto { Name = "Barbel " + Guid.NewGuid(), IsSaltwater = false });
+        var species = await _speciesAppService.CreateAsync(new SpeciesUpdateDto { Name = "Barbel " + Guid.NewGuid(), WaterType = SpeciesWaterType.Freshwater });
 
         var created = await _sessionAppService.CreateAsync(new CreateUpdateSessionDto
         {

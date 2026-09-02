@@ -13,8 +13,38 @@
     </div>
   </div>
 
+  <div class="filter-bar" *ngIf="bait.items.length > 0">
+    <div class="filter-field filter-field-grow">
+      <i class="fa fa-search filter-field-icon"></i>
+      <input
+        type="text"
+        class="form-control"
+        placeholder="Search by name or brand..."
+        [(ngModel)]="nameFilter"
+        (ngModelChange)="applyFilters()"
+      />
+    </div>
+    <div class="filter-field">
+      <select class="form-control" [(ngModel)]="baitTypeFilter" (ngModelChange)="applyFilters()">
+        <option value="all">All types</option>
+        <option [ngValue]="BaitType.Lure">Lure</option>
+        <option [ngValue]="BaitType.Bait">Bait</option>
+        <option [ngValue]="BaitType.Natural">Natural</option>
+      </select>
+    </div>
+    <div class="filter-field">
+      <select class="form-control" [(ngModel)]="sortBy" (ngModelChange)="applyFilters()">
+        <option value="name">Name (A-Z)</option>
+        <option value="size">Largest size first</option>
+      </select>
+    </div>
+    <button type="button" class="btn btn-secondary btn-sm" (click)="clearFilters()">
+      <i class="fa fa-times me-1"></i> Clear filters
+    </button>
+  </div>
+
   <div class="entity-row-list">
-    <article *ngFor="let row of bait.items" class="entity-row" [ngClass]="baitTypeRowClass(row.baitType)">
+    <article *ngFor="let row of displayedBait" class="entity-row" [ngClass]="baitTypeRowClass(row.baitType)">
       <div class="entity-row-icon" [title]="baitTypeLabel(row.baitType)">
         <i class="fa" [ngClass]="baitTypeIcon(row.baitType)"></i>
       </div>
@@ -44,6 +74,13 @@
       <button class="btn btn-primary" type="button" (click)="createBait()">
         <i class="fa fa-plus me-1"></i> Add your first bait
       </button>
+    </div>
+
+    <div *ngIf="bait.items.length > 0 && displayedBait.length === 0" class="empty-state">
+      <i class="fa fa-filter empty-state-icon"></i>
+      <h2 class="empty-state-title">No baits match your filters</h2>
+      <p class="empty-state-text">Try adjusting or clearing the filters above.</p>
+      <button class="btn btn-secondary" type="button" (click)="clearFilters()">Clear filters</button>
     </div>
   </div>
 </div>

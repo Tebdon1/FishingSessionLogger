@@ -46,8 +46,8 @@
           <span class="chip chip-primary" *ngFor="let s of speciesSummary(row)">
             {{ s.name }} <strong>&times;{{ s.count }}</strong>
           </span>
-          <span class="chip chip-best" *ngIf="bestCatch(row)">
-            <i class="fa fa-trophy"></i> {{ bestCatch(row) }}
+          <span class="chip chip-largest" *ngIf="bestCatch(row)">
+            <i class="fa fa-trophy"></i> Largest: {{ bestCatch(row) }}
           </span>
         </div>
       </div>

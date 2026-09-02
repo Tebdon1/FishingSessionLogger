@@ -74,8 +74,14 @@ public class SessionLoggerApplicationAutoMapperProfile : Profile
         CreateMap<Venue, VenueDto>();
         CreateMap<VenueUpdateDto, Venue>();
 
-        CreateMap<Species, SpeciesDto>();
-        CreateMap<SpeciesUpdateDto, Species>();
+        CreateMap<Species, SpeciesDto>()
+            .ForMember(dest => dest.HasPhoto, opt => opt.MapFrom(src => src.PhotoData != null));
+        CreateMap<SpeciesUpdateDto, Species>()
+            // Handled in SpeciesAppService.ApplyPhoto instead - a null PhotoData here
+            // means "unchanged", not "clear it", which a direct automap can't express.
+            .ForMember(dest => dest.PhotoData, opt => opt.Ignore())
+            .ForMember(dest => dest.PhotoFileName, opt => opt.Ignore())
+            .ForMember(dest => dest.PhotoExtension, opt => opt.Ignore());
 
         CreateMap<Method, MethodDto>();
         CreateMap<MethodUpdateDto, Method>();
