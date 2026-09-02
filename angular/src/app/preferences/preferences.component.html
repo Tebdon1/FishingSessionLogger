@@ -1,0 +1,41 @@
+<div class="page">
+  <div class="page-head">
+    <div class="page-heading">
+      <span class="page-eyebrow">Account</span>
+      <h1 class="page-title">Preferences</h1>
+      <p class="page-subtitle">Personal settings for how your data is displayed.</p>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-body">
+      <div class="field">
+        <label>Personal best display</label>
+        <p class="field-hint">
+          Species cards show your personal best for each fish - choose whether that's the weight or the length.
+        </p>
+        <div class="btn-group" role="group">
+          <button
+            type="button"
+            class="btn"
+            [class.btn-primary]="personalBestMetric === PersonalBestMetric.Weight"
+            [class.btn-secondary]="personalBestMetric !== PersonalBestMetric.Weight"
+            (click)="setPersonalBestMetric(PersonalBestMetric.Weight)"
+          >
+            <i class="fa fa-balance-scale me-1"></i> Weight
+          </button>
+          <button
+            type="button"
+            class="btn"
+            [class.btn-primary]="personalBestMetric === PersonalBestMetric.Length"
+            [class.btn-secondary]="personalBestMetric !== PersonalBestMetric.Length"
+            (click)="setPersonalBestMetric(PersonalBestMetric.Length)"
+          >
+            <i class="fa fa-arrows-h me-1"></i> Length
+          </button>
+        </div>
+        <span *ngIf="saved" class="field-hint">Saved.</span>
+      </div>
+    </div>
+  </div>
+</div>

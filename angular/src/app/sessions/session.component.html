@@ -42,8 +42,8 @@
           <span *ngFor="let s of sessionSpeciesSummary(row)" class="chip chip-primary">
             {{ s.name }} <strong>&times;{{ s.count }}</strong>
           </span>
-          <span *ngIf="sessionBestCatch(row)" class="chip chip-best">
-            <i class="fa fa-trophy"></i> {{ sessionBestCatch(row) }}
+          <span *ngIf="sessionBestCatch(row)" class="chip chip-largest">
+            <i class="fa fa-trophy"></i> Largest: {{ sessionBestCatch(row) }}
           </span>
         </div>
 

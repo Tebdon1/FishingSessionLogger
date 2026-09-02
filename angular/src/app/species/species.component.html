@@ -13,14 +13,47 @@
     </div>
   </div>
 
+  <div class="filter-bar" *ngIf="species.items.length > 0">
+    <div class="filter-field filter-field-grow">
+      <i class="fa fa-search filter-field-icon"></i>
+      <input
+        type="text"
+        class="form-control"
+        placeholder="Search by name..."
+        [(ngModel)]="nameFilter"
+        (ngModelChange)="applyFilters()"
+      />
+    </div>
+    <div class="filter-field">
+      <select class="form-control" [(ngModel)]="waterTypeFilter" (ngModelChange)="applyFilters()">
+        <option value="all">All water types</option>
+        <option [ngValue]="SpeciesWaterType.Freshwater">Freshwater</option>
+        <option [ngValue]="SpeciesWaterType.Saltwater">Saltwater</option>
+        <option [ngValue]="SpeciesWaterType.Both">Both</option>
+      </select>
+    </div>
+    <div class="filter-field">
+      <select class="form-control" [(ngModel)]="sortBy" (ngModelChange)="applyFilters()">
+        <option value="name">Name (A-Z)</option>
+        <option value="pb">Largest PB first</option>
+      </select>
+    </div>
+    <button type="button" class="btn btn-secondary btn-sm" (click)="clearFilters()">
+      <i class="fa fa-times me-1"></i> Clear filters
+    </button>
+  </div>
+
   <div class="entity-grid">
-    <article *ngFor="let row of species.items" class="entity-card" [class.is-accent]="row.isSaltwater">
-      <h2 class="entity-card-title">{{ row.name }}</h2>
-      <div class="entity-card-meta">
-        <span class="chip" [class.chip-accent]="row.isSaltwater" [class.chip-primary]="!row.isSaltwater">
-          <i class="fa" [ngClass]="row.isSaltwater ? 'fa-ship' : 'fa-tint'"></i>
-          {{ row.isSaltwater ? 'Saltwater' : 'Freshwater' }}
-        </span>
+    <article *ngFor="let row of displayedSpecies" class="entity-card entity-card-media">
+      <img class="entity-card-media-image" [src]="tileImage(row)" [alt]="row.name" (error)="onImageError($event)" />
+      <div class="entity-card-media-scrim"></div>
+      <div class="entity-card-media-content">
+        <div class="entity-card-media-heading">
+          <h2 class="entity-card-title">{{ row.name }}</h2>
+          <span class="chip chip-best" *ngIf="personalBestLabel(row.id) as pbLabel">
+            <i class="fa fa-trophy"></i>{{ pbLabel }}
+          </span>
+        </div>
       </div>
       <div class="entity-card-actions">
         <button class="icon-btn" [title]="'::Edit' | abpLocalization" (click)="editSpecies(row.id)">
@@ -40,6 +73,13 @@
         <i class="fa fa-plus me-1"></i> Add your first species
       </button>
     </div>
+
+    <div *ngIf="species.items.length > 0 && displayedSpecies.length === 0" class="empty-state">
+      <i class="fa fa-filter empty-state-icon"></i>
+      <h2 class="empty-state-title">No species match your filters</h2>
+      <p class="empty-state-text">Try adjusting or clearing the filters above.</p>
+      <button class="btn btn-secondary" type="button" (click)="clearFilters()">Clear filters</button>
+    </div>
   </div>
 </div>
 
@@ -58,9 +98,30 @@
           <label for="species-name">Name<span class="required-mark">*</span></label>
           <input type="text" id="species-name" class="form-control" formControlName="name" autofocus />
         </div>
-        <div class="field form-check">
-          <input type="checkbox" id="species-saltwater" class="form-check-input" formControlName="isSaltwater" />
-          <label for="species-saltwater" class="form-check-label">Saltwater species</label>
+        <div class="field">
+          <label for="species-water-type">Water Type</label>
+          <select class="form-control" id="species-water-type" formControlName="waterType">
+            <option [ngValue]="SpeciesWaterType.Freshwater">Freshwater</option>
+            <option [ngValue]="SpeciesWaterType.Saltwater">Saltwater</option>
+            <option [ngValue]="SpeciesWaterType.Both">Both</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="species-photo">Default Photo</label>
+          <span class="field-hint">
+            Shown on this species' tile. Replaced automatically for a user who has their own personal-best catch photo for it.
+          </span>
+          <input #speciesPhotoInput type="file" accept="image/*" id="species-photo" class="d-none" (change)="onSpeciesPhotoSelected($event)" />
+          <div class="photo-input-row">
+            <button type="button" class="btn btn-outline-secondary btn-sm" (click)="speciesPhotoInput.click()">
+              {{ hasSpeciesPhoto ? 'Change Photo' : 'Choose Photo' }}
+            </button>
+            <button *ngIf="hasSpeciesPhoto" type="button" class="btn btn-outline-danger btn-sm" title="Remove photo" (click)="removeSpeciesPhoto(speciesPhotoInput)">
+              <i class="fa fa-trash"></i>
+            </button>
+          </div>
+          <img *ngIf="speciesPhotoPreviewUrl" [src]="speciesPhotoPreviewUrl" class="species-photo-preview mt-2" />
+          <img *ngIf="!speciesPhotoPreviewUrl && editSpeciesItem.existingPhotoUrl" [src]="editSpeciesItem.existingPhotoUrl" class="species-photo-preview mt-2" />
         </div>
       </form>
     </div>

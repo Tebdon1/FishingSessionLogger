@@ -20,19 +20,72 @@ export class BaitComponent implements OnInit {
 
   bait = { items: [], totalCount: 0 } as PagedResultDto<BaitDto>;
 
+  // The bait page loads everything at once (no pager), so filtering/sorting is
+  // just an in-memory transform of `bait.items` rather than a server round trip.
+  displayedBait: BaitDto[] = [];
+
+  BaitType = BaitType;
+  nameFilter = '';
+  baitTypeFilter: BaitType | 'all' = 'all';
+  sortBy: 'name' | 'size' = 'name';
+
   view = '';
 
   constructor(
     public readonly list: ListService,
     private baitService: BaitService,
     private confirmation: ConfirmationService
-  ){}
+  ){
+    // A reference pick-list, not paginated data - raised well past ABP's default
+    // of 10 so every bait actually shows up (same reasoning as the other lookup
+    // pages - see species.component.ts).
+    this.list.maxResultCount = 1000;
+  }
 
   ngOnInit() {
     const baitStreamCreator = (query) => this.baitService.getList(query);
     this.list.hookToQuery(baitStreamCreator).subscribe((response) => {
       this.bait = response;
+      this.applyFilters();
     })
+  }
+
+  applyFilters() {
+    let items = [...this.bait.items];
+
+    const term = this.nameFilter.trim().toLowerCase();
+    if (term) {
+      items = items.filter((b) =>
+        b.name.toLowerCase().includes(term) || (b.brand ?? '').toLowerCase().includes(term)
+      );
+    }
+
+    if (this.baitTypeFilter !== 'all') {
+      items = items.filter((b) => b.baitType === this.baitTypeFilter);
+    }
+
+    items.sort((a, b) => {
+      if (this.sortBy === 'size') {
+        const aValue = a.sizeMm ?? -Infinity;
+        const bValue = b.sizeMm ?? -Infinity;
+        // Equality check first - two -Infinity values (neither has a size) would
+        // otherwise subtract to NaN, which Array.sort treats unpredictably rather
+        // than as "equal, fall through to the alphabetical tiebreaker".
+        if (aValue !== bValue) {
+          return bValue - aValue;
+        }
+      }
+      return a.name.localeCompare(b.name);
+    });
+
+    this.displayedBait = items;
+  }
+
+  clearFilters() {
+    this.nameFilter = '';
+    this.baitTypeFilter = 'all';
+    this.sortBy = 'name';
+    this.applyFilters();
   }
 
   baitTypeLabel(baitType: BaitType): string {

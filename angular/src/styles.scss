@@ -36,6 +36,10 @@
 
   --color-brass: #B08A3E;
 
+  --color-slate: #3D6B7A;
+  --color-slate-hover: #2E525E;
+  --color-slate-soft: #D3E1E4;
+
   --color-danger: #A63B31;
   --color-danger-hover: #872F26;
   --color-danger-soft: #EFD8D3;
@@ -72,6 +76,10 @@
   --color-accent-soft: #3A2A1D;
 
   --color-brass: #D4A85C;
+
+  --color-slate: #7FAEBB;
+  --color-slate-hover: #96C0CB;
+  --color-slate-soft: #26363B;
 
   --color-danger: #c55241;
   --color-danger-hover: #9b4134;
@@ -274,7 +282,42 @@ a:hover {
 }
 
 // ---------------------------------------------------------------------------
-// Entity cards - the replacement for the data grids. Each record is a card
+// Filter bar - a row of search/filter/sort controls above an .entity-grid or
+// .session-list. Intended to be reusable across the lookup pages.
+// ---------------------------------------------------------------------------
+.filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.filter-field {
+    position: relative;
+    min-width: 160px;
+}
+
+.filter-field-grow {
+    flex: 1 1 240px;
+}
+
+.filter-field-icon {
+    position: absolute;
+    left: 0.7rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+    pointer-events: none;
+}
+
+.filter-field-grow .form-control {
+    padding-left: 2rem;
+}
+
+// ---------------------------------------------------------------------------
+// Entity cards. Each record is a card
 // with a name, a few meta chips, and actions that surface on hover.
 // ---------------------------------------------------------------------------
 .entity-grid {
@@ -308,6 +351,57 @@ a:hover {
     &.is-brass {
         border-left-color: var(--color-brass);
     }
+}
+
+// A photo-backed variant of .entity-card - the image fills the whole tile (like the
+// home page's .species-tile preview) with the title/chips overlaid at the bottom
+// over a gradient scrim, rather than sitting above plain card content.
+.entity-card.entity-card-media {
+    display: block;
+    height: 12rem;
+    padding: 0;
+    border-left-width: 1px;
+    overflow: hidden;
+}
+
+.entity-card-media-image {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    display: block;
+    background-color: var(--color-surface-alt);
+}
+
+.entity-card-media-scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 40%, rgba(15, 12, 6, 0.82) 100%);
+    pointer-events: none;
+}
+
+.entity-card-media-content {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 1.1rem 1.15rem;
+}
+
+.entity-card-media .entity-card-title {
+    color: #FBF8EE;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+    padding-right: 0;
+}
+
+// Keeps the name and its PB chip on one line, wrapping together only if the tile
+// is too narrow for both.
+.entity-card-media-heading {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
 }
 
 .entity-card-title {
@@ -414,6 +508,15 @@ a:hover {
         color: var(--color-brass);
         font-weight: 700;
     }
+    // The largest catch of one session - its own colour, distinct from .chip-best
+    // (an all-time personal best for a species) so the two aren't mistaken for
+    // each other, and from .chip-primary/.chip-accent so it doesn't borrow a
+    // meaning already used elsewhere (freshwater/saltwater, etc.).
+    &.chip-largest {
+        background-color: var(--color-slate-soft);
+        border-color: transparent;
+        color: var(--color-slate);
+    }
 }
 
 :root[data-theme='dark'] .chip-primary {
@@ -421,6 +524,9 @@ a:hover {
 }
 :root[data-theme='dark'] .chip-accent {
     color: var(--color-accent-hover);
+}
+:root[data-theme='dark'] .chip-largest {
+    color: var(--color-slate-hover);
 }
 
 // ---------------------------------------------------------------------------
@@ -953,6 +1059,12 @@ label, .form-label {
     color: var(--color-text);
     min-height: calc(1.5em + 1rem + 2px);
 }
+// The library's own theme hardcodes this back to a white background the moment
+// the dropdown opens (higher specificity than the plain rule above), which left
+// the search text unreadable - our own text colour, but on a white box.
+.ng-select.ng-select-opened > .ng-select-container {
+    background-color: var(--color-bg-alt);
+}
 .ng-select.ng-select-focused:not(.ng-select-opened) > .ng-select-container {
     border-color: var(--color-primary);
     box-shadow: 0 0 0 3px var(--color-primary-soft);
@@ -984,6 +1096,26 @@ label, .form-label {
 .ng-dropdown-panel .ng-dropdown-panel-items .ng-option.ng-option-selected {
     background-color: var(--color-primary);
     color: var(--color-text-on-primary);
+}
+
+// Multi-selects that show their selection as one plain comma-separated line (via
+// an ng-multi-label-tmp) instead of the library's default wrapped tag chips - see
+// the venues water-type filter. The library's own multi-select layout reserves
+// lopsided top-only padding to give wrapping chips room to breathe; with a single
+// line of plain text instead, that same padding just pushes the text down off
+// the vertical centre, and the placeholder (positioned independently, absolute
+// with a fixed "top") ends up sitting high above it rather than centred to match.
+// Matches the class-count (and so specificity) of the library's own
+// `.ng-select.ng-select-multiple ...` rules being overridden here, which
+// otherwise win the tie against a plain `.ng-select-comma-list ...` selector.
+.ng-select-comma-list.ng-select-multiple .ng-select-container .ng-value-container {
+    padding-top: 0;
+}
+.ng-select-comma-list.ng-select-multiple .ng-select-container .ng-value-container .ng-placeholder {
+    position: absolute;
+    top: 50%;
+    padding-bottom: 0;
+    transform: translateY(-50%);
 }
 
 // Dropdown + "New X" quick-add button pairing.
