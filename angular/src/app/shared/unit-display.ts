@@ -33,6 +33,22 @@ export function lengthDisplay(lengthMm?: number, unit?: SizeUnit): string {
   return `${formatNumber(mmToUnitValue(lengthMm, u))}${suffix}`;
 }
 
+// Used where there's no single unit to prefer (e.g. an average) and the user's
+// preference is the metric family rather than one fixed unit - picks whichever of
+// mm/cm/m reads most naturally at that size, the way an angler would actually say it.
+export function autoLengthDisplay(lengthMm?: number): string {
+  if (lengthMm == null) {
+    return '';
+  }
+  if (lengthMm < 500) {
+    return `${formatNumber(lengthMm)}mm`;
+  }
+  if (lengthMm < 1000) {
+    return `${formatNumber(lengthMm / 10)}cm`;
+  }
+  return `${formatNumber(lengthMm / 1000)}m`;
+}
+
 export function gramsToLbOz(weightG?: number | null): { lbs: number; oz: number } | null {
   if (weightG == null) {
     return null;
@@ -62,6 +78,19 @@ export function weightDisplay(weightG?: number, unit?: WeightUnit): string {
   }
   const parts = gramsToLbOz(weightG);
   return parts ? `${parts.lbs}lb ${parts.oz}oz` : '';
+}
+
+// Used where there's no single unit to prefer (e.g. an average) and the user's
+// preference is the metric family rather than one fixed unit - grams for anything
+// under a kilo, kg above that, so a small perch doesn't read as "0.05kg".
+export function autoWeightDisplay(weightG?: number): string {
+  if (weightG == null) {
+    return '';
+  }
+  if (weightG < 1000) {
+    return `${formatNumber(weightG)}g`;
+  }
+  return `${formatNumber(weightG / 1000)}kg`;
 }
 
 // For resending a value the user isn't actively editing (e.g. an untouched catch in a

@@ -1,6 +1,6 @@
 <form *ngIf="form" [formGroup]="form">
   <div class="mt-2">
-    <label for="rig-form-name">Name</label><span> * </span>
+    <label for="rig-form-name">Name<span class="required-mark">*</span></label>
     <input type="text" id="rig-form-name" class="form-control" formControlName="name" autofocus />
   </div>
   <div class="mt-2">

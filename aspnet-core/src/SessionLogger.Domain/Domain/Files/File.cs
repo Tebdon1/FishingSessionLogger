@@ -24,10 +24,9 @@ namespace SessionLogger.Domain.Files
         [ForeignKey(nameof(CatchId))]
         public virtual Catch Catch { get; set; }
 
-        public byte[] FileData { get; set; }
-
-        // Extracted text content, used by the generic full-text search infrastructure
-        public string FileDataSearch { get; set; }
+        // The image itself - not loaded with the File unless asked for (see FileContent).
+        // Must be set on a File being created; the other details are always loaded.
+        public virtual FileContent Content { get; set; }
 
         [MaxLength(255)]
         public string FileName { get; set; }

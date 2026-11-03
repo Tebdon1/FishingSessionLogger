@@ -3,7 +3,10 @@ using SessionLogger.Catches;
 using SessionLogger.Domain.Baits;
 using SessionLogger.Domain.Catches;
 using SessionLogger.Domain.Sessions;
+using SessionLogger.Domain.SpeciesTypes;
+using SessionLogger.Domain.Venues;
 using SessionLogger.Permissions;
+using SessionLogger.Venues;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,11 +30,19 @@ public class SessionAppService :
     ISessionAppService
 {
     private readonly IRepository<FileEntity, int> _fileRepository;
+    private readonly IRepository<Venue, int> _venueRepository;
+    private readonly IRepository<Species, int> _speciesRepository;
 
-    public SessionAppService(IRepository<Session, int> repository, IRepository<FileEntity, int> fileRepository)
+    public SessionAppService(
+        IRepository<Session, int> repository,
+        IRepository<FileEntity, int> fileRepository,
+        IRepository<Venue, int> venueRepository,
+        IRepository<Species, int> speciesRepository)
         : base(repository)
     {
         _fileRepository = fileRepository;
+        _venueRepository = venueRepository;
+        _speciesRepository = speciesRepository;
         GetPolicyName = SessionLoggerPermissions.SessionConfig.Search;
         GetListPolicyName = SessionLoggerPermissions.SessionConfig.Search;
         CreatePolicyName = SessionLoggerPermissions.SessionConfig.Create;
@@ -42,12 +53,18 @@ public class SessionAppService :
     // The paged list doesn't use includeDetails, but the cards still need the venue name
     // and each catch's species/bait/method/rig names - without these, every session in
     // the list comes back with an empty Catches collection (0 fish, no species chips).
+    //
+    // Species is deliberately NOT included here, even though the cards need its name:
+    // Include loads the whole species row, including its default photo (a varbinary(max)
+    // image), and in a join that row is repeated once per catch - so listing ~200 sessions
+    // made SQL Server read the same few species photos hundreds of times over (~160MB per
+    // page load, which was most of the request's time). The names are filled in from a
+    // tiny Id/Name lookup instead - see ApplyDisplayNamesAsync.
     protected override async Task<IQueryable<Session>> CreateFilteredQueryAsync(PagedAndSortedResultRequestDto input)
     {
         var query = await base.CreateFilteredQueryAsync(input);
         return query
             .Include(x => x.Venue)
-            .Include(x => x.Catches).ThenInclude(c => c.Species)
             .Include(x => x.Catches).ThenInclude(c => c.Bait)
             .Include(x => x.Catches).ThenInclude(c => c.Method)
             .Include(x => x.Catches).ThenInclude(c => c.Rig)
@@ -63,6 +80,50 @@ public class SessionAppService :
         }
 
         return entity;
+    }
+
+    public override async Task<SessionDto> GetAsync(int id)
+    {
+        var dto = await base.GetAsync(id);
+        await ApplyDisplayNamesAsync(dto);
+        return dto;
+    }
+
+    public override async Task<PagedResultDto<SessionDto>> GetListAsync(PagedAndSortedResultRequestDto input)
+    {
+        var result = await base.GetListAsync(input);
+        await ApplyDisplayNamesAsync(result.Items.ToArray());
+        return result;
+    }
+
+    // Two things the DTOs need that the query deliberately doesn't load:
+    //  - Venue: two venues can share a name on different tickets - VenueName carries the
+    //    disambiguated label (see VenueLabels) so session cards tell them apart.
+    //  - Species: only the name is wanted, so it comes from an Id/Name-only query rather
+    //    than Include(Species), which would drag each species' photo blob along with it
+    //    (see CreateFilteredQueryAsync).
+    private async Task ApplyDisplayNamesAsync(params SessionDto[] dtos)
+    {
+        var venueQuery = await _venueRepository.GetQueryableAsync();
+        var venues = await AsyncExecuter.ToListAsync(
+            venueQuery.Include(v => v.Ticket).Where(v => v.CreatorId == CurrentUser.Id));
+        var labels = VenueLabels.From(venues);
+
+        var speciesQuery = await _speciesRepository.GetQueryableAsync();
+        var speciesNames = (await AsyncExecuter.ToListAsync(speciesQuery.Select(s => new { s.Id, s.Name })))
+            .ToDictionary(s => s.Id, s => s.Name);
+
+        foreach (var dto in dtos)
+        {
+            dto.VenueName = labels.For(dto.VenueId, dto.VenueName);
+
+            foreach (var catchDto in dto.Catches ?? Enumerable.Empty<CatchDto>())
+            {
+                catchDto.SpeciesName = speciesNames.TryGetValue(catchDto.SpeciesId, out var name)
+                    ? name
+                    : catchDto.SpeciesName;
+            }
+        }
     }
 
     protected override async Task<Session> MapToEntityAsync(CreateUpdateSessionDto createInput)

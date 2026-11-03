@@ -21,9 +21,7 @@ public class Species : AuditedAggregateRoot<int>
     // by a catch photo when the user has their own personal best for this species
     // (see PersonalBestAppService), falling back further to a generic image/icon on
     // the frontend when neither exists.
-    public byte[]? PhotoData { get; set; }
-
-    public string? PhotoFileName { get; set; }
-
-    public string? PhotoExtension { get; set; }
+    //
+    // Not loaded unless asked for (Include(x => x.Photo)) - see SpeciesPhoto for why.
+    public virtual SpeciesPhoto? Photo { get; set; }
 }

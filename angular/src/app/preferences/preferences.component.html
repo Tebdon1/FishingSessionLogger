@@ -34,8 +34,65 @@
             <i class="fa fa-arrows-h me-1"></i> Length
           </button>
         </div>
-        <span *ngIf="saved" class="field-hint">Saved.</span>
       </div>
+
+      <div class="field" *ngIf="personalBestMetric === PersonalBestMetric.Weight">
+        <label>Weight unit</label>
+        <p class="field-hint">
+          Used for averages that aren't any single catch's own weight (individual catches always show in the unit
+          they were entered in).
+        </p>
+        <div class="btn-group" role="group">
+          <button
+            type="button"
+            class="btn"
+            [class.btn-primary]="preferredWeightUnit === WeightUnitPreference.Imperial"
+            [class.btn-secondary]="preferredWeightUnit !== WeightUnitPreference.Imperial"
+            (click)="setPreferredWeightUnit(WeightUnitPreference.Imperial)"
+          >
+            lb/oz
+          </button>
+          <button
+            type="button"
+            class="btn"
+            [class.btn-primary]="preferredWeightUnit === WeightUnitPreference.Metric"
+            [class.btn-secondary]="preferredWeightUnit !== WeightUnitPreference.Metric"
+            (click)="setPreferredWeightUnit(WeightUnitPreference.Metric)"
+          >
+            kg
+          </button>
+        </div>
+      </div>
+
+      <div class="field" *ngIf="personalBestMetric === PersonalBestMetric.Length">
+        <label>Length unit</label>
+        <p class="field-hint">
+          Used for averages that aren't any single catch's own length (individual catches always show in the unit
+          they were entered in).
+        </p>
+        <div class="btn-group" role="group">
+          <button
+            type="button"
+            class="btn"
+            [class.btn-primary]="preferredLengthUnit === LengthUnitPreference.Metric"
+            [class.btn-secondary]="preferredLengthUnit !== LengthUnitPreference.Metric"
+            (click)="setPreferredLengthUnit(LengthUnitPreference.Metric)"
+          >
+            m
+          </button>
+          <button
+            type="button"
+            class="btn"
+            [class.btn-primary]="preferredLengthUnit === LengthUnitPreference.Imperial"
+            [class.btn-secondary]="preferredLengthUnit !== LengthUnitPreference.Imperial"
+            (click)="setPreferredLengthUnit(LengthUnitPreference.Imperial)"
+          >
+            in
+          </button>
+        </div>
+      </div>
+
+      <span *ngIf="saved" class="field-hint">Saved.</span>
     </div>
   </div>
 </div>

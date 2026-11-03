@@ -23,14 +23,18 @@ public class SpeciesPhotoAppService : SessionLoggerAppService
     public async Task<IRemoteStreamContent> GetAsync(int id)
     {
         var query = await _speciesRepository.GetQueryableAsync();
-        var species = query.FirstOrDefault(x => x.Id == id);
+        // Projects just the photo columns - this is the one place the image is meant to be read.
+        var photo = query
+            .Where(x => x.Id == id && x.Photo!.Data != null)
+            .Select(x => new { x.Photo!.Data, x.Photo.FileName, x.Photo.Extension })
+            .FirstOrDefault();
 
-        if (species?.PhotoData == null)
+        if (photo?.Data == null)
         {
             throw new EntityNotFoundException(typeof(Species), id);
         }
 
-        return new RemoteStreamContent(new MemoryStream(species.PhotoData), species.PhotoFileName, GetContentType(species.PhotoExtension));
+        return new RemoteStreamContent(new MemoryStream(photo.Data), photo.FileName, GetContentType(photo.Extension));
     }
 
     private static string GetContentType(string extension) => extension?.ToLowerInvariant() switch

@@ -6,15 +6,16 @@ import { SpeciesService, SpeciesDto } from '@proxy/species';
 import { VenueService, VenueDto } from '@proxy/venues';
 import { TicketService, TicketDto } from '@proxy/tickets';
 import { MethodService, MethodDto } from '@proxy/methods';
-import { RigService, RigDto, HookWeightUnit } from '@proxy/rigs';
+import { RigService, RigDto } from '@proxy/rigs';
 import { ConfirmationService, Confirmation, ToasterService } from '@abp/ng.theme.shared';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { FormGroup, FormArray, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { lastValueFrom, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { BaitService } from '@proxy/baits';
 import { UrlService } from '../services/url.service';
-import { lengthDisplay as formatLength, weightDisplay as formatWeight, hookWeightDisplay as formatHookWeight, lengthMmToInput, weightGToInput, lengthInputToMm, weightInputToGrams } from '../shared/unit-display';
+import { lengthDisplay as formatLength, weightDisplay as formatWeight, lengthMmToInput, weightGToInput, lengthInputToMm, weightInputToGrams } from '../shared/unit-display';
+import { rigDisplayLabel } from '../shared/rig-display';
 import { sessionCatchCount, sessionSpeciesSummary as sharedSpeciesSummary, sessionBestCatch as sharedBestCatch } from '../shared/session-summary';
 
 @Component({
@@ -77,15 +78,181 @@ export class SessionComponent implements OnInit {
     private fb: FormBuilder,
     private urlService: UrlService,
     private http: HttpClient) {
-      this.list.maxResultCount = 25;
+      // The page filters, sorts and "shows more" in memory (see applyFilters), so it needs
+      // every session up front. This used to be 25 with no pager, which silently hid
+      // everything older; 1000 is the API's page-size ceiling, and a note under the list
+      // says so if a log ever outgrows it.
+      this.list.maxResultCount = 1000;
     }
 
   ngOnInit() {
     const sessionStreamCreator = (query) => this.sessionService.getList(query);
     this.list.hookToQuery(sessionStreamCreator).subscribe((response) => {
       this.session = response;
+      // A reload (after a save or delete) shouldn't throw away how far down the list
+      // the user had expanded, or what they'd filtered to.
+      this.applyFilters(false);
     });
     this.loadLookups();
+  }
+
+  // --- Search, filters and sorting for the sessions list -------------------
+  // Everything is an in-memory transform of `session.items`, the same approach as the
+  // venues page - a personal log is small enough that a round trip per keystroke
+  // would only add latency.
+
+  readonly pageSize = 25;
+
+  searchFilter = '';
+  // Empty = no filter. A session matches if its venue / any of its catches' species is
+  // any one of the selected values (an "or" within a filter, "and" across filters).
+  venueFilter: number[] = [];
+  speciesFilter: number[] = [];
+  // yyyy-MM-dd, straight from <input type="date">.
+  dateFrom = '';
+  dateTo = '';
+  outcomeFilter: 'all' | 'caught' | 'blank' = 'all';
+  sortBy: 'newest' | 'oldest' | 'catches' = 'newest';
+
+  // Offered from what's actually in the log rather than the full lookup lists, so the
+  // dropdowns only list venues/species that can match something.
+  venueFilterItems: { id: number; name: string }[] = [];
+  speciesFilterItems: { id: number; name: string }[] = [];
+
+  // Every session that passes the filters, in order; `visibleSessions` is the slice of it
+  // rendered so far (grows by `pageSize` each time "Show more" is pressed).
+  displayedSessions: SessionDto[] = [];
+  visibleSessions: SessionDto[] = [];
+  private visibleCount = this.pageSize;
+
+  get hasActiveFilters(): boolean {
+    return !!(
+      this.searchFilter.trim() ||
+      this.venueFilter.length ||
+      this.speciesFilter.length ||
+      this.dateFrom ||
+      this.dateTo ||
+      this.outcomeFilter !== 'all'
+    );
+  }
+
+  get remainingSessions(): number {
+    return this.displayedSessions.length - this.visibleSessions.length;
+  }
+
+  get venueFilterLabel(): string {
+    return this.venueFilterItems
+      .filter((v) => this.venueFilter.includes(v.id))
+      .map((v) => v.name)
+      .join(', ');
+  }
+
+  get speciesFilterLabel(): string {
+    return this.speciesFilterItems
+      .filter((s) => this.speciesFilter.includes(s.id))
+      .map((s) => s.name)
+      .join(', ');
+  }
+
+  applyFilters(resetPaging = true) {
+    const items = this.session.items;
+
+    this.venueFilterItems = this.distinctVenues(items);
+    this.speciesFilterItems = this.distinctSpecies(items);
+    // A selection whose venue/species has since vanished from the log (its last session
+    // was deleted) would otherwise stay applied with nothing in the control to remove it.
+    this.venueFilter = this.venueFilter.filter((id) => this.venueFilterItems.some((v) => v.id === id));
+    this.speciesFilter = this.speciesFilter.filter((id) => this.speciesFilterItems.some((s) => s.id === id));
+
+    const terms = this.searchFilter.trim().toLowerCase().split(/\s+/).filter((t) => t);
+    const from = this.dateFrom ? new Date(`${this.dateFrom}T00:00:00`).getTime() : null;
+    const to = this.dateTo ? new Date(`${this.dateTo}T23:59:59.999`).getTime() : null;
+
+    let matches = items.filter((s) => {
+      const start = new Date(s.startDateTime).getTime();
+      if (from != null && start < from) return false;
+      if (to != null && start > to) return false;
+      if (this.outcomeFilter === 'caught' && s.isBlank) return false;
+      if (this.outcomeFilter === 'blank' && !s.isBlank) return false;
+      if (this.venueFilter.length && !this.venueFilter.includes(s.venueId)) return false;
+      if (this.speciesFilter.length && !(s.catches ?? []).some((c) => this.speciesFilter.includes(c.speciesId))) {
+        return false;
+      }
+      if (terms.length) {
+        // Every word has to match somewhere (so "canal perch" narrows, not widens).
+        const haystack = this.searchText(s);
+        if (!terms.every((t) => haystack.includes(t))) return false;
+      }
+      return true;
+    });
+
+    // Sorted here rather than trusting the API's order: the server returns sessions by
+    // when they were created, which isn't the order they were fished in once older trips
+    // have been back-filled.
+    const byStart = (a: SessionDto, b: SessionDto) =>
+      new Date(b.startDateTime).getTime() - new Date(a.startDateTime).getTime();
+    matches = [...matches].sort((a, b) => {
+      switch (this.sortBy) {
+        case 'oldest': return -byStart(a, b);
+        case 'catches': return (b.catches?.length ?? 0) - (a.catches?.length ?? 0) || byStart(a, b);
+        default: return byStart(a, b);
+      }
+    });
+
+    if (resetPaging) {
+      this.visibleCount = this.pageSize;
+    }
+    this.displayedSessions = matches;
+    this.visibleSessions = matches.slice(0, this.visibleCount);
+  }
+
+  showMoreSessions() {
+    this.visibleCount += this.pageSize;
+    this.visibleSessions = this.displayedSessions.slice(0, this.visibleCount);
+  }
+
+  clearFilters() {
+    this.searchFilter = '';
+    this.venueFilter = [];
+    this.speciesFilter = [];
+    this.dateFrom = '';
+    this.dateTo = '';
+    this.outcomeFilter = 'all';
+    this.sortBy = 'newest';
+    this.applyFilters();
+  }
+
+  // Everything a search term can hit, lower-cased once per session: the venue, the
+  // date as written out ("16 October 2026", so "october" finds a month), the session's
+  // notes, and each catch's species/bait/method/rig/notes.
+  private searchText(s: SessionDto): string {
+    const parts: (string | undefined)[] = [
+      s.venueName,
+      s.notes,
+      new Date(s.startDateTime).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }),
+    ];
+    for (const c of s.catches ?? []) {
+      parts.push(c.speciesName, c.baitName, c.methodName, c.rigName, c.notes);
+    }
+    return parts.filter((p) => p).join(' ').toLowerCase();
+  }
+
+  private distinctVenues(items: SessionDto[]): { id: number; name: string }[] {
+    const byId = new Map<number, string>();
+    for (const s of items) {
+      byId.set(s.venueId, s.venueName || 'Unknown venue');
+    }
+    return [...byId.entries()].map(([id, name]) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  private distinctSpecies(items: SessionDto[]): { id: number; name: string }[] {
+    const byId = new Map<number, string>();
+    for (const s of items) {
+      for (const c of s.catches ?? []) {
+        byId.set(c.speciesId, c.speciesName || 'Unknown');
+      }
+    }
+    return [...byId.entries()].map(([id, name]) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name));
   }
 
   async loadLookups() {
@@ -155,7 +322,17 @@ export class SessionComponent implements OnInit {
   }
 
   get bulkWeightIsLbOz(): boolean {
-    return this.bulkForm?.value.weightUnitEach === WeightUnit.LbOz;
+    return this.bulkForm?.value.weightUnit === WeightUnit.LbOz;
+  }
+
+  get bulkWeights(): FormArray {
+    return this.bulkForm.get('weights') as FormArray;
+  }
+
+  // Each weight row belongs to one catch, so there can never be more rows than fish.
+  get canAddBulkWeight(): boolean {
+    const count = Number(this.bulkForm?.value.count);
+    return count >= 1 && this.bulkWeights.length < count;
   }
 
   deleteSession(id: number) {
@@ -508,7 +685,9 @@ export class SessionComponent implements OnInit {
     });
   }
 
-  // bulk entry - fans out into N individual catch rows, no quantity stored
+  // bulk entry - fans out into N individual catch rows, no quantity stored. Weights are
+  // optional and entered one row per weighed fish: row 1 goes on the first catch created,
+  // row 2 on the second, and so on - any remaining catches are saved unweighed.
 
   addBulkCatch() {
     this.bulkForm = this.fb.group({
@@ -517,12 +696,25 @@ export class SessionComponent implements OnInit {
       methodId: [null],
       rigId: [null],
       count: [1, [Validators.required, Validators.min(1), Validators.max(200)]],
-      weightUnitEach: [WeightUnit.LbOz],
-      weightLbsEach: [null],
-      weightOzEach: [null, [Validators.min(0), Validators.max(15)]],
-      weightValueEach: [null],
-    });
+      weightUnit: [WeightUnit.LbOz],
+      weights: this.fb.array([]),
+    }, { validators: weightsWithinCount });
     this.modalService.open(this.bulkModalTpl, { size: 'md' });
+  }
+
+  addBulkWeight() {
+    if (!this.canAddBulkWeight) {
+      return;
+    }
+    this.bulkWeights.push(this.fb.group({
+      lbs: [null],
+      oz: [null, [Validators.min(0), Validators.max(15)]],
+      value: [null],
+    }));
+  }
+
+  removeBulkWeight(index: number) {
+    this.bulkWeights.removeAt(index);
   }
 
   saveBulkCatch(modal: NgbActiveModal) {
@@ -531,13 +723,20 @@ export class SessionComponent implements OnInit {
     }
 
     const formValue = this.bulkForm.value;
-    const weightUnit = formValue.weightUnitEach ?? WeightUnit.LbOz;
-    const weightLbs = formValue.weightLbsEach === '' || formValue.weightLbsEach == null ? null : formValue.weightLbsEach;
-    const weightOz = formValue.weightOzEach === '' || formValue.weightOzEach == null ? null : formValue.weightOzEach;
-    const weightValue = formValue.weightValueEach === '' || formValue.weightValueEach == null ? null : formValue.weightValueEach;
+    const weightUnit = formValue.weightUnit ?? WeightUnit.LbOz;
+    const blankToNull = (v: any) => (v === '' || v == null ? null : v);
 
     for (let i = 0; i < formValue.count; i++) {
-      this.editSessionItem.catches.push({
+      const row = formValue.weights[i];
+      // Only the fields the chosen unit actually uses are sent, so switching units
+      // mid-entry can't leave a stale lb/oz or kg/g value riding along on the DTO.
+      const weightInput = row
+        ? weightUnit === WeightUnit.LbOz
+          ? { weightLbs: blankToNull(row.lbs), weightOz: blankToNull(row.oz), weightValue: null }
+          : { weightLbs: null, weightOz: null, weightValue: blankToNull(row.value) }
+        : { weightLbs: null, weightOz: null, weightValue: null };
+
+      const catchEntry: CreateUpdateCatchDto = {
         sessionId: this.sessionItem?.id ?? 0,
         speciesId: formValue.speciesId,
         baitId: formValue.baitId || null,
@@ -545,10 +744,13 @@ export class SessionComponent implements OnInit {
         rigId: formValue.rigId || null,
         lengthUnit: SizeUnit.Centimetres,
         weightUnit,
-        weightLbs,
-        weightOz,
-        weightValue,
-      });
+        ...weightInput,
+      };
+
+      // weightG is display-only and computed server-side on save - set here too (as
+      // saveCatch does) so the session-edit table shows the weight immediately instead
+      // of a blank until the session round-trips.
+      this.editSessionItem.catches.push({ ...catchEntry, weightG: weightInputToGrams(catchEntry) } as any);
     }
 
     modal.close();
@@ -560,49 +762,66 @@ export class SessionComponent implements OnInit {
     this.modalService.open(this.venueModalTpl, { size: 'md' });
   }
 
-  onVenueQuickAddSaved(newVenue: VenueDto, modal: NgbActiveModal) {
-    this.venueList = [...this.venueList, newVenue].sort((a, b) => a.name.localeCompare(b.name));
+  // Reloaded rather than just appending the new venue: if it shares a name with an
+  // existing venue (on a different ticket), that venue's display label has just changed
+  // too, to include its ticket.
+  async onVenueQuickAddSaved(newVenue: VenueDto, modal: NgbActiveModal) {
+    const venues = await lastValueFrom(this.venueService.getList({ maxResultCount: 1000 }));
+    this.venueList = venues.items.sort((a, b) => a.displayName.localeCompare(b.displayName));
     this.sessionForm.patchValue({ venueId: newVenue.id });
 
     modal.close();
   }
 
   // bait/method/rig quick-add - same pattern as venue quick-add, but patch into the
-  // catch form (these are fields on a catch, not the session itself)
+  // catch form (these are fields on a catch, not the session itself). The bulk-add modal
+  // offers the same buttons, so the form that opened the quick-add is remembered and the
+  // new item is selected there, rather than always in the single-catch form.
 
-  addBaitQuickAdd() {
+  private quickAddTarget: FormGroup;
+
+  addBaitQuickAdd(target?: FormGroup) {
+    this.quickAddTarget = target ?? this.catchForm;
     this.modalService.open(this.baitModalTpl, { size: 'md' });
   }
 
   onBaitQuickAddSaved(newBait: BaitDto, modal: NgbActiveModal) {
     this.baitList = [...this.baitList, newBait].sort((a, b) => a.name.localeCompare(b.name));
-    this.catchForm.patchValue({ baitId: newBait.id });
+    this.quickAddTarget.patchValue({ baitId: newBait.id });
 
     modal.close();
   }
 
-  addMethodQuickAdd() {
+  addMethodQuickAdd(target?: FormGroup) {
+    this.quickAddTarget = target ?? this.catchForm;
     this.modalService.open(this.methodModalTpl, { size: 'md' });
   }
 
   onMethodQuickAddSaved(newMethod: MethodDto, modal: NgbActiveModal) {
     this.methodList = [...this.methodList, newMethod].sort((a, b) => a.name.localeCompare(b.name));
-    this.catchForm.patchValue({ methodId: newMethod.id });
+    this.quickAddTarget.patchValue({ methodId: newMethod.id });
 
     modal.close();
   }
 
-  addRigQuickAdd() {
+  addRigQuickAdd(target?: FormGroup) {
+    this.quickAddTarget = target ?? this.catchForm;
     this.modalService.open(this.rigModalTpl, { size: 'md' });
   }
 
   onRigQuickAddSaved(newRig: RigDto, modal: NgbActiveModal) {
     const withLabel = { ...newRig, displayLabel: rigDisplayLabel(newRig) };
     this.rigList = [...this.rigList, withLabel].sort((a, b) => a.name.localeCompare(b.name));
-    this.catchForm.patchValue({ rigId: newRig.id });
+    this.quickAddTarget.patchValue({ rigId: newRig.id });
 
     modal.close();
   }
+}
+
+function weightsWithinCount(group: AbstractControl): ValidationErrors | null {
+  const count = Number(group.get('count')?.value);
+  const weights = group.get('weights') as FormArray;
+  return weights && count >= 1 && weights.length > count ? { tooManyWeights: true } : null;
 }
 
 function toLocalDateTimeInput(date: Date): string {
@@ -630,28 +849,6 @@ function timeSpanToTimeInput(value?: string | null): string | null {
   return value.substring(0, 5);
 }
 
-// Rig names aren't unique - fold the specs into the label so "Ronnie Rig" tied two
-// different ways reads as two distinct options instead of an ambiguous duplicate.
-function rigDisplayLabel(rig: {
-  name: string;
-  lengthMm?: number;
-  lengthUnit?: SizeUnit;
-  hookSize?: string;
-  hookWeightG?: number;
-  hookWeightUnit?: HookWeightUnit;
-  hookPattern?: string;
-  materials?: string;
-}): string {
-  const parts = [
-    rig.lengthMm != null ? formatLength(rig.lengthMm, rig.lengthUnit) : null,
-    rig.hookSize ? `Size ${rig.hookSize}` : null,
-    rig.hookWeightG != null ? formatHookWeight(rig.hookWeightG, rig.hookWeightUnit) : null,
-    rig.hookPattern || null,
-    rig.materials || null,
-  ].filter(p => p);
-
-  return parts.length ? `${rig.name} (${parts.join(', ')})` : rig.name;
-}
 
 // Matches CreateUpdateCatchDto.MaxPhotoBytes on the backend.
 const MAX_PHOTO_BYTES = 8 * 1024 * 1024;

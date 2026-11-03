@@ -57,6 +57,10 @@ const routes: Routes = [
       path: 'preferences',
       loadChildren: () => import('./preferences/preferences.module').then(m => m.PreferencesModule)
   },
+  {
+      path: 'statistics',
+      loadChildren: () => import('./statistics/statistics.module').then(m => m.StatisticsModule)
+  },
 
 ];
 

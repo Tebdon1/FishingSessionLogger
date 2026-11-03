@@ -12,6 +12,7 @@ export enum WaterType {
 
 export interface VenueDto extends AuditedEntityDto<number> {
   name: string;
+  displayName?: string;
   postcode?: string;
   ticketId?: number;
   ticketName?: string;

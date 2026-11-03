@@ -14,6 +14,7 @@ using Volo.Abp.SettingManagement.EntityFrameworkCore;
 using Volo.Abp.TenantManagement.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using SessionLogger.Domain.Sessions;
 using SessionLogger.Domain.Catches;
 using SessionLogger.Domain.Venues;
@@ -81,6 +82,17 @@ public class SessionLoggerEntityFrameworkCoreModule : AbpModule
                 /* The main point to change your DBMS.
                  * See also SessionLoggerMigrationsDbContextFactory for EF Core tooling. */
             options.UseSqlServer();
+
+            // SpeciesPhoto shares AppSpecies's row (table splitting) and every one of its
+            // columns is nullable, so EF warns that it can't tell "no photo" from "photo
+            // with null values" and will leave Species.Photo null when the columns are
+            // all null. That's exactly the behaviour wanted - a species without a photo
+            // has no SpeciesPhoto - so the warning is just noise at every startup.
+            options.PreConfigure<SessionLoggerDbContext>(context =>
+            {
+                context.DbContextOptions.ConfigureWarnings(warnings =>
+                    warnings.Ignore(RelationalEventId.OptionalDependentWithoutIdentifyingPropertyWarning));
+            });
         });
     }
 }

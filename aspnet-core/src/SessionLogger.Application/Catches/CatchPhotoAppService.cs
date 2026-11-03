@@ -21,14 +21,18 @@ public class CatchPhotoAppService : SessionLoggerAppService
     public async Task<IRemoteStreamContent> GetAsync(int id)
     {
         var query = await _fileRepository.GetQueryableAsync();
-        var file = query.FirstOrDefault(x => x.Id == id);
+        // Projects just what's needed - this is the one place the image is meant to be read.
+        var file = query
+            .Where(x => x.Id == id)
+            .Select(x => new { x.CreatorId, x.Content.Data, x.FileName, x.Extension })
+            .FirstOrDefault();
 
         if (file == null || file.CreatorId != CurrentUser.Id)
         {
             throw new EntityNotFoundException(typeof(FileEntity), id);
         }
 
-        return new RemoteStreamContent(new MemoryStream(file.FileData), file.FileName, GetContentType(file.Extension));
+        return new RemoteStreamContent(new MemoryStream(file.Data), file.FileName, GetContentType(file.Extension));
     }
 
     private static string GetContentType(string extension) => extension?.ToLowerInvariant() switch

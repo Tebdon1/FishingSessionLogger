@@ -53,12 +53,15 @@ public class SessionLoggerApplicationAutoMapperProfile : Profile
                 opt.Condition(src => src.PhotoData != null);
                 opt.MapFrom(src => new File
                 {
-                    FileData = src.PhotoData,
                     FileName = src.PhotoFileName,
                     Extension = System.IO.Path.GetExtension(src.PhotoFileName),
                     Size = src.PhotoData.Length,
-                    // Not a text document - nothing to feed the full-text search index.
-                    FileDataSearch = string.Empty
+                    Content = new FileContent
+                    {
+                        Data = src.PhotoData,
+                        // Not a text document - nothing to feed the full-text search index.
+                        Search = string.Empty
+                    }
                 });
             });
 
@@ -75,13 +78,13 @@ public class SessionLoggerApplicationAutoMapperProfile : Profile
         CreateMap<VenueUpdateDto, Venue>();
 
         CreateMap<Species, SpeciesDto>()
-            .ForMember(dest => dest.HasPhoto, opt => opt.MapFrom(src => src.PhotoData != null));
+            // Filled in by SpeciesAppService.ApplyHasPhotoAsync: the photo isn't loaded
+            // with the species (see SpeciesPhoto), so there's nothing here to test.
+            .ForMember(dest => dest.HasPhoto, opt => opt.Ignore());
         CreateMap<SpeciesUpdateDto, Species>()
-            // Handled in SpeciesAppService.ApplyPhoto instead - a null PhotoData here
-            // means "unchanged", not "clear it", which a direct automap can't express.
-            .ForMember(dest => dest.PhotoData, opt => opt.Ignore())
-            .ForMember(dest => dest.PhotoFileName, opt => opt.Ignore())
-            .ForMember(dest => dest.PhotoExtension, opt => opt.Ignore());
+            // Handled in SpeciesAppService.ApplyPhoto instead - a null PhotoData on the
+            // DTO means "unchanged", not "clear it", which a direct automap can't express.
+            .ForMember(dest => dest.Photo, opt => opt.Ignore());
 
         CreateMap<Method, MethodDto>();
         CreateMap<MethodUpdateDto, Method>();

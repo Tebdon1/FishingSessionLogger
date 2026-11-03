@@ -13,8 +13,89 @@
     </div>
   </div>
 
+  <div class="filter-bar" *ngIf="session.items.length > 0">
+    <div class="filter-field filter-field-grow">
+      <i class="fa fa-search filter-field-icon"></i>
+      <input
+        type="text"
+        class="form-control"
+        placeholder="Search venue, etc..."
+        [(ngModel)]="searchFilter"
+        (ngModelChange)="applyFilters()"
+      />
+    </div>
+    <div class="filter-field filter-field-grow">
+      <ng-select
+        class="ng-select-comma-list"
+        [items]="venueFilterItems"
+        bindLabel="name"
+        bindValue="id"
+        [multiple]="true"
+        [closeOnSelect]="false"
+        placeholder="All venues"
+        [(ngModel)]="venueFilter"
+        (ngModelChange)="applyFilters()"
+      >
+        <ng-template ng-multi-label-tmp>
+          <span class="ng-value-comma-list">{{ venueFilterLabel }}</span>
+        </ng-template>
+      </ng-select>
+    </div>
+    <div class="filter-field filter-field-grow">
+      <ng-select
+        class="ng-select-comma-list"
+        [items]="speciesFilterItems"
+        bindLabel="name"
+        bindValue="id"
+        [multiple]="true"
+        [closeOnSelect]="false"
+        placeholder="All species"
+        [(ngModel)]="speciesFilter"
+        (ngModelChange)="applyFilters()"
+      >
+        <ng-template ng-multi-label-tmp>
+          <span class="ng-value-comma-list">{{ speciesFilterLabel }}</span>
+        </ng-template>
+      </ng-select>
+    </div>
+    <div class="filter-field filter-field-dates">
+      <input type="date" class="form-control" title="From date" aria-label="From date"
+        [(ngModel)]="dateFrom" (ngModelChange)="applyFilters()" />
+      <span class="filter-field-separator">to</span>
+      <input type="date" class="form-control" title="To date" aria-label="To date"
+        [(ngModel)]="dateTo" (ngModelChange)="applyFilters()" />
+    </div>
+    <div class="filter-field">
+      <select class="form-control" aria-label="Outcome" [(ngModel)]="outcomeFilter" (ngModelChange)="applyFilters()">
+        <option value="all">All sessions</option>
+        <option value="caught">Caught fish</option>
+        <option value="blank">Blanks only</option>
+      </select>
+    </div>
+    <div class="filter-field">
+      <select class="form-control" aria-label="Sort" [(ngModel)]="sortBy" (ngModelChange)="applyFilters()">
+        <option value="newest">Newest first</option>
+        <option value="oldest">Oldest first</option>
+        <option value="catches">Most fish</option>
+      </select>
+    </div>
+    <button type="button" class="btn btn-secondary btn-sm" (click)="clearFilters()">
+      <i class="fa fa-times me-1"></i> Clear filters
+    </button>
+  </div>
+
+  <p *ngIf="session.items.length > 0" class="entity-card-note filter-summary">
+    <ng-container *ngIf="hasActiveFilters; else allSessions">
+      {{ displayedSessions.length }} of {{ session.items.length }} sessions match.
+    </ng-container>
+    <ng-template #allSessions>{{ session.items.length }} sessions.</ng-template>
+    <ng-container *ngIf="session.totalCount > session.items.length">
+      Only the first {{ session.items.length }} of {{ session.totalCount }} sessions could be loaded.
+    </ng-container>
+  </p>
+
   <div class="session-list">
-    <article *ngFor="let row of session.items" class="session-card">
+    <article *ngFor="let row of visibleSessions" class="session-card">
       <div class="session-date" [class.is-blank]="row.isBlank">
         <span class="session-date-day">{{ row.startDateTime | date:'d' }}</span>
         <span class="session-date-month">{{ row.startDateTime | date:'MMM' }}</span>
@@ -60,6 +141,14 @@
       </div>
     </article>
 
+    <div *ngIf="remainingSessions > 0" class="list-footer">
+      <button class="btn btn-secondary" type="button" (click)="showMoreSessions()">
+        <i class="fa fa-chevron-down me-1"></i>
+        Show {{ remainingSessions < pageSize ? remainingSessions : pageSize }} more
+      </button>
+      <span class="list-footer-count">Showing {{ visibleSessions.length }} of {{ displayedSessions.length }}</span>
+    </div>
+
     <div *ngIf="session.items.length === 0" class="empty-state">
       <i class="fa fa-water empty-state-icon"></i>
       <h2 class="empty-state-title">No sessions logged yet</h2>
@@ -67,6 +156,13 @@
       <button class="btn btn-primary" type="button" (click)="createSession()">
         <i class="fa fa-plus me-1"></i> Log your first session
       </button>
+    </div>
+
+    <div *ngIf="session.items.length > 0 && displayedSessions.length === 0" class="empty-state">
+      <i class="fa fa-filter empty-state-icon"></i>
+      <h2 class="empty-state-title">No sessions match your filters</h2>
+      <p class="empty-state-text">Try adjusting or clearing the filters above.</p>
+      <button class="btn btn-secondary" type="button" (click)="clearFilters()">Clear filters</button>
     </div>
   </div>
 </div>
@@ -95,7 +191,7 @@
         <div class="field">
           <label for="session-venue">Venue<span class="required-mark">*</span></label>
           <div class="picker-row">
-            <ng-select id="session-venue" class="flex-grow-1" [items]="venueList" bindLabel="name" bindValue="id"
+            <ng-select id="session-venue" class="flex-grow-1" [items]="venueList" bindLabel="displayName" bindValue="id"
               formControlName="venueId" placeholder="Select a venue"></ng-select>
             <button type="button" class="btn btn-outline-secondary btn-sm" (click)="addVenueQuickAdd()">
               <i class="fa fa-plus me-1"></i>New Venue
@@ -222,7 +318,7 @@
   <div class="modal-body">
     <form *ngIf="catchForm" [formGroup]="catchForm">
       <div class="mt-2">
-        <label for="catch-species">Species</label><span> * </span>
+        <label for="catch-species">Species<span class="required-mark">*</span></label>
         <ng-select id="catch-species" [items]="speciesList" bindLabel="name" bindValue="id"
           formControlName="speciesId" placeholder="Select a species"></ng-select>
       </div>
@@ -230,6 +326,7 @@
         <label for="catch-bait">Bait</label>
         <div class="picker-row">
           <ng-select id="catch-bait" class="flex-grow-1" [items]="baitList" bindLabel="name" bindValue="id"
+            [title]="baitName(catchForm.value.baitId)"
             formControlName="baitId" placeholder="Unknown / not recorded"></ng-select>
           <button type="button" class="btn btn-outline-secondary btn-sm" (click)="addBaitQuickAdd()">
             <i class="fa fa-plus me-1"></i>New Bait
@@ -278,6 +375,7 @@
         <label for="catch-rig">Rig</label>
         <div class="picker-row">
           <ng-select id="catch-rig" class="flex-grow-1" [items]="rigList" bindLabel="displayLabel" bindValue="id"
+            [title]="rigName(catchForm.value.rigId)"
             formControlName="rigId" placeholder="Unknown / not recorded"></ng-select>
           <button type="button" class="btn btn-outline-secondary btn-sm" (click)="addRigQuickAdd()">
             <i class="fa fa-plus me-1"></i>New Rig
@@ -327,46 +425,76 @@
   <div class="modal-body">
     <form *ngIf="bulkForm" [formGroup]="bulkForm">
       <div class="mt-2">
-        <label for="bulk-species">Species</label><span> * </span>
+        <label for="bulk-species">Species<span class="required-mark">*</span></label>
         <ng-select id="bulk-species" [items]="speciesList" bindLabel="name" bindValue="id"
           formControlName="speciesId" placeholder="Select a species"></ng-select>
       </div>
       <div class="mt-2">
         <label for="bulk-bait">Bait</label>
-        <ng-select id="bulk-bait" [items]="baitList" bindLabel="name" bindValue="id"
-          formControlName="baitId" placeholder="Unknown / not recorded"></ng-select>
+        <div class="picker-row">
+          <ng-select id="bulk-bait" class="flex-grow-1" [items]="baitList" bindLabel="name" bindValue="id"
+            [title]="baitName(bulkForm.value.baitId)"
+            formControlName="baitId" placeholder="Unknown / not recorded"></ng-select>
+          <button type="button" class="btn btn-outline-secondary btn-sm" (click)="addBaitQuickAdd(bulkForm)">
+            <i class="fa fa-plus me-1"></i>New Bait
+          </button>
+        </div>
       </div>
       <div class="mt-2">
         <label for="bulk-method">Method</label>
-        <ng-select id="bulk-method" [items]="methodList" bindLabel="name" bindValue="id"
-          formControlName="methodId" placeholder="Unknown / not recorded"></ng-select>
+        <div class="picker-row">
+          <ng-select id="bulk-method" class="flex-grow-1" [items]="methodList" bindLabel="name" bindValue="id"
+            formControlName="methodId" placeholder="Unknown / not recorded"></ng-select>
+          <button type="button" class="btn btn-outline-secondary btn-sm" (click)="addMethodQuickAdd(bulkForm)">
+            <i class="fa fa-plus me-1"></i>New Method
+          </button>
+        </div>
       </div>
       <div class="mt-2">
         <label for="bulk-rig">Rig</label>
-        <ng-select id="bulk-rig" [items]="rigList" bindLabel="displayLabel" bindValue="id"
-          formControlName="rigId" placeholder="Unknown / not recorded"></ng-select>
+        <div class="picker-row">
+          <ng-select id="bulk-rig" class="flex-grow-1" [items]="rigList" bindLabel="displayLabel" bindValue="id"
+            [title]="rigName(bulkForm.value.rigId)"
+            formControlName="rigId" placeholder="Unknown / not recorded"></ng-select>
+          <button type="button" class="btn btn-outline-secondary btn-sm" (click)="addRigQuickAdd(bulkForm)">
+            <i class="fa fa-plus me-1"></i>New Rig
+          </button>
+        </div>
       </div>
       <div class="mt-2">
-        <label for="bulk-count">Number caught</label><span> * </span>
+        <label for="bulk-count">Number caught<span class="required-mark">*</span></label>
         <input type="number" min="1" max="200" id="bulk-count" class="form-control" formControlName="count" />
       </div>
       <div class="mt-2">
-        <label for="bulk-weight-unit">Weight (each, if known)</label>
-        <div class="weight-input-row">
-          <ng-container *ngIf="bulkWeightIsLbOz; else bulkWeightValueInput">
-            <input type="number" min="0" id="bulk-weight-lbs" class="form-control" formControlName="weightLbsEach" placeholder="lb" />
-            <input type="number" min="0" max="15" id="bulk-weight-oz" class="form-control" formControlName="weightOzEach" placeholder="oz" />
-          </ng-container>
-          <ng-template #bulkWeightValueInput>
-            <input type="number" step="0.01" min="0" id="bulk-weight-value" class="form-control" formControlName="weightValueEach" />
-          </ng-template>
-          <select class="form-control" id="bulk-weight-unit" formControlName="weightUnitEach">
-            <option [ngValue]="WeightUnit.LbOz">lb/oz</option>
-            <option [ngValue]="WeightUnit.Kilograms">kg</option>
-            <option [ngValue]="WeightUnit.Grams">g</option>
-          </select>
+        <label for="bulk-weight-unit">Weights</label>
+        <select class="form-control mb-2" id="bulk-weight-unit" formControlName="weightUnit">
+          <option [ngValue]="WeightUnit.LbOz">lb/oz</option>
+          <option [ngValue]="WeightUnit.Kilograms">kg</option>
+          <option [ngValue]="WeightUnit.Grams">g</option>
+        </select>
+        <div formArrayName="weights">
+          <div *ngFor="let w of bulkWeights.controls; let i = index" [formGroupName]="i" class="weight-input-row mb-2">
+            <span class="align-self-center text-muted">Fish {{ i + 1 }}</span>
+            <ng-container *ngIf="bulkWeightIsLbOz; else bulkWeightValueInput">
+              <input type="number" min="0" class="form-control" formControlName="lbs" placeholder="lb" />
+              <input type="number" min="0" max="15" class="form-control" formControlName="oz" placeholder="oz" />
+            </ng-container>
+            <ng-template #bulkWeightValueInput>
+              <input type="number" step="0.01" min="0" class="form-control" formControlName="value"
+                [placeholder]="bulkForm.value.weightUnit === WeightUnit.Kilograms ? 'kg' : 'g'" />
+            </ng-template>
+            <button type="button" class="btn btn-outline-secondary btn-sm" (click)="removeBulkWeight(i)"
+              aria-label="Remove weight">
+              <i class="fa fa-times"></i>
+            </button>
+          </div>
         </div>
-        <small class="text-muted">Leave blank if you didn't weigh these.</small>
+        <button *ngIf="canAddBulkWeight" type="button" class="btn btn-secondary btn-sm" (click)="addBulkWeight()">
+          <i class="fa fa-plus mr-1"></i> Add weight
+        </button>
+        <div *ngIf="bulkForm.errors?.tooManyWeights" class="text-danger mt-1">
+          <small>There are more weights than fish. Remove a weight or raise the number caught.</small>
+        </div>
       </div>
     </form>
   </div>

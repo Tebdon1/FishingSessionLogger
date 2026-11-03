@@ -177,6 +177,24 @@ public class SessionLoggerDbContext :
                 .OnDelete(DeleteBehavior.Cascade);
 
             b.HasIndex(x => x.CatchId).IsUnique();
+
+            // The image bytes live in the same AppFile row (table splitting) but are their
+            // own entity, so a query only reads them when it asks for them.
+            b.HasOne(x => x.Content)
+                .WithOne()
+                .HasForeignKey<FileContent>(c => c.FileId)
+                .OnDelete(DeleteBehavior.Cascade);
+            b.Navigation(x => x.Content).IsRequired();
+        });
+
+        builder.Entity<FileContent>(b =>
+        {
+            b.ToTable(SessionLoggerConsts.DbTablePrefix + "File", SessionLoggerConsts.DbSchema);
+            b.HasKey(x => x.FileId);
+            // Same columns as before the split, so no schema change.
+            b.Property(x => x.FileId).HasColumnName("Id");
+            b.Property(x => x.Data).HasColumnName("FileData").IsRequired();
+            b.Property(x => x.Search).HasColumnName("FileDataSearch").IsRequired();
         });
 
         builder.Entity<Bait>(b =>
@@ -219,11 +237,27 @@ public class SessionLoggerDbContext :
             b.ToTable(SessionLoggerConsts.DbTablePrefix + "Species", SessionLoggerConsts.DbSchema);
             b.Property(x => x.Name).IsRequired().HasMaxLength(100);
             b.Property(x => x.WaterType).IsRequired().HasDefaultValue(SpeciesWaterType.Freshwater);
-            b.Property(x => x.PhotoFileName).HasMaxLength(255);
-            b.Property(x => x.PhotoExtension).HasMaxLength(10);
             b.ConfigureByConvention(); //auto configure for the base class props
 
             b.HasIndex(x => x.Name).IsUnique();
+
+            // The photo lives in the same AppSpecies row (table splitting) but is its own
+            // entity, so a query only reads the image bytes when it asks for them.
+            b.HasOne(x => x.Photo)
+                .WithOne()
+                .HasForeignKey<SpeciesPhoto>(p => p.SpeciesId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<SpeciesPhoto>(b =>
+        {
+            b.ToTable(SessionLoggerConsts.DbTablePrefix + "Species", SessionLoggerConsts.DbSchema);
+            b.HasKey(x => x.SpeciesId);
+            // Same columns as before the split, so no schema change.
+            b.Property(x => x.SpeciesId).HasColumnName("Id");
+            b.Property(x => x.Data).HasColumnName("PhotoData");
+            b.Property(x => x.FileName).HasColumnName("PhotoFileName").HasMaxLength(255);
+            b.Property(x => x.Extension).HasColumnName("PhotoExtension").HasMaxLength(10);
         });
 
         builder.Entity<Method>(b =>
@@ -261,6 +295,8 @@ public class SessionLoggerDbContext :
             // Id is the user's own Id, assigned explicitly rather than generated.
             b.Property(x => x.Id).ValueGeneratedNever();
             b.Property(x => x.PersonalBestMetric).IsRequired().HasDefaultValue(PersonalBestMetric.Weight);
+            b.Property(x => x.PreferredWeightUnit).IsRequired().HasDefaultValue(WeightUnitPreference.Imperial);
+            b.Property(x => x.PreferredLengthUnit).IsRequired().HasDefaultValue(LengthUnitPreference.Metric);
         });
     }
 }

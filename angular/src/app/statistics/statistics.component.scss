@@ -1,0 +1,8 @@
+// Chart.js's responsive mode sizes the canvas to fill its parent - which needs
+// an explicit height, or (with maintainAspectRatio: false, set in the component)
+// it collapses to 0. Fixed rather than aspect-ratio-based so a full-width panel
+// doesn't end up with an absurdly tall canvas.
+.chart-canvas {
+    position: relative;
+    height: 280px;
+}

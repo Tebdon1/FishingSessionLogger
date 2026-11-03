@@ -1,0 +1,485 @@
+<div class="page">
+  <div class="page-head">
+    <div class="page-heading">
+      <span class="page-eyebrow">Insights</span>
+      <h1 class="page-title">Statistics</h1>
+      <p class="page-subtitle">What your logged sessions say about how you fish.</p>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <div class="filter-field">
+      <select class="form-control" [(ngModel)]="rangePreset" (ngModelChange)="setRangePreset($event)">
+        <option value="all">All time</option>
+        <option value="year">This year</option>
+        <option value="last12">Last 12 months</option>
+        <option value="custom">Custom range</option>
+      </select>
+    </div>
+    <ng-container *ngIf="rangePreset === 'custom'">
+      <div class="filter-field">
+        <input type="date" class="form-control" [(ngModel)]="customFrom" (change)="applyCustomRange()" />
+      </div>
+      <div class="filter-field">
+        <input type="date" class="form-control" [(ngModel)]="customTo" (change)="applyCustomRange()" />
+      </div>
+    </ng-container>
+  </div>
+
+  <div class="filter-bar">
+    <div class="filter-field filter-field-grow">
+      <ng-select
+        class="ng-select-comma-list"
+        [items]="venueOptions"
+        bindLabel="name"
+        bindValue="id"
+        [multiple]="true"
+        [closeOnSelect]="false"
+        placeholder="All venues"
+        [(ngModel)]="venueFilter"
+        (ngModelChange)="applyFilters()"
+      >
+        <ng-template ng-multi-label-tmp>
+          <span class="ng-value-comma-list">{{ selectionLabel(venueOptions, venueFilter) }}</span>
+        </ng-template>
+      </ng-select>
+    </div>
+    <div class="filter-field filter-field-grow">
+      <ng-select
+        class="ng-select-comma-list"
+        [items]="waterTypeOptions"
+        bindLabel="name"
+        bindValue="id"
+        [multiple]="true"
+        [closeOnSelect]="false"
+        placeholder="All water types"
+        [(ngModel)]="waterTypeFilter"
+        (ngModelChange)="applyFilters()"
+      >
+        <ng-template ng-multi-label-tmp>
+          <span class="ng-value-comma-list">{{ selectionLabel(waterTypeOptions, waterTypeFilter) }}</span>
+        </ng-template>
+      </ng-select>
+    </div>
+    <div class="filter-field filter-field-grow" *ngIf="ticketOptions.length > 1">
+      <ng-select
+        class="ng-select-comma-list"
+        [items]="ticketOptions"
+        bindLabel="name"
+        bindValue="id"
+        [multiple]="true"
+        [closeOnSelect]="false"
+        placeholder="All tickets"
+        [(ngModel)]="ticketFilter"
+        (ngModelChange)="applyFilters()"
+      >
+        <ng-template ng-multi-label-tmp>
+          <span class="ng-value-comma-list">{{ selectionLabel(ticketOptions, ticketFilter) }}</span>
+        </ng-template>
+      </ng-select>
+    </div>
+    <div class="filter-field filter-field-grow">
+      <ng-select
+        class="ng-select-comma-list"
+        [items]="speciesOptions"
+        bindLabel="name"
+        bindValue="id"
+        [multiple]="true"
+        [closeOnSelect]="false"
+        placeholder="All species"
+        [(ngModel)]="speciesFilter"
+        (ngModelChange)="applyFilters()"
+      >
+        <ng-template ng-multi-label-tmp>
+          <span class="ng-value-comma-list">{{ selectionLabel(speciesOptions, speciesFilter) }}</span>
+        </ng-template>
+      </ng-select>
+    </div>
+    <div class="filter-field filter-field-grow">
+      <ng-select
+        class="ng-select-comma-list"
+        [items]="baitOptions"
+        bindLabel="name"
+        bindValue="id"
+        [multiple]="true"
+        [closeOnSelect]="false"
+        placeholder="All baits"
+        [(ngModel)]="baitFilter"
+        (ngModelChange)="applyFilters()"
+      >
+        <ng-template ng-multi-label-tmp>
+          <span class="ng-value-comma-list">{{ selectionLabel(baitOptions, baitFilter) }}</span>
+        </ng-template>
+      </ng-select>
+    </div>
+    <div class="filter-field filter-field-grow">
+      <ng-select
+        class="ng-select-comma-list"
+        [items]="methodOptions"
+        bindLabel="name"
+        bindValue="id"
+        [multiple]="true"
+        [closeOnSelect]="false"
+        placeholder="All methods"
+        [(ngModel)]="methodFilter"
+        (ngModelChange)="applyFilters()"
+      >
+        <ng-template ng-multi-label-tmp>
+          <span class="ng-value-comma-list">{{ selectionLabel(methodOptions, methodFilter) }}</span>
+        </ng-template>
+      </ng-select>
+    </div>
+    <div class="filter-field filter-field-grow">
+      <ng-select
+        class="ng-select-comma-list"
+        [items]="rigOptions"
+        bindLabel="name"
+        bindValue="id"
+        [multiple]="true"
+        [closeOnSelect]="false"
+        placeholder="All rigs"
+        [(ngModel)]="rigFilter"
+        (ngModelChange)="applyFilters()"
+      >
+        <ng-template ng-multi-label-tmp>
+          <span class="ng-value-comma-list">{{ selectionLabel(rigOptions, rigFilter) }}</span>
+        </ng-template>
+      </ng-select>
+    </div>
+    <button type="button" class="btn btn-secondary btn-sm" [disabled]="!hasActiveFilters" (click)="clearFilters()">
+      <i class="fa fa-times me-1"></i> Clear filters
+    </button>
+  </div>
+
+  <p *ngIf="hasCatchFilter" class="entity-card-note filter-summary">
+    Filtering by species, bait, method or rig counts only the matching fish, and only sessions that caught at
+    least one - so blank sessions aren't included, and every figure below is about those fish alone.
+  </p>
+
+  <div *ngIf="loading && !statistics" class="empty-state">
+    <div class="donut centered"></div>
+  </div>
+
+  <div *ngIf="statistics as stats" class="stats-body" [class.is-refreshing]="loading">
+    <div *ngIf="stats.summary.totalSessions === 0 && hasActiveFilters" class="empty-state">
+      <i class="fa fa-filter empty-state-icon"></i>
+      <h2 class="empty-state-title">No sessions match your filters</h2>
+      <p class="empty-state-text">Try adjusting or clearing the filters above.</p>
+      <button class="btn btn-secondary" type="button" (click)="clearFilters()">Clear filters</button>
+    </div>
+
+    <div *ngIf="stats.summary.totalSessions === 0 && !hasActiveFilters" class="empty-state">
+      <i class="fa fa-bar-chart empty-state-icon"></i>
+      <h2 class="empty-state-title">Nothing to show yet</h2>
+      <p class="empty-state-text">Log a session and this page will start filling in with your stats.</p>
+      <a class="btn btn-primary" [routerLink]="['/sessions']">
+        <i class="fa fa-plus me-1"></i> Log a session
+      </a>
+    </div>
+
+    <ng-container *ngIf="stats.summary.totalSessions > 0">
+      <div class="stat-grid">
+        <div class="stat-tile">
+          <span class="stat-value">{{ stats.summary.totalSessions }}</span>
+          <span class="stat-label">Sessions</span>
+        </div>
+        <div class="stat-tile">
+          <span class="stat-value">{{ stats.summary.totalCatches }}</span>
+          <span class="stat-label">Fish Caught</span>
+        </div>
+        <div class="stat-tile">
+          <span class="stat-value">{{ stats.summary.totalHoursFishing | number:'1.0-1' }}</span>
+          <span class="stat-label">Hours fishing</span>
+        </div>
+        <div class="stat-tile">
+          <span class="stat-value">{{ stats.summary.catchRatePerHour !== null ? (stats.summary.catchRatePerHour | number:'1.1-2') : '-' }}</span>
+          <span class="stat-label">Fish / hour</span>
+        </div>
+        <div class="stat-tile">
+          <span class="stat-value">{{ stats.summary.blankRatePercent | number:'1.0-0' }}%</span>
+          <span class="stat-label">Blank rate</span>
+        </div>
+        <div class="stat-tile">
+          <span class="stat-value">{{ stats.summary.distinctSpeciesCount }}</span>
+          <span class="stat-label">Species caught</span>
+        </div>
+      </div>
+
+      <div class="chart-grid">
+        <div class="chart-panel chart-panel-wide">
+          <h2 class="chart-panel-title">Catches over time</h2>
+          <div class="chart-canvas">
+            <canvas baseChart [data]="activityChartData" [options]="activityChartOptions" type="bar"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-panel chart-panel-wide">
+          <h2 class="chart-panel-title">Sessions over time</h2>
+          <div class="chart-canvas">
+            <canvas baseChart [data]="sessionsChartData" [options]="sessionsChartOptions" type="bar"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-panel">
+          <h2 class="chart-panel-title">Catches by species</h2>
+          <div class="chart-canvas">
+            <canvas baseChart [data]="speciesChartData" [options]="breakdownChartOptions" type="bar"></canvas>
+          </div>
+          <p *ngIf="stats.catchesBySpecies.length > maxBreakdownBars" class="entity-card-note">
+            Showing the top {{ maxBreakdownBars }} of {{ stats.catchesBySpecies.length }} species.
+          </p>
+        </div>
+
+        <div class="chart-panel">
+          <h2 class="chart-panel-title">Catches by venue</h2>
+          <div class="chart-canvas">
+            <canvas baseChart [data]="venueChartData" [options]="breakdownChartOptions" type="bar"></canvas>
+          </div>
+          <p *ngIf="stats.catchesByVenue.length > maxBreakdownBars" class="entity-card-note">
+            Showing the top {{ maxBreakdownBars }} of {{ stats.catchesByVenue.length }} venues.
+          </p>
+        </div>
+
+        <div class="chart-panel">
+          <h2 class="chart-panel-title">Catches by bait</h2>
+          <div class="chart-canvas">
+            <canvas baseChart [data]="baitChartData" [options]="breakdownChartOptions" type="bar"></canvas>
+          </div>
+          <p *ngIf="stats.catchesByBait.length > maxBreakdownBars" class="entity-card-note">
+            Showing the top {{ maxBreakdownBars }} of {{ stats.catchesByBait.length }} baits.
+          </p>
+        </div>
+
+        <div class="chart-panel">
+          <h2 class="chart-panel-title">Catches by method</h2>
+          <div class="chart-canvas">
+            <canvas baseChart [data]="methodChartData" [options]="breakdownChartOptions" type="bar"></canvas>
+          </div>
+          <p *ngIf="stats.catchesByMethod.length > maxBreakdownBars" class="entity-card-note">
+            Showing the top {{ maxBreakdownBars }} of {{ stats.catchesByMethod.length }} methods.
+          </p>
+        </div>
+
+        <div class="chart-panel">
+          <h2 class="chart-panel-title">Catches by venue water type</h2>
+          <div class="chart-canvas">
+            <canvas baseChart [data]="waterTypeChartData" [options]="breakdownChartOptions" type="bar"></canvas>
+          </div>
+          <p *ngIf="stats.catchesByVenueWaterType.length > maxBreakdownBars" class="entity-card-note">
+            Showing the top {{ maxBreakdownBars }} of {{ stats.catchesByVenueWaterType.length }} water types.
+          </p>
+        </div>
+      </div>
+
+      <div class="chart-grid">
+        <div class="chart-panel chart-panel-wide">
+          <h2 class="chart-panel-title">Catches through the year</h2>
+          <div class="chart-canvas">
+            <canvas baseChart [data]="seasonalityChartData" [options]="verticalCountChartOptions" type="bar"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-panel chart-panel-wide">
+          <h2 class="chart-panel-title">Sessions through the year</h2>
+          <div class="chart-canvas">
+            <canvas baseChart [data]="sessionsSeasonalityChartData" [options]="sessionsChartOptions" type="bar"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-panel">
+          <h2 class="chart-panel-title">Catches by day of week</h2>
+          <div class="chart-canvas">
+            <canvas baseChart [data]="dayOfWeekChartData" [options]="verticalCountChartOptions" type="bar"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-panel">
+          <h2 class="chart-panel-title">Catches by time of day</h2>
+          <div class="chart-canvas">
+            <canvas baseChart [data]="hourOfDayChartData" [options]="verticalCountChartOptions" type="bar"></canvas>
+          </div>
+          <p *ngIf="stats.catchesMissingTimeCount > 0" class="entity-card-note">
+            {{ stats.catchesMissingTimeCount }} of {{ stats.summary.totalCatches }} catches have no time of day logged
+            and aren't included above.
+          </p>
+        </div>
+      </div>
+
+      <div class="chart-grid" *ngIf="progressionSpeciesOptions.length > 0">
+        <div class="chart-panel chart-panel-wide">
+          <div class="chart-panel-heading">
+            <h2 class="chart-panel-title">Personal best progression</h2>
+            <select
+              class="form-control chart-panel-select"
+              [ngModel]="selectedProgressionSpecies"
+              (ngModelChange)="selectProgressionSpecies($event)"
+            >
+              <option *ngFor="let name of progressionSpeciesOptions" [value]="name">{{ name }}</option>
+            </select>
+          </div>
+          <div class="chart-canvas">
+            <canvas baseChart [data]="progressionChartData" [options]="progressionChartOptions" type="line"></canvas>
+          </div>
+          <p class="entity-card-note">Larger points mark a new personal best at the time.</p>
+        </div>
+      </div>
+
+      <div class="table-panel">
+        <h2 class="chart-panel-title">Personal bests</h2>
+        <div class="table-responsive" *ngIf="stats.personalBests.length; else noPersonalBests">
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th>Species</th>
+                <ng-container *ngIf="personalBestMetric === PersonalBestMetric.Weight; else pbLengthHeaders">
+                  <th>Best weight</th>
+                  <th>Where / when</th>
+                </ng-container>
+                <ng-template #pbLengthHeaders>
+                  <th>Best length</th>
+                  <th>Where / when</th>
+                </ng-template>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let row of stats.personalBests">
+                <td>{{ row.speciesName }}</td>
+                <ng-container *ngIf="personalBestMetric === PersonalBestMetric.Weight; else pbLengthCells">
+                  <td>{{ weightDisplay(row.weightG, row.weightUnit) || '-' }}</td>
+                  <td>
+                    <span *ngIf="row.weightDate">{{ row.weightVenueName }} &middot; {{ row.weightDate | date:'d MMM y' }}</span>
+                  </td>
+                </ng-container>
+                <ng-template #pbLengthCells>
+                  <td>{{ lengthDisplay(row.lengthMm, row.lengthUnit) || '-' }}</td>
+                  <td>
+                    <span *ngIf="row.lengthDate">{{ row.lengthVenueName }} &middot; {{ row.lengthDate | date:'d MMM y' }}</span>
+                  </td>
+                </ng-template>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <ng-template #noPersonalBests>
+          <p class="entity-card-note">No weighed or measured catches in this range yet.</p>
+        </ng-template>
+      </div>
+
+      <div class="table-panel">
+        <h2 class="chart-panel-title">Top venues</h2>
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th>Venue</th>
+                <th>Sessions</th>
+                <th>Catches</th>
+                <th>Avg / session</th>
+                <th>Blank rate</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let row of stats.topVenues">
+                <td>{{ row.venueName }}</td>
+                <td>{{ row.sessionCount }}</td>
+                <td>{{ row.catchCount }}</td>
+                <td>{{ row.avgCatchesPerSession | number:'1.1-1' }}</td>
+                <td>{{ row.blankRatePercent | number:'1.0-0' }}%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="table-panel">
+        <h2 class="chart-panel-title">Top species</h2>
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th>Species</th>
+                <th>Catches</th>
+                <ng-container *ngIf="personalBestMetric === PersonalBestMetric.Weight; else lengthHeaders">
+                  <th>Best weight</th>
+                  <th>Avg weight</th>
+                </ng-container>
+                <ng-template #lengthHeaders>
+                  <th>Best length</th>
+                  <th>Avg length</th>
+                </ng-template>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let row of stats.topSpecies">
+                <td>{{ row.speciesName }}</td>
+                <td>{{ row.catchCount }}</td>
+                <ng-container *ngIf="personalBestMetric === PersonalBestMetric.Weight; else lengthCells">
+                  <td>{{ weightDisplay(row.bestWeightG, row.bestWeightUnit) || '-' }}</td>
+                  <td>
+                    <ng-container *ngIf="row.weighedCount > 0; else noAvg">
+                      {{ avgWeightDisplay(row.avgWeightG) }} <span class="entity-row-note">(n={{ row.weighedCount }})</span>
+                    </ng-container>
+                    <ng-template #noAvg>-</ng-template>
+                  </td>
+                </ng-container>
+                <ng-template #lengthCells>
+                  <td>{{ lengthDisplay(row.bestLengthMm, row.bestLengthUnit) || '-' }}</td>
+                  <td>
+                    <ng-container *ngIf="row.measuredCount > 0; else noAvg">
+                      {{ avgLengthDisplay(row.avgLengthMm) }} <span class="entity-row-note">(n={{ row.measuredCount }})</span>
+                    </ng-container>
+                    <ng-template #noAvg>-</ng-template>
+                  </td>
+                </ng-template>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="table-panel">
+        <h2 class="chart-panel-title">Top baits</h2>
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th>Bait</th>
+                <th>Sessions used</th>
+                <th>Catches</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let row of stats.topBaits">
+                <td>{{ row.name }}</td>
+                <td>{{ row.sessionsUsedCount }}</td>
+                <td>{{ row.catchCount }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="table-panel">
+        <h2 class="chart-panel-title">Top methods</h2>
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th>Method</th>
+                <th>Sessions used</th>
+                <th>Catches</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let row of stats.topMethods">
+                <td>{{ row.name }}</td>
+                <td>{{ row.sessionsUsedCount }}</td>
+                <td>{{ row.catchCount }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+</div>

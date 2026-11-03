@@ -1,5 +1,5 @@
 import { AccountConfigModule } from '@abp/ng.account/config';
-import { CoreModule } from '@abp/ng.core';
+import { CoreModule, LIST_QUERY_DEBOUNCE_TIME } from '@abp/ng.core';
 import { registerLocale } from '@abp/ng.core/locale';
 import { IdentityConfigModule } from '@abp/ng.identity/config';
 import { SettingManagementConfigModule } from '@abp/ng.setting-management/config';
@@ -47,7 +47,14 @@ import { ToastrModule } from 'ngx-toastr';
     PageTopbarNavComponent
   ],
   declarations: [AppComponent],
-  providers: [APP_ROUTE_PROVIDER],
+  providers: [
+    APP_ROUTE_PROVIDER,
+    // ABP's ListService waits this long (300ms by default) before sending each list
+    // request, so that typing into a server-side search box doesn't fire a request per
+    // keystroke. Nothing here searches server-side - filtering is done in the browser -
+    // so the wait is pure dead time at the start of every list page's load.
+    { provide: LIST_QUERY_DEBOUNCE_TIME, useValue: 0 },
+  ],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

@@ -1,6 +1,6 @@
 <form *ngIf="form" [formGroup]="form">
   <div class="mt-2">
-    <label for="bait-form-type">Type</label><span> * </span>
+    <label for="bait-form-type">Type<span class="required-mark">*</span></label>
     <select class="form-control" id="bait-form-type" formControlName="baitType">
       <option [ngValue]="BaitType.Lure">Lure (artificial)</option>
       <option [ngValue]="BaitType.Bait">Bait (manufactured - boilie, pellet, pop-up...)</option>
@@ -9,13 +9,13 @@
   </div>
 
   <div class="mt-2" *ngIf="isNatural">
-    <label for="bait-form-name">Name</label><span> * </span>
+    <label for="bait-form-name">Name<span class="required-mark">*</span></label>
     <input type="text" id="bait-form-name" class="form-control" formControlName="name" autofocus />
   </div>
 
   <ng-container *ngIf="!isNatural">
     <div class="mt-2">
-      <label for="bait-form-brand">Brand</label><span> * </span>
+      <label for="bait-form-brand">Brand<span class="required-mark">*</span></label>
       <input type="text" id="bait-form-brand" class="form-control" formControlName="brand" autofocus />
     </div>
     <div class="mt-2">

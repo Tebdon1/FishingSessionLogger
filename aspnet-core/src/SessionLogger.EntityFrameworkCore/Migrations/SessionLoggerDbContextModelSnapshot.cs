@@ -219,14 +219,6 @@ namespace SessionLogger.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("ExtraProperties");
 
-                    b.Property<byte[]>("FileData")
-                        .IsRequired()
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<string>("FileDataSearch")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("FileName")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -247,6 +239,27 @@ namespace SessionLogger.Migrations
 
                     b.HasIndex("CatchId")
                         .IsUnique();
+
+                    b.ToTable("AppFile", (string)null);
+                });
+
+            modelBuilder.Entity("SessionLogger.Domain.Files.FileContent", b =>
+                {
+                    b.Property<int>("FileId")
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    b.Property<byte[]>("Data")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)")
+                        .HasColumnName("FileData");
+
+                    b.Property<string>("Search")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("FileDataSearch");
+
+                    b.HasKey("FileId");
 
                     b.ToTable("AppFile", (string)null);
                 });
@@ -472,17 +485,6 @@ namespace SessionLogger.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<byte[]>("PhotoData")
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<string>("PhotoExtension")
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
-
-                    b.Property<string>("PhotoFileName")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
                     b.Property<int>("WaterType")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
@@ -492,6 +494,31 @@ namespace SessionLogger.Migrations
 
                     b.HasIndex("Name")
                         .IsUnique();
+
+                    b.ToTable("AppSpecies", (string)null);
+                });
+
+            modelBuilder.Entity("SessionLogger.Domain.SpeciesTypes.SpeciesPhoto", b =>
+                {
+                    b.Property<int>("SpeciesId")
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
+
+                    b.Property<byte[]>("Data")
+                        .HasColumnType("varbinary(max)")
+                        .HasColumnName("PhotoData");
+
+                    b.Property<string>("Extension")
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)")
+                        .HasColumnName("PhotoExtension");
+
+                    b.Property<string>("FileName")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("PhotoFileName");
+
+                    b.HasKey("SpeciesId");
 
                     b.ToTable("AppSpecies", (string)null);
                 });
@@ -556,6 +583,16 @@ namespace SessionLogger.Migrations
                         .HasColumnName("ExtraProperties");
 
                     b.Property<int>("PersonalBestMetric")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<int>("PreferredLengthUnit")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
+
+                    b.Property<int>("PreferredWeightUnit")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasDefaultValue(0);
@@ -2296,6 +2333,15 @@ namespace SessionLogger.Migrations
                     b.Navigation("Catch");
                 });
 
+            modelBuilder.Entity("SessionLogger.Domain.Files.FileContent", b =>
+                {
+                    b.HasOne("SessionLogger.Domain.Files.File", null)
+                        .WithOne("Content")
+                        .HasForeignKey("SessionLogger.Domain.Files.FileContent", "FileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("SessionLogger.Domain.Sessions.Session", b =>
                 {
                     b.HasOne("SessionLogger.Domain.Venues.Venue", "Venue")
@@ -2305,6 +2351,15 @@ namespace SessionLogger.Migrations
                         .IsRequired();
 
                     b.Navigation("Venue");
+                });
+
+            modelBuilder.Entity("SessionLogger.Domain.SpeciesTypes.SpeciesPhoto", b =>
+                {
+                    b.HasOne("SessionLogger.Domain.SpeciesTypes.Species", null)
+                        .WithOne("Photo")
+                        .HasForeignKey("SessionLogger.Domain.SpeciesTypes.SpeciesPhoto", "SpeciesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("SessionLogger.Domain.Venues.Venue", b =>
@@ -2464,9 +2519,20 @@ namespace SessionLogger.Migrations
                     b.Navigation("Photo");
                 });
 
+            modelBuilder.Entity("SessionLogger.Domain.Files.File", b =>
+                {
+                    b.Navigation("Content")
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("SessionLogger.Domain.Sessions.Session", b =>
                 {
                     b.Navigation("Catches");
+                });
+
+            modelBuilder.Entity("SessionLogger.Domain.SpeciesTypes.Species", b =>
+                {
+                    b.Navigation("Photo");
                 });
 
             modelBuilder.Entity("Volo.Abp.AuditLogging.AuditLog", b =>

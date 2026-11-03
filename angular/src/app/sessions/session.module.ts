@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { SessionRoutingModule } from './session-routing.module';
 import { SessionComponent } from './session.component';
@@ -20,6 +20,7 @@ import { RigFormComponent } from '../rigs/rig-form/rig-form.component';
     SessionRoutingModule,
     RouterModule,
     ReactiveFormsModule,
+    FormsModule,
     NgSelectModule,
     VenueFormComponent,
     BaitFormComponent,

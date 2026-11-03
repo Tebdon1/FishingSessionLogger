@@ -316,6 +316,51 @@ a:hover {
     padding-left: 2rem;
 }
 
+// A from/to pair of date inputs sharing one filter slot, joined by a "to".
+.filter-field-dates {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+
+    .form-control {
+        flex: 1 1 0;
+        min-width: 130px;
+    }
+}
+
+.filter-field-separator {
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+}
+
+// A page's results while a refresh is in flight: left in place but dimmed and inert, so a
+// filter change doesn't blank the page to a spinner and jump the scroll position.
+.is-refreshing {
+    opacity: 0.55;
+    pointer-events: none;
+    transition: opacity 0.15s;
+}
+
+// Result count under a filter bar.
+.filter-summary {
+    margin: -0.5rem 0 1rem;
+}
+
+// "Show more" row at the bottom of a progressively-revealed list.
+.list-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.list-footer-count {
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+}
+
 // ---------------------------------------------------------------------------
 // Entity cards. Each record is a card
 // with a name, a few meta chips, and actions that surface on hover.
@@ -878,6 +923,97 @@ a:hover {
     border-top: 1px solid var(--color-border);
 }
 
+// ---------------------------------------------------------------------------
+// Statistics dashboard - KPI tiles, chart cards and table cards. Deliberately
+// not built on .panel, which caps out at 760px wide for the create/edit forms
+// it was designed for - a dashboard needs the full page width.
+// ---------------------------------------------------------------------------
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+}
+
+.stat-tile {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    padding: 1.1rem 1.2rem;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-left: 4px solid var(--color-primary);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+}
+
+.stat-value {
+    font-family: var(--font-heading);
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+}
+
+.chart-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 1.75rem;
+}
+
+.chart-panel,
+.table-panel {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: 1.25rem;
+}
+
+.table-panel {
+    margin-bottom: 1.75rem;
+}
+
+// Spans both columns on wider screens - the time-series charts read better
+// wide and short than in a narrow square like the breakdown charts.
+.chart-panel-wide {
+    grid-column: 1 / -1;
+}
+
+.chart-panel-title {
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+    margin: 0 0 1rem;
+    color: var(--color-text);
+}
+
+// Title + an inline control (e.g. the species picker on the PB progression
+// chart) sharing one row instead of the title's usual full-width margin.
+.chart-panel-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+
+    .chart-panel-title {
+        margin-bottom: 0;
+    }
+}
+
+.chart-panel-select {
+    width: auto;
+    min-width: 160px;
+}
+
 // Legacy Bootstrap card, kept themed for any markup still using it.
 .card {
     background-color: var(--color-surface);
@@ -1079,6 +1215,29 @@ label, .form-label {
 .ng-select .ng-clear-wrapper {
     color: var(--color-text-muted);
 }
+// The text typed into a select's search box. Single-selects inherit the themed colour, but
+// the library hard-codes a multi-select's search input to #000 - black on this theme's dark
+// background, so what you type is nearly invisible. `.ng-select-searchable` is only there to
+// outrank that rule (same selector otherwise, and the library's stylesheet loads after
+// ours, so it would win a tie); the search input only exists in searchable selects anyway.
+.ng-select .ng-select-container .ng-value-container .ng-input > input,
+.ng-select.ng-select-multiple.ng-select-searchable .ng-select-container .ng-value-container .ng-input > input {
+    color: var(--color-text);
+    caret-color: var(--color-text);
+}
+// The clear (x) and arrow buttons never give up space to the selected value. They're flex
+// siblings of the value area, and when that area is wider than its box - a long selection
+// - they were the ones pushed out of it, past the edge and out of reach.
+.ng-select .ng-arrow-wrapper,
+.ng-select .ng-clear-wrapper {
+    flex-shrink: 0;
+}
+// ...and the value area, for its part, may shrink below the width of its text (a flex child
+// won't by default), so a long selection is cut off with an ellipsis inside the control
+// instead of widening it.
+.ng-select .ng-select-container .ng-value-container {
+    min-width: 0;
+}
 .ng-dropdown-panel {
     background-color: var(--color-surface);
     border: 1px solid var(--color-border);
@@ -1117,6 +1276,57 @@ label, .form-label {
     padding-bottom: 0;
     transform: translateY(-50%);
 }
+// Keep the joined selection on one line, cut off with an ellipsis. Without this a long
+// selection (e.g. two venues with long names) wraps and makes the filter control grow
+// several lines taller while its dropdown is open, pushing the rest of the filter bar
+// out of line.
+.ng-select-comma-list .ng-value-container .ng-value {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.ng-select-comma-list .ng-value-comma-list {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+// With a long selection the (invisible) search input wraps onto a second line of its
+// own and leaves the closed control a line taller than its neighbours. While the
+// dropdown is closed it's taken out of the flow - still focusable for the keyboard,
+// just no longer taking up space - and it returns, on its own line, once opened for
+// typing a search.
+.ng-select-comma-list.ng-select-multiple:not(.ng-select-opened) .ng-select-container .ng-value-container .ng-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    opacity: 0;
+    overflow: hidden;
+}
+
+// Never let a select grow past its container. A flex/grid item won't shrink below its
+// content's width by default (min-width: auto), so without this a long selected label
+// (e.g. a rig with its specs folded into the name) widens the whole control instead of
+// being cut off. The library already truncates the selected value with an ellipsis -
+// it just never gets the chance unless the control is allowed to be narrower than its
+// content.
+.ng-select {
+    min-width: 0;
+    max-width: 100%;
+}
+
+// In the dropdown, wrap rather than truncate: option labels that only differ at the end
+// (two "Hair Rig (12in, Size 6, ...)" variants) would be indistinguishable if cut off.
+// The `div` qualifier is deliberate: the library's own nowrap/ellipsis rule has the same
+// class-only specificity as a plain `.ng-option` selector and loads after this file, so
+// it would otherwise win the tie.
+.ng-dropdown-panel .ng-dropdown-panel-items div.ng-option {
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
 
 // Dropdown + "New X" quick-add button pairing.
 .picker-row {
@@ -1125,7 +1335,13 @@ label, .form-label {
     align-items: flex-start;
 
     .ng-select {
-        flex-grow: 1;
+        flex: 1 1 0;
+        min-width: 0;
+    }
+
+    .btn {
+        flex-shrink: 0;
+        white-space: nowrap;
     }
 }
 
