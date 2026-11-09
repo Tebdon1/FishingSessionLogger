@@ -3,7 +3,7 @@ using Volo.Abp.Domain.Entities.Auditing;
 
 namespace SessionLogger.Domain.Methods;
 
-public class Method : AuditedAggregateRoot<int>
+public class Method : FullAuditedAggregateRoot<int>
 {
     public Method(int id) : base(id)
     {

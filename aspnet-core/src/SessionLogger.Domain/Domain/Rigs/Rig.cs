@@ -4,7 +4,7 @@ using Volo.Abp.Domain.Entities.Auditing;
 
 namespace SessionLogger.Domain.Rigs;
 
-public class Rig : AuditedAggregateRoot<int>
+public class Rig : FullAuditedAggregateRoot<int>
 {
     public Rig(int id) : base(id)
     {

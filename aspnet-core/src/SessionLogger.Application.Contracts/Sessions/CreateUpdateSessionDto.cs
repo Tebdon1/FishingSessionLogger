@@ -22,6 +22,9 @@ public class CreateUpdateSessionDto
     [StringLength(2000)]
     public string? Notes { get; set; }
 
+    // The species being targeted this session; empty means "Any".
+    public ICollection<int> TargetSpeciesIds { get; set; } = new List<int>();
+
     // IsBlank isn't here - it's derived server-side in SessionAppService from whether
     // Catches ends up empty, not supplied by the client.
 

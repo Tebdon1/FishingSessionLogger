@@ -16,6 +16,10 @@ namespace SessionLogger.Statistics;
 //    and a session only counts if it has at least one such catch - so while one is active,
 //    blank sessions are left out (a session with no catches can't have a matching one), and
 //    every figure on the page is about the matching catches only.
+//    The one exception: when species is the only catch filter, blank sessions that
+//    targeted one of the chosen species are counted as well (see Session.TargetSpecies) -
+//    they have no catches, so they add to the session figures and the blank rate, not to
+//    any catch figure.
 public class GetStatisticsInput
 {
     // Filters on Session.StartDateTime - both ends inclusive, either or both may be

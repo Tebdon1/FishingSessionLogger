@@ -32,6 +32,7 @@
         bindValue="id"
         [multiple]="true"
         [closeOnSelect]="false"
+        [clearSearchOnAdd]="true"
         placeholder="All venues"
         [(ngModel)]="venueFilter"
         (ngModelChange)="applyFilters()"
@@ -49,6 +50,7 @@
         bindValue="id"
         [multiple]="true"
         [closeOnSelect]="false"
+        [clearSearchOnAdd]="true"
         placeholder="All species"
         [(ngModel)]="speciesFilter"
         (ngModelChange)="applyFilters()"
@@ -110,6 +112,9 @@
             <i class="fa fa-clock-o"></i> {{ row.startDateTime | date:'HH:mm' }} &ndash; {{ row.endDateTime | date:'HH:mm' }}
           </span>
           <span class="session-fact"><i class="fa fa-hourglass-half"></i> {{ row.duration }} hrs</span>
+          <span *ngIf="row.targetSpeciesNames?.length" class="session-fact">
+            <i class="fa fa-bullseye"></i> Targeting {{ row.targetSpeciesNames.join(', ') }}
+          </span>
           <span *ngIf="row.isBlank" class="session-fact session-fact-blank">
             <i class="fa fa-ban"></i> Blank
           </span>
@@ -192,11 +197,21 @@
           <label for="session-venue">Venue<span class="required-mark">*</span></label>
           <div class="picker-row">
             <ng-select id="session-venue" class="flex-grow-1" [items]="venueList" bindLabel="displayName" bindValue="id"
-              formControlName="venueId" placeholder="Select a venue"></ng-select>
+              formControlName="venueId" placeholder="Select a venue" (change)="refreshTargetSpeciesOptions()"></ng-select>
             <button type="button" class="btn btn-outline-secondary btn-sm" (click)="addVenueQuickAdd()">
               <i class="fa fa-plus me-1"></i>New Venue
             </button>
           </div>
+        </div>
+        <div class="field">
+          <label for="session-target">Target</label>
+          <ng-select id="session-target" class="ng-select-comma-list" [items]="targetSpeciesOptions"
+            bindLabel="name" bindValue="id" [multiple]="true" [closeOnSelect]="false"
+            [clearSearchOnAdd]="true" formControlName="targetSpeciesIds" placeholder="Any">
+            <ng-template ng-multi-label-tmp>
+              <span class="ng-value-comma-list">{{ targetSpeciesLabel }}</span>
+            </ng-template>
+          </ng-select>
         </div>
         <div class="field">
           <label for="session-notes">Notes</label>

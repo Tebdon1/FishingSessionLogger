@@ -8,6 +8,7 @@ using SessionLogger.Domain.Sessions;
 using SessionLogger.Domain.SpeciesTypes;
 using SessionLogger.Domain.Venues;
 using SessionLogger.Venues;
+using Volo.Abp;
 using Volo.Abp.Domain.Repositories;
 
 namespace SessionLogger.Statistics;
@@ -32,7 +33,18 @@ public class StatisticsAppService : SessionLoggerAppService, IStatisticsAppServi
         _speciesRepository = speciesRepository;
     }
 
+    // Venues, species, baits and methods are soft-deleted, not removed, so past sessions
+    // and catches still count towards the numbers. With the soft-delete filter left on,
+    // EF would drop every session at a deleted venue and every catch of a deleted species.
     public async Task<StatisticsDto> GetAsync(GetStatisticsInput input)
+    {
+        using (DataFilter.Disable<ISoftDelete>())
+        {
+            return await BuildStatisticsAsync(input);
+        }
+    }
+
+    private async Task<StatisticsDto> BuildStatisticsAsync(GetStatisticsInput input)
     {
         var query = await _sessionRepository.GetQueryableAsync();
         // Species is deliberately not Included: that loads the whole species row, photo
@@ -47,7 +59,7 @@ public class StatisticsAppService : SessionLoggerAppService, IStatisticsAppServi
         var waterTypes = input.WaterTypes ?? new List<WaterType>();
         var ticketIds = input.TicketIds ?? new List<int>();
 
-        var sessions = query
+        var sessionQuery = query
             .AsNoTracking()
             .Include(s => s.Venue)
             .Include(s => s.Catches).ThenInclude(c => c.Bait)
@@ -59,10 +71,27 @@ public class StatisticsAppService : SessionLoggerAppService, IStatisticsAppServi
             .Where(s => waterTypes.Count == 0
                 || (s.Venue.WaterType != null && waterTypes.Contains(s.Venue.WaterType.Value)))
             .Where(s => ticketIds.Count == 0
-                || (s.Venue.TicketId != null && ticketIds.Contains(s.Venue.TicketId.Value)))
-            .ToList();
+                || (s.Venue.TicketId != null && ticketIds.Contains(s.Venue.TicketId.Value)));
 
+        var sessions = sessionQuery.ToList();
         sessions = ApplyCatchFilters(sessions, input);
+
+        // A species filter alone also counts the blank sessions where that species was the
+        // target - a blank has no catch to match on, but "I went for carp and blanked" is
+        // part of the carp story. Any bait/method/rig filter rules them out again, since a
+        // blank has no bait, method or rig to match.
+        var speciesIds = input.SpeciesIds ?? new List<int>();
+        var onlySpeciesFilter = speciesIds.Count > 0
+            && (input.BaitIds ?? new List<int>()).Count == 0
+            && (input.MethodIds ?? new List<int>()).Count == 0
+            && (input.RigIds ?? new List<int>()).Count == 0;
+        if (onlySpeciesFilter)
+        {
+            var targetedBlanks = sessionQuery
+                .Where(s => s.IsBlank && s.TargetSpecies.Any(t => speciesIds.Contains(t.Id)))
+                .ToList();
+            sessions = sessions.Concat(targetedBlanks).OrderBy(s => s.Id).ToList();
+        }
 
         var speciesQuery = await _speciesRepository.GetQueryableAsync();
         var speciesById = speciesQuery

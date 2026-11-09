@@ -2,7 +2,7 @@ using Volo.Abp.Domain.Entities.Auditing;
 
 namespace SessionLogger.Domain.Baits;
 
-public class Bait : AuditedAggregateRoot<int>
+public class Bait : FullAuditedAggregateRoot<int>
 {
     public Bait(int id) : base(id)
     {

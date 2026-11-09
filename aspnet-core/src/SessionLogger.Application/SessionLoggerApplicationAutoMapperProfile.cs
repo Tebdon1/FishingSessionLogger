@@ -28,8 +28,13 @@ public class SessionLoggerApplicationAutoMapperProfile : Profile
         /* You can configure your AutoMapper mapping configuration here.
          * Alternatively, you can split your mapping configurations
          * into multiple profile classes for a better organization. */
-        CreateMap<Session, SessionDto>();
+        CreateMap<Session, SessionDto>()
+            .ForMember(dest => dest.TargetSpeciesIds, opt => opt.MapFrom(src => src.TargetSpecies.Select(s => s.Id).ToList()))
+            // Filled in by SessionAppService.ApplyDisplayNamesAsync.
+            .ForMember(dest => dest.TargetSpeciesNames, opt => opt.Ignore());
         CreateMap<CreateUpdateSessionDto, Session>()
+            // Resolved to Species rows in SessionAppService.ReconcileTargetSpecies.
+            .ForMember(dest => dest.TargetSpecies, opt => opt.Ignore())
             // Catches are reconciled by id in SessionAppService, not blindly replaced -
             // AutoMapper's default list-mapping would otherwise delete and recreate every
             // catch (and cascade-delete their photos) on every session update.

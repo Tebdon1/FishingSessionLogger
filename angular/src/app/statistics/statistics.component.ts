@@ -311,6 +311,17 @@ export class StatisticsComponent implements OnInit, OnDestroy {
 
   // Species/bait/method/rig filter individual catches (the others filter sessions) - the
   // page says so when one's on, since it changes what "blank" and the counts mean.
+  // Species on its own also brings in blank sessions that targeted it (see
+  // GetStatisticsInput); adding a bait, method or rig filter takes those back out.
+  get onlySpeciesFilter(): boolean {
+    return (
+      this.speciesFilter.length > 0 &&
+      this.baitFilter.length === 0 &&
+      this.methodFilter.length === 0 &&
+      this.rigFilter.length === 0
+    );
+  }
+
   get hasCatchFilter(): boolean {
     return (
       this.speciesFilter.length > 0 ||
