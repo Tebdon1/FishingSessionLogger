@@ -32,6 +32,7 @@
         bindValue="id"
         [multiple]="true"
         [closeOnSelect]="false"
+        [clearSearchOnAdd]="true"
         placeholder="All water types"
         [(ngModel)]="waterTypeFilter"
         (ngModelChange)="applyFilters()"

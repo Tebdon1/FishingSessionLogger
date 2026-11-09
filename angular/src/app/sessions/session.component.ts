@@ -17,6 +17,7 @@ import { UrlService } from '../services/url.service';
 import { lengthDisplay as formatLength, weightDisplay as formatWeight, lengthMmToInput, weightGToInput, lengthInputToMm, weightInputToGrams } from '../shared/unit-display';
 import { rigDisplayLabel } from '../shared/rig-display';
 import { sessionCatchCount, sessionSpeciesSummary as sharedSpeciesSummary, sessionBestCatch as sharedBestCatch } from '../shared/session-summary';
+import { speciesForVenueWaterType } from '../shared/target-species';
 
 @Component({
   selector: 'app-session',
@@ -270,6 +271,91 @@ export class SessionComponent implements OnInit {
     this.ticketList = tickets.items;
     this.methodList = methods.items;
     this.rigList = rigs.items.map(r => ({ ...r, displayLabel: rigDisplayLabel(r) }));
+    this.refreshTargetSpeciesOptions();
+  }
+
+  // --- Target species ------------------------------------------------------
+  // What the session set out to catch, limited to species that live where the venue is
+  // (salt vs fresh). An empty selection is "Any" - no particular target.
+
+  targetSpeciesOptions: SpeciesDto[] = [];
+
+  // The selection as one comma-separated line, like the list's venue/species filters.
+  get targetSpeciesLabel(): string {
+    const selected: number[] = this.sessionForm?.value.targetSpeciesIds ?? [];
+    return this.targetSpeciesOptions
+      .filter((s) => selected.includes(s.id))
+      .map((s) => s.name)
+      .join(', ');
+  }
+
+  // Re-run whenever the venue changes or the species list arrives, since either can
+  // change which species are on offer.
+  refreshTargetSpeciesOptions() {
+    const venueId = this.sessionForm?.value.venueId;
+    const venue = this.venueList.find((v) => v.id === venueId);
+    // A deleted species the session already targets stays on offer (the venue's water
+    // type can't be judged for it - the stub doesn't carry one), so editing doesn't drop it.
+    this.targetSpeciesOptions = [
+      ...speciesForVenueWaterType(this.speciesList.filter((s) => !isDeletedStub(s)), venue?.waterType),
+      ...this.speciesList.filter((s) => isDeletedStub(s)),
+    ];
+
+    // Switching from, say, a canal to the sea shouldn't leave freshwater species silently
+    // selected where the dropdown no longer offers them.
+    const control = this.sessionForm?.get('targetSpeciesIds');
+    const current: number[] = control?.value ?? [];
+    const stillValid = current.filter((id) => this.targetSpeciesOptions.some((s) => s.id === id));
+    if (control && stillValid.length !== current.length) {
+      control.setValue(stillValid);
+    }
+  }
+
+  // --- Deleted lookups ------------------------------------------------------
+  // Venues, species, baits, methods and rigs are soft-deleted, so a session can still point
+  // at one the lookup lists no longer return. Without an entry the dropdown would render
+  // that field blank even though the value is intact. Each such item is added back as a
+  // stub named from the session itself, and the stubs are cleared again for the next form.
+
+  private syncDeletedStubs(session: SessionDto | null) {
+    const strip = <T>(list: T[]) => list.filter((x) => !isDeletedStub(x));
+    this.speciesList = strip(this.speciesList);
+    this.baitList = strip(this.baitList);
+    this.methodList = strip(this.methodList);
+    this.rigList = strip(this.rigList);
+    this.venueList = strip(this.venueList);
+
+    if (!session) {
+      return;
+    }
+
+    const stub = (id: number, name: string) => ({
+      id, name, displayName: name, displayLabel: name, isDeletedStub: true,
+    }) as any;
+    const missing = (list: { id?: number }[], id?: number | null) => id != null && !list.some((x) => x.id === id);
+
+    if (missing(this.venueList, session.venueId)) {
+      this.venueList = [...this.venueList, stub(session.venueId, session.venueName ?? 'Deleted venue')];
+    }
+    (session.targetSpeciesIds ?? []).forEach((id, i) => {
+      if (missing(this.speciesList, id)) {
+        this.speciesList = [...this.speciesList, stub(id, session.targetSpeciesNames?.[i] ?? 'Deleted species')];
+      }
+    });
+    for (const c of session.catches ?? []) {
+      if (missing(this.speciesList, c.speciesId)) {
+        this.speciesList = [...this.speciesList, stub(c.speciesId, c.speciesName)];
+      }
+      if (missing(this.baitList, c.baitId)) {
+        this.baitList = [...this.baitList, stub(c.baitId, c.baitName)];
+      }
+      if (missing(this.methodList, c.methodId)) {
+        this.methodList = [...this.methodList, stub(c.methodId, c.methodName)];
+      }
+      if (missing(this.rigList, c.rigId)) {
+        this.rigList = [...this.rigList, stub(c.rigId, c.rigName)];
+      }
+    }
   }
 
   speciesName(speciesId: number): string {
@@ -345,12 +431,14 @@ export class SessionComponent implements OnInit {
 
   createSession() {
     this.sessionItem = null;
+    this.syncDeletedStubs(null);
 
     this.editSessionItem = {
       startDateTime: toLocalDateTimeInput(new Date()),
       endDateTime: toLocalDateTimeInput(new Date()),
       venueId: null,
       notes: '',
+      targetSpeciesIds: [],
       catches: [],
     };
 
@@ -360,12 +448,14 @@ export class SessionComponent implements OnInit {
 
   async editSession(id) {
     this.sessionItem = await lastValueFrom(this.sessionService.get(id));
+    this.syncDeletedStubs(this.sessionItem);
 
     this.editSessionItem = {
       startDateTime: toLocalDateTimeInput(new Date(this.sessionItem.startDateTime)),
       endDateTime: toLocalDateTimeInput(new Date(this.sessionItem.endDateTime)),
       venueId: this.sessionItem.venueId,
       notes: this.sessionItem.notes ?? '',
+      targetSpeciesIds: [...(this.sessionItem.targetSpeciesIds ?? [])],
       // Catches not reopened via editCatch() in this session-edit pass are resent
       // as-is on save - reconstructing the value in the catch's own already-stored
       // unit (rather than a hardcoded one) means the backend's conversion round-trips
@@ -404,7 +494,9 @@ export class SessionComponent implements OnInit {
       endDateTime: [sessionItem.endDateTime, Validators.required],
       venueId: [sessionItem.venueId, Validators.required],
       notes: [sessionItem.notes || ''],
+      targetSpeciesIds: [sessionItem.targetSpeciesIds ?? []],
     });
+    this.refreshTargetSpeciesOptions();
   }
 
   async saveSession() {
@@ -422,6 +514,7 @@ export class SessionComponent implements OnInit {
       endDateTime: toDateTimeInputIso(formValue.endDateTime),
       venueId: formValue.venueId,
       notes: formValue.notes,
+      targetSpeciesIds: formValue.targetSpeciesIds ?? [],
       catches: this.editSessionItem.catches,
     };
 
@@ -769,6 +862,7 @@ export class SessionComponent implements OnInit {
     const venues = await lastValueFrom(this.venueService.getList({ maxResultCount: 1000 }));
     this.venueList = venues.items.sort((a, b) => a.displayName.localeCompare(b.displayName));
     this.sessionForm.patchValue({ venueId: newVenue.id });
+    this.refreshTargetSpeciesOptions();
 
     modal.close();
   }
@@ -816,6 +910,10 @@ export class SessionComponent implements OnInit {
 
     modal.close();
   }
+}
+
+function isDeletedStub(item: unknown): boolean {
+  return !!(item as { isDeletedStub?: boolean })?.isDeletedStub;
 }
 
 function weightsWithinCount(group: AbstractControl): ValidationErrors | null {
@@ -870,6 +968,7 @@ export interface EditableSession {
   endDateTime: string;
   venueId: number;
   notes: string;
+  targetSpeciesIds: number[];
   catches: CreateUpdateCatchDto[];
 }
 

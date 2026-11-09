@@ -35,6 +35,7 @@
         bindValue="id"
         [multiple]="true"
         [closeOnSelect]="false"
+        [clearSearchOnAdd]="true"
         placeholder="All venues"
         [(ngModel)]="venueFilter"
         (ngModelChange)="applyFilters()"
@@ -52,6 +53,7 @@
         bindValue="id"
         [multiple]="true"
         [closeOnSelect]="false"
+        [clearSearchOnAdd]="true"
         placeholder="All water types"
         [(ngModel)]="waterTypeFilter"
         (ngModelChange)="applyFilters()"
@@ -69,6 +71,7 @@
         bindValue="id"
         [multiple]="true"
         [closeOnSelect]="false"
+        [clearSearchOnAdd]="true"
         placeholder="All tickets"
         [(ngModel)]="ticketFilter"
         (ngModelChange)="applyFilters()"
@@ -86,6 +89,7 @@
         bindValue="id"
         [multiple]="true"
         [closeOnSelect]="false"
+        [clearSearchOnAdd]="true"
         placeholder="All species"
         [(ngModel)]="speciesFilter"
         (ngModelChange)="applyFilters()"
@@ -103,6 +107,7 @@
         bindValue="id"
         [multiple]="true"
         [closeOnSelect]="false"
+        [clearSearchOnAdd]="true"
         placeholder="All baits"
         [(ngModel)]="baitFilter"
         (ngModelChange)="applyFilters()"
@@ -120,6 +125,7 @@
         bindValue="id"
         [multiple]="true"
         [closeOnSelect]="false"
+        [clearSearchOnAdd]="true"
         placeholder="All methods"
         [(ngModel)]="methodFilter"
         (ngModelChange)="applyFilters()"
@@ -137,6 +143,7 @@
         bindValue="id"
         [multiple]="true"
         [closeOnSelect]="false"
+        [clearSearchOnAdd]="true"
         placeholder="All rigs"
         [(ngModel)]="rigFilter"
         (ngModelChange)="applyFilters()"
@@ -153,7 +160,11 @@
 
   <p *ngIf="hasCatchFilter" class="entity-card-note filter-summary">
     Filtering by species, bait, method or rig counts only the matching fish, and only sessions that caught at
-    least one - so blank sessions aren't included, and every figure below is about those fish alone.
+    least one - so every figure below is about those fish alone.
+    <ng-container *ngIf="onlySpeciesFilter; else noBlanks">
+      Blank sessions are counted only where you were targeting one of the chosen species.
+    </ng-container>
+    <ng-template #noBlanks>Blank sessions aren't included.</ng-template>
   </p>
 
   <div *ngIf="loading && !statistics" class="empty-state">

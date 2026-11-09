@@ -19,6 +19,11 @@ public class SessionDto : AuditedEntityDto<int>
 
     public bool IsBlank { get; set; }
 
+    // The species being targeted; empty means "Any". Names are filled in by
+    // SessionAppService.ApplyDisplayNamesAsync, alongside the catches' species names.
+    public ICollection<int> TargetSpeciesIds { get; set; } = new List<int>();
+    public ICollection<string> TargetSpeciesNames { get; set; } = new List<string>();
+
     // Duration in hours, calculated from start and end times
     public float Duration => (float)(EndDateTime - StartDateTime).TotalHours;
 

@@ -1,4 +1,5 @@
 using SessionLogger.Domain.Tickets;
+using SessionLogger.Domain.Venues;
 using System.Linq;
 using System.Threading.Tasks;
 using Volo.Abp;
@@ -21,9 +22,12 @@ public class TicketAppService :
 {
     private const int MaxTicketsPerUser = 50;
 
-    public TicketAppService(IRepository<Ticket, int> repository)
+    private readonly IRepository<Venue, int> _venueRepository;
+
+    public TicketAppService(IRepository<Ticket, int> repository, IRepository<Venue, int> venueRepository)
         : base(repository)
     {
+        _venueRepository = venueRepository;
     }
 
     protected override async Task<IQueryable<Ticket>> CreateFilteredQueryAsync(PagedAndSortedResultRequestDto input)
@@ -53,5 +57,27 @@ public class TicketAppService :
         }
 
         return await base.CreateAsync(input);
+    }
+
+    // Tickets are removed outright rather than soft-deleted (a ticket has no history of its
+    // own), so one can't go while any venue still points at it. Deleted venues count too:
+    // they're only hidden, and their sessions still show which ticket they were fished on.
+    public override async Task DeleteAsync(int id)
+    {
+        int venueCount;
+        using (DataFilter.Disable<ISoftDelete>())
+        {
+            var venues = await _venueRepository.GetQueryableAsync();
+            venueCount = venues.Count(v => v.TicketId == id);
+        }
+
+        if (venueCount > 0)
+        {
+            throw new UserFriendlyException(
+                $"This ticket is still used by {venueCount} venue(s), including any you've deleted " +
+                "(they're kept so past sessions still show where they were fished).");
+        }
+
+        await base.DeleteAsync(id);
     }
 }

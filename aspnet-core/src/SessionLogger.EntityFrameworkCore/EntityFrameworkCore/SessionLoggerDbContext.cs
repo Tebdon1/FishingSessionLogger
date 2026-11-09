@@ -119,6 +119,12 @@ public class SessionLoggerDbContext :
                 .WithMany()
                 .HasForeignKey(x => x.VenueId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Many-to-many through a plain join table (no payload): a session's targets
+            // are just which species were being fished for. No rows = "Any".
+            b.HasMany(x => x.TargetSpecies)
+                .WithMany()
+                .UsingEntity(j => j.ToTable(SessionLoggerConsts.DbTablePrefix + "SessionTargetSpecies", SessionLoggerConsts.DbSchema));
         });
 
         builder.Entity<Catch>(b =>
@@ -209,7 +215,9 @@ public class SessionLoggerDbContext :
             b.Property(x => x.SizeMm).HasPrecision(8, 2);
             b.ConfigureByConvention(); //auto configure for the base class props
 
-            b.HasIndex(x => x.Name).IsUnique();
+            // Soft-deleted rows keep their name, so only live rows have to be unique - otherwise
+            // a deleted species/bait/method would block ever re-adding one with the same name.
+            b.HasIndex(x => x.Name).IsUnique().HasFilter("[IsDeleted] = 0");
         });
 
         builder.Entity<Venue>(b =>
@@ -239,7 +247,9 @@ public class SessionLoggerDbContext :
             b.Property(x => x.WaterType).IsRequired().HasDefaultValue(SpeciesWaterType.Freshwater);
             b.ConfigureByConvention(); //auto configure for the base class props
 
-            b.HasIndex(x => x.Name).IsUnique();
+            // Soft-deleted rows keep their name, so only live rows have to be unique - otherwise
+            // a deleted species/bait/method would block ever re-adding one with the same name.
+            b.HasIndex(x => x.Name).IsUnique().HasFilter("[IsDeleted] = 0");
 
             // The photo lives in the same AppSpecies row (table splitting) but is its own
             // entity, so a query only reads the image bytes when it asks for them.
@@ -266,7 +276,9 @@ public class SessionLoggerDbContext :
             b.Property(x => x.Name).IsRequired().HasMaxLength(255);
             b.ConfigureByConvention(); //auto configure for the base class props
 
-            b.HasIndex(x => x.Name).IsUnique();
+            // Soft-deleted rows keep their name, so only live rows have to be unique - otherwise
+            // a deleted species/bait/method would block ever re-adding one with the same name.
+            b.HasIndex(x => x.Name).IsUnique().HasFilter("[IsDeleted] = 0");
         });
 
         builder.Entity<Rig>(b =>

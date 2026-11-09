@@ -1,4 +1,5 @@
 ﻿using SessionLogger.Domain.Catches;
+using SessionLogger.Domain.SpeciesTypes;
 using SessionLogger.Domain.Venues;
 using System;
 using System.Collections.Generic;
@@ -16,6 +17,7 @@ public class Session : AuditedAggregateRoot<int>
     public Session()
     {
         Catches = new HashSet<Catch>();
+        TargetSpecies = new HashSet<Species>();
     }
 
     public DateTime StartDateTime { get; set; }
@@ -37,5 +39,9 @@ public class Session : AuditedAggregateRoot<int>
     public float Duration => (float)(EndDateTime - StartDateTime).TotalHours;
 
     public virtual ICollection<Catch> Catches { get; set; }
+
+    // What the angler set out to catch. Empty means "Any" - no particular target - so
+    // there's no sentinel species row for it, and a session can name several.
+    public virtual ICollection<Species> TargetSpecies { get; set; }
 
 }

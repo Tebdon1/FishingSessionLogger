@@ -45,6 +45,7 @@ export interface CreateUpdateSessionDto {
   endDateTime: string;
   venueId: number;
   notes?: string;
+  targetSpeciesIds: number[];
   catches: CreateUpdateCatchDto[];
 }
 
@@ -55,6 +56,8 @@ export interface SessionDto extends AuditedEntityDto<number> {
   venueName?: string;
   notes?: string;
   isBlank: boolean;
+  targetSpeciesIds: number[];
+  targetSpeciesNames: string[];
   duration: number;
   catches: CatchDto[];
 }

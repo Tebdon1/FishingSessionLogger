@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Volo.Abp;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Entities;
@@ -65,6 +66,7 @@ public class SessionAppService :
         var query = await base.CreateFilteredQueryAsync(input);
         return query
             .Include(x => x.Venue)
+            .Include(x => x.TargetSpecies)
             .Include(x => x.Catches).ThenInclude(c => c.Bait)
             .Include(x => x.Catches).ThenInclude(c => c.Method)
             .Include(x => x.Catches).ThenInclude(c => c.Rig)
@@ -82,18 +84,52 @@ public class SessionAppService :
         return entity;
     }
 
+    // Venues, species, baits, methods and rigs are soft-deleted, not removed, so a session
+    // keeps showing what it was logged against. The soft-delete filter has to be off for
+    // everything a session touches: left on, EF drops any session or catch whose (required)
+    // venue/species has been deleted, as though it never existed.
     public override async Task<SessionDto> GetAsync(int id)
     {
-        var dto = await base.GetAsync(id);
-        await ApplyDisplayNamesAsync(dto);
-        return dto;
+        using (DataFilter.Disable<ISoftDelete>())
+        {
+            var dto = await base.GetAsync(id);
+            await ApplyDisplayNamesAsync(dto);
+            return dto;
+        }
     }
 
     public override async Task<PagedResultDto<SessionDto>> GetListAsync(PagedAndSortedResultRequestDto input)
     {
-        var result = await base.GetListAsync(input);
-        await ApplyDisplayNamesAsync(result.Items.ToArray());
-        return result;
+        using (DataFilter.Disable<ISoftDelete>())
+        {
+            var result = await base.GetListAsync(input);
+            await ApplyDisplayNamesAsync(result.Items.ToArray());
+            return result;
+        }
+    }
+
+    public override async Task<SessionDto> CreateAsync(CreateUpdateSessionDto input)
+    {
+        using (DataFilter.Disable<ISoftDelete>())
+        {
+            return await base.CreateAsync(input);
+        }
+    }
+
+    public override async Task<SessionDto> UpdateAsync(int id, CreateUpdateSessionDto input)
+    {
+        using (DataFilter.Disable<ISoftDelete>())
+        {
+            return await base.UpdateAsync(id, input);
+        }
+    }
+
+    public override async Task DeleteAsync(int id)
+    {
+        using (DataFilter.Disable<ISoftDelete>())
+        {
+            await base.DeleteAsync(id);
+        }
     }
 
     // Two things the DTOs need that the query deliberately doesn't load:
@@ -117,6 +153,15 @@ public class SessionAppService :
         {
             dto.VenueName = labels.For(dto.VenueId, dto.VenueName);
 
+            // Ids and names stay in step (both by name) so the form can pair them up.
+            var targets = dto.TargetSpeciesIds
+                .Where(speciesNames.ContainsKey)
+                .Select(id => (Id: id, Name: speciesNames[id]))
+                .OrderBy(t => t.Name)
+                .ToList();
+            dto.TargetSpeciesIds = targets.Select(t => t.Id).ToList();
+            dto.TargetSpeciesNames = targets.Select(t => t.Name).ToList();
+
             foreach (var catchDto in dto.Catches ?? Enumerable.Empty<CatchDto>())
             {
                 catchDto.SpeciesName = speciesNames.TryGetValue(catchDto.SpeciesId, out var name)
@@ -130,6 +175,7 @@ public class SessionAppService :
     {
         var entity = await base.MapToEntityAsync(createInput);
         await ReconcileCatches(createInput.Catches, entity);
+        await ReconcileTargetSpecies(createInput.TargetSpeciesIds, entity);
         entity.IsBlank = entity.Catches.Count == 0;
         return entity;
     }
@@ -138,7 +184,48 @@ public class SessionAppService :
     {
         await base.MapToEntityAsync(updateInput, entity);
         await ReconcileCatches(updateInput.Catches, entity);
+        await ReconcileTargetSpecies(updateInput.TargetSpeciesIds, entity);
         entity.IsBlank = entity.Catches.Count == 0;
+    }
+
+    // Makes the session's targets exactly the species asked for, adding and removing
+    // only the difference so unchanged links aren't deleted and re-inserted. An empty or
+    // missing list clears the targets, which is how "Any" is stored.
+    private async Task ReconcileTargetSpecies(ICollection<int> incoming, Session session)
+    {
+        var wanted = (incoming ?? new List<int>()).ToHashSet();
+
+        foreach (var existing in session.TargetSpecies.Where(s => !wanted.Contains(s.Id)).ToList())
+        {
+            session.TargetSpecies.Remove(existing);
+        }
+
+        var missing = wanted.Except(session.TargetSpecies.Select(s => s.Id)).ToList();
+        if (missing.Count == 0)
+        {
+            return;
+        }
+
+        // A species that has since been deleted can stay a target of the sessions already
+        // using it (they're kept above), but can't be newly chosen - so this lookup is the
+        // one place the soft-delete filter is switched back on.
+        List<Species> found;
+        using (DataFilter.Enable<ISoftDelete>())
+        {
+            var speciesQuery = await _speciesRepository.GetQueryableAsync();
+            found = await AsyncExecuter.ToListAsync(speciesQuery.Where(s => missing.Contains(s.Id)));
+        }
+
+        var unknown = missing.Except(found.Select(s => s.Id)).ToList();
+        if (unknown.Count > 0)
+        {
+            throw new EntityNotFoundException(typeof(Species), unknown[0]);
+        }
+
+        foreach (var species in found)
+        {
+            session.TargetSpecies.Add(species);
+        }
     }
 
     // AutoMapper's default list-mapping would delete and recreate every catch (and

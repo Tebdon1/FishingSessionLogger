@@ -52,6 +52,7 @@ public class SessionLoggerEntityFrameworkCoreModule : AbpModule
             {
                 options.DefaultWithDetailsFunc = query => query
                 .Include(o => o.Venue)
+                .Include(o => o.TargetSpecies)
                 .Include(o => o.Catches).ThenInclude(c => c.Species)
                 .Include(o => o.Catches).ThenInclude(c => c.Bait)
                 .Include(o => o.Catches).ThenInclude(c => c.Method)

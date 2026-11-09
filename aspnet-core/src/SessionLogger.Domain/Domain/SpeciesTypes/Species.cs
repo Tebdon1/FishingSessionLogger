@@ -3,7 +3,7 @@ using Volo.Abp.Domain.Entities.Auditing;
 
 namespace SessionLogger.Domain.SpeciesTypes;
 
-public class Species : AuditedAggregateRoot<int>
+public class Species : FullAuditedAggregateRoot<int>
 {
     public Species(int id) : base(id)
     {

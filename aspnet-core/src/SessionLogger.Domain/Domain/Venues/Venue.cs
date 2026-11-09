@@ -5,7 +5,7 @@ using SessionLogger.Domain.Tickets;
 
 namespace SessionLogger.Domain.Venues;
 
-public class Venue : AuditedAggregateRoot<int>
+public class Venue : FullAuditedAggregateRoot<int>
 {
     public Venue(int id) : base(id)
     {

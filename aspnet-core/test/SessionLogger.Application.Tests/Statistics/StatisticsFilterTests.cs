@@ -159,6 +159,57 @@ public class StatisticsFilterTests : SessionLoggerApplicationTestBase
         filtered.Summary.BlankRatePercent.ShouldBe(0);
     }
 
+    // A species filter on its own also counts the blank sessions that were aimed at that
+    // species; they have no catches, so only the session figures move.
+    [Fact]
+    public async Task A_Species_Filter_Should_Also_Count_Blank_Sessions_That_Targeted_It()
+    {
+        var venue = await NewVenueAsync();
+        var perch = await NewSpeciesAsync("Perch");
+        var pike = await NewSpeciesAsync("Pike");
+
+        await NewSessionAsync(venue, Catches((perch, null, null, null), (perch, null, null, null)));
+        await NewSessionAsync(venue, Catches(), targets: new[] { perch });         // blank, targeted perch
+        await NewSessionAsync(venue, Catches(), targets: new[] { pike });          // blank, targeted pike
+        await NewSessionAsync(venue, Catches());                                   // blank, no target
+        await NewSessionAsync(venue, Catches((pike, null, null, null)), targets: new[] { perch }); // caught pike while after perch
+
+        var stats = await _statistics.GetAsync(new GetStatisticsInput { SpeciesIds = new List<int> { perch } });
+
+        stats.Summary.TotalSessions.ShouldBe(2);
+        stats.Summary.TotalCatches.ShouldBe(2);
+        stats.Summary.BlankRatePercent.ShouldBe(50);
+        stats.CatchesBySpecies.ShouldHaveSingleItem().Count.ShouldBe(2);
+    }
+
+    [Fact]
+    public async Task Targeted_Blanks_Should_Respect_The_Session_Filters_And_Drop_Out_When_Another_Catch_Filter_Is_Set()
+    {
+        var venue = await NewVenueAsync();
+        var otherVenue = await NewVenueAsync();
+        var perch = await NewSpeciesAsync("Perch");
+        var worm = await NewBaitAsync("Worm");
+
+        await NewSessionAsync(venue, Catches((perch, worm, null, null)));
+        await NewSessionAsync(venue, Catches(), targets: new[] { perch });
+        await NewSessionAsync(otherVenue, Catches(), targets: new[] { perch });
+
+        var atVenue = await _statistics.GetAsync(new GetStatisticsInput
+        {
+            SpeciesIds = new List<int> { perch },
+            VenueIds = new List<int> { venue },
+        });
+        atVenue.Summary.TotalSessions.ShouldBe(2);
+
+        var withBait = await _statistics.GetAsync(new GetStatisticsInput
+        {
+            SpeciesIds = new List<int> { perch },
+            BaitIds = new List<int> { worm },
+        });
+        withBait.Summary.TotalSessions.ShouldBe(1);
+        withBait.Summary.BlankRatePercent.ShouldBe(0);
+    }
+
     // ---- session filters ------------------------------------------------------------
 
     [Fact]
@@ -297,7 +348,7 @@ public class StatisticsFilterTests : SessionLoggerApplicationTestBase
         }).ToList();
     }
 
-    private Task<SessionDto> NewSessionAsync(int venueId, List<CreateUpdateCatchDto> catches, DateTime? start = null)
+    private Task<SessionDto> NewSessionAsync(int venueId, List<CreateUpdateCatchDto> catches, DateTime? start = null, int[]? targets = null)
     {
         var from = start ?? Day;
         return _sessions.CreateAsync(new CreateUpdateSessionDto
@@ -305,6 +356,7 @@ public class StatisticsFilterTests : SessionLoggerApplicationTestBase
             StartDateTime = from,
             EndDateTime = from.AddHours(3),
             VenueId = venueId,
+            TargetSpeciesIds = (targets ?? Array.Empty<int>()).ToList(),
             Catches = catches,
         });
     }
